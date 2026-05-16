@@ -12,7 +12,13 @@ export default function Navbar({ onMenuClick }) {
       }}
     >
       <Toolbar sx={{ gap: 1 }}>
-        <IconButton color="inherit" edge="start" onClick={onMenuClick} size="large">
+        <IconButton
+          color="inherit"
+          edge="start"
+          onClick={onMenuClick}
+          size="large"
+          sx={{ display: { xs: 'none', md: 'inline-flex' } }}
+        >
           <FiMenu />
         </IconButton>
 
