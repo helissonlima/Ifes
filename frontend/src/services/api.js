@@ -14,6 +14,22 @@ api.interceptors.response.use(
   }
 );
 
+export function setAuthToken(token) {
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
+}
+
+export const authAPI = {
+  login: (email, senha) => api.post('/auth/login', { email, senha }),
+  me: () => api.get('/auth/me'),
+  listarUsuarios: () => api.get('/auth/usuarios'),
+  criarUsuario: (data) => api.post('/auth/usuarios', data),
+  atualizarPermissoes: (id, data) => api.put(`/auth/usuarios/${id}/permissoes`, data),
+};
+
 // Propriedades
 export const propriedadesAPI = {
   listar: (params) => api.get('/propriedades', { params }),

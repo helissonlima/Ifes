@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
-import { avaliacoesAPI, avaliacoesAPI as aval } from '../services/api';
+import { avaliacoesAPI } from '../services/api';
 import StatCard from '../components/Dashboard/StatCard';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
@@ -67,7 +67,7 @@ export default function Dashboard() {
         </Button>
       </Box>
 
-      {erro && <Alert severity="warning" sx={{ mb: 2 }}>{erro} — exibindo dados de demonstração.</Alert>}
+      {erro && <Alert severity="warning" sx={{ mb: 2 }}>{erro}</Alert>}
 
       {/* Cards de estatísticas */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

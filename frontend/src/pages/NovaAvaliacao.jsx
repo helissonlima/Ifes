@@ -14,12 +14,28 @@ import DimensaoStep from '../components/Evaluation/DimensaoStep';
 
 const DIMENSOES_ORDEM = ['economica', 'ambiental', 'social', 'gestao_qualidade'];
 
+const formatLocalizacao = (propriedade) => {
+  const cidade = propriedade?.municipio?.trim?.() || '';
+  const uf = propriedade?.estado?.trim?.() || '';
+  return [cidade, uf].filter(Boolean).join('/') || 'Localização não informada';
+};
+
+const formatAreaCafe = (areaCafe) => {
+  if (areaCafe === null || areaCafe === undefined || areaCafe === '') return 'Não informada';
+  return `${areaCafe} ha`;
+};
+
+const formatPropriedadeOption = (propriedade) =>
+  `${propriedade?.nome || 'Propriedade sem nome'} - ${formatLocalizacao(propriedade)}`;
+
 export default function NovaAvaliacao() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { notify } = useApp();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isCompactStepper = useMediaQuery(theme.breakpoints.down('lg'));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up('xl'));
 
   const [step, setStep] = useState(0); // 0=info, 1-4=dimensões, 5=revisão
   const [propriedades, setPropriedades] = useState([]);
@@ -56,7 +72,10 @@ export default function NovaAvaliacao() {
   }, []);
 
   const dimensoesLista = DIMENSOES_ORDEM.map((d) => dimensoes[d]).filter(Boolean);
-  const TOTAL_STEPS = 2 + dimensoesLista.length; // info + dimensões + revisão
+  const clampProgress = (value) => {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(100, value));
+  };
 
   const handleRespostaChange = (dimensaoCodigo, indicadorCodigo, nota, nomeIndicador, criterio) => {
     setRespostas((r) => ({ ...r, [indicadorCodigo]: nota }));
@@ -164,10 +183,18 @@ export default function NovaAvaliacao() {
   if (carregando) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress /></Box>;
 
   const STEP_LABELS = ['Informações', ...dimensoesLista.map((d) => d.nome), 'Revisão'];
+  const STEP_LABELS_STEPPER = STEP_LABELS.map((label) => {
+    if (label === 'Informações') return 'Info';
+    if (label === 'Gestão e Qualidade') return 'Gestão';
+    return label;
+  });
+  const stepAtualLabel = STEP_LABELS[step] || 'Revisão';
+  const progressoGlobal = clampProgress((totalRespondidos / Math.max(totalIndicadores, 1)) * 100);
+  const progressoEtapa = clampProgress(progrStep);
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
         <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h5" fontWeight={800} color="primary.dark">Nova Avaliação</Typography>
@@ -179,61 +206,109 @@ export default function NovaAvaliacao() {
           variant="outlined" startIcon={<FiSave />}
           onClick={salvarRascunho} disabled={salvando || !info.propriedade}
           size="small"
+          sx={{ ml: { xs: 0, sm: 'auto' } }}
         >
           {salvando ? <CircularProgress size={16} /> : 'Salvar rascunho'}
         </Button>
       </Box>
 
-      {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
 
       {/* Progresso global */}
       <LinearProgress
         variant="determinate"
-        value={(totalRespondidos / Math.max(totalIndicadores, 1)) * 100}
-        sx={{ height: 6, borderRadius: 3, mb: 2 }}
+        value={progressoGlobal}
+        sx={{ height: 5, borderRadius: 3, mb: 1.5 }}
         color="primary"
       />
 
       {/* Stepper */}
       {!isMobile ? (
-        <Stepper nonLinear activeStep={step} sx={{ mb: 3, overflowX: 'auto' }}>
-          {STEP_LABELS.map((label, idx) => (
+        <Box sx={{ mb: 2, overflow: 'hidden' }}>
+          <Stepper
+            nonLinear
+            alternativeLabel
+            activeStep={step}
+            sx={{
+              width: '100%',
+              '& .MuiStepConnector-alternativeLabel': {
+                top: isLargeDesktop ? 16 : isCompactStepper ? 13 : 15,
+                left: isLargeDesktop ? 'calc(-50% + 23px)' : isCompactStepper ? 'calc(-50% + 20px)' : 'calc(-50% + 22px)',
+                right: isLargeDesktop ? 'calc(50% + 23px)' : isCompactStepper ? 'calc(50% + 20px)' : 'calc(50% + 22px)',
+              },
+              '& .MuiStepConnector-root': { zIndex: 0 },
+              '& .MuiStepLabel-label': {
+                fontSize: isLargeDesktop ? '0.94rem' : isCompactStepper ? '0.82rem' : '0.9rem',
+                mt: 0.75,
+                whiteSpace: 'nowrap',
+              },
+              '& .MuiStepButton-root': { px: isLargeDesktop ? 1.05 : isCompactStepper ? 0.5 : 0.8 },
+              '& .MuiStepConnector-line': { borderTopWidth: 2 },
+              '& .MuiStepLabel-iconContainer': {
+                zIndex: 1,
+                px: 0.5,
+              },
+              '& .MuiStepIcon-root': {
+                fontSize: isLargeDesktop ? '1.95rem' : isCompactStepper ? '1.55rem' : '1.75rem',
+                position: 'relative',
+                zIndex: 1,
+                borderRadius: '50%',
+              },
+            }}
+          >
+          {STEP_LABELS_STEPPER.map((label, idx) => (
             <Step key={label} completed={idx < step}>
               <StepButton onClick={() => setStep(idx)}>
-                <Typography variant="caption" fontWeight={600}>{label}</Typography>
+                <Typography
+                  variant="caption"
+                  fontWeight={700}
+                  noWrap
+                  sx={{ fontSize: isLargeDesktop ? '0.92rem' : isCompactStepper ? '0.78rem' : '0.86rem' }}
+                >
+                  {label}
+                </Typography>
               </StepButton>
             </Step>
           ))}
-        </Stepper>
+          </Stepper>
+        </Box>
       ) : (
         <MobileStepper
           variant="text"
           steps={STEP_LABELS.length}
           position="static"
           activeStep={step}
-          sx={{ mb: 2, bgcolor: 'transparent', p: 0 }}
+          sx={{ mb: 1.5, bgcolor: 'transparent', p: 0 }}
           nextButton={<span />}
           backButton={<span />}
         />
       )}
 
       {/* Progresso do step atual */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+        <Typography variant="caption" color="text.secondary" fontWeight={600}>
+          Etapa {Math.min(step + 1, STEP_LABELS.length)} de {STEP_LABELS.length}: {stepAtualLabel}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" fontWeight={700}>
+          {Math.round(progressoEtapa)}%
+        </Typography>
+      </Box>
       <LinearProgress
         variant="determinate"
-        value={progrStep}
-        sx={{ height: 4, borderRadius: 2, mb: 2, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: step === 0 ? 'primary.main' : dimensoesLista[step - 1]?.cor } }}
+        value={progressoEtapa}
+        sx={{ height: 4, borderRadius: 2, mb: 1.5, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: step === 0 ? 'primary.main' : dimensoesLista[step - 1]?.cor } }}
       />
 
       {/* Conteúdo dos steps */}
       {step === 0 && (
         <Card>
-          <CardContent>
+          <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
             <Typography variant="h6" fontWeight={700} gutterBottom>Informações da Avaliação</Typography>
-            <Grid container spacing={2}>
+            <Grid container spacing={1.5}>
               <Grid size={12}>
                 <Autocomplete
                   options={propriedades}
-                  getOptionLabel={(o) => `${o.nome} — ${o.municipio}/${o.estado}`}
+                  getOptionLabel={formatPropriedadeOption}
                   value={info.propriedade}
                   onChange={(_, v) => setInfo((i) => ({ ...i, propriedade: v }))}
                   renderInput={(params) => (
@@ -250,9 +325,9 @@ export default function NovaAvaliacao() {
               </Grid>
               {info.propriedade && (
                 <Grid size={12}>
-                  <Paper sx={{ p: 1.5, bgcolor: 'primary.50', borderRadius: 2 }} variant="outlined">
+                  <Paper sx={{ p: 1.25, bgcolor: 'primary.50', borderRadius: 2 }} variant="outlined">
                     <Typography variant="caption" color="text.secondary">
-                      Proprietário: {info.propriedade.proprietario} · Área café: {info.propriedade.area_cafe || '—'} ha
+                      Proprietário: {info.propriedade.proprietario || 'Não informado'} · Área café: {formatAreaCafe(info.propriedade.area_cafe)}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -275,7 +350,7 @@ export default function NovaAvaliacao() {
               <Grid size={12}>
                 <TextField
                   label="Observações gerais"
-                  fullWidth multiline rows={3} value={info.observacoes}
+                  fullWidth multiline rows={2} value={info.observacoes}
                   onChange={(e) => setInfo((i) => ({ ...i, observacoes: e.target.value }))}
                 />
               </Grid>
@@ -308,12 +383,13 @@ export default function NovaAvaliacao() {
       )}
 
       {/* Botões de navegação */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3, gap: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, gap: 1.5 }}>
         <Button
           startIcon={<FiArrowLeft />}
           onClick={() => setStep((s) => s - 1)}
           disabled={step === 0}
           variant="outlined"
+          fullWidth={isMobile}
         >
           Anterior
         </Button>
@@ -328,6 +404,7 @@ export default function NovaAvaliacao() {
               setStep((s) => s + 1);
             }}
             variant="contained"
+            fullWidth={isMobile}
           >
             Próximo
           </Button>
@@ -339,6 +416,7 @@ export default function NovaAvaliacao() {
             color="success"
             disabled={salvando}
             size="large"
+            fullWidth={isMobile}
           >
             {salvando ? <CircularProgress size={20} /> : 'Concluir Avaliação'}
           </Button>
@@ -355,23 +433,35 @@ function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao,
 
   return (
     <Box>
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
+      <Card sx={{ mb: 1.5 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
           <Typography variant="h6" fontWeight={700} gutterBottom>Resumo da Avaliação</Typography>
           <Grid container spacing={1}>
-            <Grid size={6}><Typography variant="caption" color="text.secondary">Propriedade</Typography><br /><Typography variant="body2" fontWeight={600}>{info.propriedade?.nome || '—'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="text.secondary">Município</Typography><br /><Typography variant="body2" fontWeight={600}>{info.propriedade?.municipio || '—'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="text.secondary">Técnico</Typography><br /><Typography variant="body2">{info.tecnico || 'Não informado'}</Typography></Grid>
-            <Grid size={6}><Typography variant="caption" color="text.secondary">Data</Typography><br /><Typography variant="body2">{new Date(info.data).toLocaleDateString('pt-BR')}</Typography></Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="caption" color="text.secondary">Propriedade</Typography>
+              <Typography variant="body2" fontWeight={600}>{info.propriedade?.nome || '—'}</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="caption" color="text.secondary">Município/UF</Typography>
+              <Typography variant="body2" fontWeight={600}>{formatLocalizacao(info.propriedade)}</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="caption" color="text.secondary">Técnico</Typography>
+              <Typography variant="body2">{info.tecnico || 'Não informado'}</Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="caption" color="text.secondary">Data</Typography>
+              <Typography variant="body2">{new Date(info.data).toLocaleDateString('pt-BR')}</Typography>
+            </Grid>
           </Grid>
         </CardContent>
       </Card>
 
       {/* IGS calculado */}
-      <Card sx={{ mb: 2, border: `2px solid ${COR_CLASS[classificacao]}` }}>
-        <CardContent sx={{ textAlign: 'center' }}>
+      <Card sx={{ mb: 1.5, border: `2px solid ${COR_CLASS[classificacao]}` }}>
+        <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 2.5 } }}>
           <MdOutlineEco size={36} color={COR_CLASS[classificacao]} />
-          <Typography variant="h4" fontWeight={800} color={COR_CLASS[classificacao]} sx={{ mt: 1 }}>
+          <Typography variant="h4" fontWeight={800} color={COR_CLASS[classificacao]} sx={{ mt: 0.75 }}>
             IGS: {(igs * 100).toFixed(1)}%
           </Typography>
           <Typography variant="h6" fontWeight={700} color={COR_CLASS[classificacao]}>
@@ -385,14 +475,14 @@ function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao,
 
       {/* Índices por dimensão */}
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
           <Typography variant="subtitle1" fontWeight={700} gutterBottom>Índices por Dimensão</Typography>
-          <Grid container spacing={1.5}>
+          <Grid container spacing={1.25}>
             {dimensoesLista.map((d) => {
               const idx = calcularIndiceDimensao(d.codigo);
               return (
-                <Grid size={6} key={d.codigo}>
-                  <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: `${d.cor}11`, border: `1px solid ${d.cor}33` }}>
+                <Grid size={{ xs: 12, sm: 6 }} key={d.codigo}>
+                  <Box sx={{ p: 1.25, borderRadius: 2, bgcolor: `${d.cor}11`, border: `1px solid ${d.cor}33` }}>
                     <Typography variant="caption" color="text.secondary" fontWeight={600}>{d.nome}</Typography>
                     <Typography variant="h5" fontWeight={800} color={d.cor}>
                       {idx !== null ? `${(idx * 100).toFixed(1)}%` : '—'}

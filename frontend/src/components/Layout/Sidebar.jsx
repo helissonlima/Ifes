@@ -3,20 +3,23 @@ import {
   Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Divider, Box, Typography, Tooltip,
 } from '@mui/material';
-import { FiHome, FiMap, FiClipboard, FiBarChart2, FiBook, FiList } from 'react-icons/fi';
-import { MdOutlineEco } from 'react-icons/md';
+import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers } from 'react-icons/fi';
+import { useApp } from '../../context/AppContext';
 
 const MENU_ITEMS = [
-  { label: 'Dashboard', icon: <FiHome size={20} />, path: '/' },
-  { label: 'Propriedades', icon: <FiMap size={20} />, path: '/propriedades' },
-  { label: 'Nova Avaliação', icon: <FiClipboard size={20} />, path: '/avaliacao/nova' },
-  { label: 'Histórico', icon: <FiList size={20} />, path: '/historico' },
-  { label: 'Metodologia', icon: <FiBook size={20} />, path: '/metodologia' },
+  { label: 'Dashboard', icon: <FiHome size={20} />, path: '/', permission: 'dashboard' },
+  { label: 'Propriedades', icon: <FiMap size={20} />, path: '/propriedades', permission: 'propriedades' },
+  { label: 'Nova Avaliação', icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
+  { label: 'Histórico', icon: <FiList size={20} />, path: '/historico', permission: 'historico' },
+  { label: 'Metodologia', icon: <FiBook size={20} />, path: '/metodologia', permission: 'metodologia' },
+  { label: 'Usuários', icon: <FiUsers size={20} />, path: '/usuarios', permission: 'usuarios' },
 ];
 
 function SidebarContent({ onClose, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { hasPermission } = useApp();
+  const visibleItems = MENU_ITEMS.filter((item) => hasPermission(item.permission));
 
   const handleNav = (path) => {
     navigate(path);
@@ -25,30 +28,8 @@ function SidebarContent({ onClose, isMobile }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Logo area */}
-      <Box
-        sx={{
-          p: 2.5,
-          background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
-          display: 'flex', alignItems: 'center', gap: 1.5,
-          minHeight: 64,
-        }}
-      >
-        <MdOutlineEco size={32} color="#fff" />
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700} color="white" sx={{ lineHeight: 1.2 }}>
-            SustentaCafé
-          </Typography>
-          <Typography variant="caption" color="rgba(255,255,255,0.75)" sx={{ lineHeight: 1 }}>
-            Sustentabilidade Rural
-          </Typography>
-        </Box>
-      </Box>
-
-      <Divider />
-
       <List sx={{ px: 1, pt: 1, flexGrow: 1 }}>
-        {MENU_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const active = location.pathname === item.path ||
             (item.path !== '/' && location.pathname.startsWith(item.path));
           return (
