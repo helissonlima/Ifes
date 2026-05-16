@@ -214,7 +214,7 @@ export default function Propriedades() {
 
       {/* FAB mobile */}
       {isMobile && (
-        <Fab color="primary" sx={{ position: 'fixed', bottom: 24, right: 24 }} onClick={abrirNovo}>
+        <Fab color="primary" sx={{ position: 'fixed', bottom: 80, right: 24 }} onClick={abrirNovo}>
           <FiPlus size={24} />
         </Fab>
       )}

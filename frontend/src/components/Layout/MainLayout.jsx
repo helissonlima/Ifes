@@ -32,7 +32,7 @@ export default function MainLayout() {
           flexGrow: 1,
           pt: { xs: 8, sm: 9 },
           px: { xs: 2, sm: 3 },
-          pb: { xs: 10, md: 4 },
+          pb: { xs: 12, md: 4 },
           ml: { md: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
           transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
