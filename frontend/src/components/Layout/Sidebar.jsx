@@ -117,7 +117,8 @@ export default function Sidebar({ open, onClose, width, isMobile }) {
           width,
           boxSizing: 'border-box',
           borderRight: '1px solid rgba(0,0,0,0.08)',
-          top: 0,
+          top: 64,
+          height: 'calc(100% - 64px)',
         },
       }}
     >
