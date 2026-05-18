@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiEye } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
+import { maskTelefone, maskUF, erroEmail } from '../utils/masks';
 import { propriedadesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
@@ -20,18 +21,82 @@ const FORM_INICIAL = {
 
 function FormPropriedade({ dados, onChange }) {
   const f = (field) => (e) => onChange({ ...dados, [field]: e.target.value });
+
+  const handleTelefone = (e) => {
+    onChange({ ...dados, telefone: maskTelefone(e.target.value) });
+  };
+
+  const handleUF = (e) => {
+    onChange({ ...dados, estado: maskUF(e.target.value) });
+  };
+
+  const emailErro = erroEmail(dados.email);
+
   return (
     <Grid container spacing={2} sx={{ pt: 1 }}>
-      <Grid size={12}><TextField label="Nome da Propriedade *" fullWidth value={dados.nome} onChange={f('nome')} /></Grid>
-      <Grid size={8}><TextField label="Município *" fullWidth value={dados.municipio} onChange={f('municipio')} /></Grid>
-      <Grid size={4}>
-        <TextField label="UF" fullWidth value={dados.estado} onChange={f('estado')} slotProps={{ htmlInput: { maxLength: 2, style: { textTransform: 'uppercase' } } }} />
+      <Grid size={12}>
+        <TextField label="Nome da Propriedade *" fullWidth value={dados.nome} onChange={f('nome')} />
       </Grid>
-      <Grid size={12}><TextField label="Nome do Proprietário *" fullWidth value={dados.proprietario} onChange={f('proprietario')} /></Grid>
-      <Grid size={6}><TextField label="Área Total (ha)" type="number" fullWidth value={dados.area_total} onChange={f('area_total')} /></Grid>
-      <Grid size={6}><TextField label="Área de Café (ha)" type="number" fullWidth value={dados.area_cafe} onChange={f('area_cafe')} /></Grid>
-      <Grid size={6}><TextField label="Telefone" fullWidth value={dados.telefone} onChange={f('telefone')} /></Grid>
-      <Grid size={6}><TextField label="E-mail" type="email" fullWidth value={dados.email} onChange={f('email')} /></Grid>
+      <Grid size={8}>
+        <TextField label="Município *" fullWidth value={dados.municipio} onChange={f('municipio')} />
+      </Grid>
+      <Grid size={4}>
+        <TextField
+          label="UF"
+          fullWidth
+          value={dados.estado}
+          onChange={handleUF}
+          slotProps={{ htmlInput: { maxLength: 2 } }}
+          helperText="Ex.: ES, MG"
+        />
+      </Grid>
+      <Grid size={12}>
+        <TextField label="Nome do Proprietário *" fullWidth value={dados.proprietario} onChange={f('proprietario')} />
+      </Grid>
+      <Grid size={6}>
+        <TextField
+          label="Área Total (ha)"
+          fullWidth
+          value={dados.area_total}
+          onChange={f('area_total')}
+          slotProps={{ htmlInput: { inputMode: 'decimal', min: 0, step: '0.01' } }}
+          type="number"
+        />
+      </Grid>
+      <Grid size={6}>
+        <TextField
+          label="Área de Café (ha)"
+          fullWidth
+          value={dados.area_cafe}
+          onChange={f('area_cafe')}
+          slotProps={{ htmlInput: { inputMode: 'decimal', min: 0, step: '0.01' } }}
+          type="number"
+        />
+      </Grid>
+      <Grid size={6}>
+        <TextField
+          label="Telefone"
+          fullWidth
+          value={dados.telefone}
+          onChange={handleTelefone}
+          placeholder="(XX) XXXXX-XXXX"
+          slotProps={{ htmlInput: { inputMode: 'tel', maxLength: 15 } }}
+          helperText="DDD + número (celular ou fixo)"
+        />
+      </Grid>
+      <Grid size={6}>
+        <TextField
+          label="E-mail"
+          fullWidth
+          value={dados.email}
+          onChange={f('email')}
+          type="email"
+          placeholder="nome@dominio.com.br"
+          error={!!emailErro}
+          helperText={emailErro || 'Ex.: produtor@email.com.br'}
+          slotProps={{ htmlInput: { inputMode: 'email' } }}
+        />
+      </Grid>
     </Grid>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { erroEmail } from '../utils/masks';
 import {
   Box, Typography, Card, CardContent, Grid, Button, TextField, InputAdornment,
   Select, MenuItem, FormControl, InputLabel, Chip, IconButton, Dialog,
@@ -400,8 +401,17 @@ export default function Usuarios() {
                 onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))} />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField label="E-mail *" type="email" fullWidth value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+              <TextField
+                label="E-mail *"
+                type="email"
+                fullWidth
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="usuario@dominio.com.br"
+                error={!!erroEmail(form.email)}
+                helperText={erroEmail(form.email) || 'Ex.: tecnico@empresa.com.br'}
+                slotProps={{ htmlInput: { inputMode: 'email' } }}
+              />
             </Grid>
             {!dialogForm.editando && (
               <Grid size={{ xs: 12, md: 6 }}>
@@ -409,7 +419,12 @@ export default function Usuarios() {
                   label="Senha inicial *"
                   type={showSenha ? 'text' : 'password'} fullWidth value={form.senha}
                   onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
-                  helperText="Mínimo 6 caracteres. O usuário pode alterar depois."
+                  error={form.senha.length > 0 && form.senha.length < 6}
+                  helperText={
+                    form.senha.length > 0 && form.senha.length < 6
+                      ? `Muito curta: ${form.senha.length}/6 caracteres mínimos`
+                      : 'Mínimo 6 caracteres. O usuário pode alterar depois.'
+                  }
                   slotProps={{
                     input: {
                       endAdornment: (
@@ -423,8 +438,20 @@ export default function Usuarios() {
               </Grid>
             )}
             <Grid size={{ xs: 12, md: dialogForm.editando ? 6 : 6 }}>
-              <TextField label="URL da Foto (opcional)" fullWidth value={form.foto_url}
-                onChange={(e) => setForm((f) => ({ ...f, foto_url: e.target.value }))} />
+              <TextField
+                label="URL da Foto (opcional)"
+                fullWidth
+                value={form.foto_url}
+                onChange={(e) => setForm((f) => ({ ...f, foto_url: e.target.value }))}
+                placeholder="https://exemplo.com/foto.jpg"
+                error={!!form.foto_url && !/^https?:\/\/.+/.test(form.foto_url)}
+                helperText={
+                  form.foto_url && !/^https?:\/\/.+/.test(form.foto_url)
+                    ? 'URL inválida. Deve começar com http:// ou https://'
+                    : 'URL pública de imagem (opcional)'
+                }
+                slotProps={{ htmlInput: { inputMode: 'url' } }}
+              />
             </Grid>
 
             <Grid size={12}>
@@ -521,7 +548,12 @@ export default function Usuarios() {
             autoFocus fullWidth label="Nova senha"
             type={showSenha ? 'text' : 'password'}
             value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)}
-            helperText="Mínimo 6 caracteres."
+            error={novaSenha.length > 0 && novaSenha.length < 6}
+            helperText={
+              novaSenha.length > 0 && novaSenha.length < 6
+                ? `Muito curta: ${novaSenha.length}/6 caracteres mínimos`
+                : 'Mínimo 6 caracteres.'
+            }
             slotProps={{
               input: {
                 endAdornment: (
