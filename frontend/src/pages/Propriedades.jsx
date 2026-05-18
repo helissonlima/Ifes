@@ -7,7 +7,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   useMediaQuery, useTheme,
 } from '@mui/material';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiEye } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -134,7 +134,7 @@ export default function Propriedades() {
         <Grid container spacing={2}>
           {propriedades.map((p) => (
             <Grid size={12} key={p.id}>
-              <Card>
+              <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }} onClick={() => navigate(`/propriedades/${p.id}`)}>
                 <CardContent sx={{ pb: '12px !important' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ flexGrow: 1 }}>
@@ -150,7 +150,10 @@ export default function Propriedades() {
                     <Chip label={`${p.total_avaliacoes} avaliação(ões)`} size="small" color="primary" variant="outlined" />
                   </Box>
                   <Divider sx={{ my: 1 }} />
-                  <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }} onClick={(e) => e.stopPropagation()}>
+                    <Button size="small" startIcon={<FiEye />} onClick={() => navigate(`/propriedades/${p.id}`)}>
+                      Detalhes
+                    </Button>
                     <Button size="small" startIcon={<FiClipboard />} onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
                       Avaliar
                     </Button>
@@ -177,7 +180,11 @@ export default function Propriedades() {
             </TableHead>
             <TableBody>
               {propriedades.map((p, i) => (
-                <TableRow key={p.id} sx={{ bgcolor: i % 2 === 0 ? 'inherit' : 'action.hover', '&:hover': { bgcolor: 'primary.50' } }}>
+                <TableRow
+                  key={p.id}
+                  sx={{ cursor: 'pointer', bgcolor: i % 2 === 0 ? 'inherit' : 'action.hover', '&:hover': { bgcolor: 'primary.50' } }}
+                  onClick={() => navigate(`/propriedades/${p.id}`)}
+                >
                   <TableCell>
                     <Typography variant="body2" fontWeight={600}>{p.nome}</Typography>
                   </TableCell>
@@ -190,8 +197,12 @@ export default function Propriedades() {
                       <IGSBadge classificacao={p.ultima_classificacao} igs={p.ultimo_igs} size="small" />
                     ) : <Typography variant="caption" color="text.disabled">—</Typography>}
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <IconButton size="small" color="primary" title="Ver detalhe / histórico"
+                        onClick={() => navigate(`/propriedades/${p.id}`)}>
+                        <FiEye size={16} />
+                      </IconButton>
                       <IconButton size="small" color="primary" title="Nova Avaliação"
                         onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
                         <FiClipboard size={16} />

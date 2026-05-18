@@ -27,7 +27,10 @@ export const authAPI = {
   me: () => api.get('/auth/me'),
   listarUsuarios: () => api.get('/auth/usuarios'),
   criarUsuario: (data) => api.post('/auth/usuarios', data),
+  atualizarUsuario: (id, data) => api.put(`/auth/usuarios/${id}`, data),
   atualizarPermissoes: (id, data) => api.put(`/auth/usuarios/${id}/permissoes`, data),
+  redefinirSenha: (id, senha) => api.put(`/auth/usuarios/${id}/senha`, { senha }),
+  excluirUsuario: (id) => api.delete(`/auth/usuarios/${id}`),
 };
 
 // Propriedades
@@ -49,6 +52,7 @@ export const avaliacoesAPI = {
   estatisticas: () => api.get('/avaliacoes/estatisticas'),
   diagnostico: (id) => api.get(`/avaliacoes/${id}/diagnostico`),
   timeline: (propriedadeId) => api.get(`/avaliacoes/timeline/${propriedadeId}`),
+  comparar: (a, b) => api.get('/avaliacoes/comparar', { params: { a, b } }),
 };
 
 // Indicadores

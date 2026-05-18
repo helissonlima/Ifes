@@ -29,4 +29,13 @@ function requirePermission(permissionKey) {
   };
 }
 
-module.exports = { authRequired, requirePermission };
+function requireAdmin(req, res, next) {
+  const user = req.user;
+  if (!user) return res.status(401).json({ erro: 'Não autenticado' });
+  if (user.role !== 'admin') {
+    return res.status(403).json({ erro: 'Acesso restrito a administradores' });
+  }
+  return next();
+}
+
+module.exports = { authRequired, requirePermission, requireAdmin };

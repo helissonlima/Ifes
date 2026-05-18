@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { FiHome, FiMap, FiClipboard, FiList, FiBook, FiUsers } from 'react-icons/fi';
+import { FiHome, FiMap, FiClipboard, FiList, FiBook, FiShield } from 'react-icons/fi';
 import { useApp } from '../../context/AppContext';
 
 const NAV_ITEMS = [
@@ -9,14 +9,16 @@ const NAV_ITEMS = [
   { label: 'Avaliar',      icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
   { label: 'Historico',    icon: <FiList size={20} />,      path: '/historico', permission: 'historico' },
   { label: 'Metodologia',  icon: <FiBook size={20} />,      path: '/metodologia', permission: 'metodologia' },
-  { label: 'Usuarios',     icon: <FiUsers size={20} />,     path: '/usuarios', permission: 'usuarios' },
+  { label: 'Admin',        icon: <FiShield size={20} />,    path: '/usuarios', adminOnly: true },
 ];
 
 export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasPermission } = useApp();
-  const visibleItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
+  const { hasPermission, user } = useApp();
+  const visibleItems = NAV_ITEMS.filter((item) => (
+    item.adminOnly ? user?.role === 'admin' : hasPermission(item.permission)
+  ));
 
   const activeIndex = visibleItems.findIndex((item) =>
     item.path === '/'

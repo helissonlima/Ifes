@@ -3,7 +3,7 @@ import {
   Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Divider, Box, Typography, Tooltip,
 } from '@mui/material';
-import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle } from 'react-icons/fi';
+import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle, FiShield } from 'react-icons/fi';
 import { useApp } from '../../context/AppContext';
 
 const MENU_ITEMS = [
@@ -13,14 +13,16 @@ const MENU_ITEMS = [
   { label: 'Histórico', icon: <FiList size={20} />, path: '/historico', permission: 'historico' },
   { label: 'Metodologia', icon: <FiBook size={20} />, path: '/metodologia', permission: 'metodologia' },
   { label: 'Guia de Aplicação', icon: <FiHelpCircle size={20} />, path: '/guia', permission: 'metodologia' },
-  { label: 'Usuários', icon: <FiUsers size={20} />, path: '/usuarios', permission: 'usuarios' },
+  { label: 'Administração', icon: <FiShield size={20} />, path: '/usuarios', adminOnly: true },
 ];
 
 function SidebarContent({ onClose, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasPermission } = useApp();
-  const visibleItems = MENU_ITEMS.filter((item) => hasPermission(item.permission));
+  const { hasPermission, user } = useApp();
+  const visibleItems = MENU_ITEMS.filter((item) => (
+    item.adminOnly ? user?.role === 'admin' : hasPermission(item.permission)
+  ));
 
   const handleNav = (path) => {
     navigate(path);

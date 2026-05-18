@@ -287,6 +287,96 @@ const diagnostico = async (req, res) => {
   }
 };
 
+// Comparativo entre duas avaliações (mesma propriedade ou não)
+const comparar = async (req, res) => {
+  try {
+    const { a, b } = req.query;
+    if (!a || !b) return res.status(400).json({ erro: 'Parâmetros a e b (IDs das avaliações) são obrigatórios' });
+
+    const fetchAvaliacao = async (id) => {
+      const av = await pool.query(
+        `SELECT a.*, p.nome AS propriedade_nome, p.municipio
+         FROM avaliacoes a JOIN propriedades p ON p.id = a.propriedade_id WHERE a.id = $1`,
+        [id]
+      );
+      if (av.rows.length === 0) return null;
+      const resp = await pool.query(
+        `SELECT * FROM respostas_indicadores WHERE avaliacao_id = $1`,
+        [id]
+      );
+      return { ...av.rows[0], respostas: resp.rows };
+    };
+
+    const [av1, av2] = await Promise.all([fetchAvaliacao(a), fetchAvaliacao(b)]);
+    if (!av1 || !av2) return res.status(404).json({ erro: 'Avaliação não encontrada' });
+
+    const num = (v) => parseFloat(v) || 0;
+    const delta = (x, y) => parseFloat((num(y) - num(x)).toFixed(4));
+
+    const dimensoesDelta = [
+      { codigo: 'ambiental', nome: 'Ambiental', cor: '#4CAF50', peso: 0.35 },
+      { codigo: 'economica', nome: 'Econômica', cor: '#2196F3', peso: 0.30 },
+      { codigo: 'social', nome: 'Social', cor: '#FF9800', peso: 0.20 },
+      { codigo: 'gestao_qualidade', nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 0.15 },
+    ].map((d) => {
+      const campo = `indice_${d.codigo}`;
+      return {
+        ...d,
+        a: num(av1[campo]),
+        b: num(av2[campo]),
+        delta: delta(av1[campo], av2[campo]),
+      };
+    });
+
+    // Mapa de indicadores por código
+    const respA = {};
+    av1.respostas.forEach((r) => { respA[r.indicador_codigo] = r; });
+    const respB = {};
+    av2.respostas.forEach((r) => { respB[r.indicador_codigo] = r; });
+    const codigos = Array.from(new Set([...Object.keys(respA), ...Object.keys(respB)]));
+
+    const indicadoresDelta = codigos.map((cod) => {
+      const ra = respA[cod];
+      const rb = respB[cod];
+      const def = localizarIndicador(cod) || {};
+      return {
+        codigo: cod,
+        indicador_nome: ra?.indicador_nome || rb?.indicador_nome || cod,
+        dimensao: ra?.dimensao || rb?.dimensao || def.dimensao,
+        dimensao_nome: def.dimensao_nome || ra?.dimensao || rb?.dimensao,
+        nota_a: ra ? num(ra.nota) : null,
+        nota_b: rb ? num(rb.nota) : null,
+        delta: ra && rb ? delta(ra.nota, rb.nota) : null,
+        criterio_a: ra?.criterio_selecionado || null,
+        criterio_b: rb?.criterio_selecionado || null,
+      };
+    }).sort((x, y) => Math.abs(y.delta || 0) - Math.abs(x.delta || 0));
+
+    res.json({
+      a: {
+        id: av1.id, data: av1.data_avaliacao, igs: num(av1.igs),
+        classificacao: av1.classificacao, tecnico: av1.tecnico_responsavel,
+        propriedade_nome: av1.propriedade_nome,
+      },
+      b: {
+        id: av2.id, data: av2.data_avaliacao, igs: num(av2.igs),
+        classificacao: av2.classificacao, tecnico: av2.tecnico_responsavel,
+        propriedade_nome: av2.propriedade_nome,
+      },
+      delta_igs: delta(av1.igs, av2.igs),
+      dimensoes: dimensoesDelta,
+      indicadores: indicadoresDelta,
+      resumo: {
+        melhoraram: indicadoresDelta.filter((i) => (i.delta || 0) > 0).length,
+        pioraram: indicadoresDelta.filter((i) => (i.delta || 0) < 0).length,
+        estaveis: indicadoresDelta.filter((i) => i.delta === 0).length,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+};
+
 // Evolução temporal de uma propriedade
 const timelinePropriedade = async (req, res) => {
   try {
@@ -308,5 +398,5 @@ const timelinePropriedade = async (req, res) => {
 
 module.exports = {
   listar, buscarPorId, criar, salvarRespostas, excluir, estatisticas,
-  diagnostico, timelinePropriedade,
+  diagnostico, timelinePropriedade, comparar,
 };

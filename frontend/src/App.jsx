@@ -6,6 +6,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import MainLayout from './components/Layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Propriedades from './pages/Propriedades';
+import PropriedadeDetalhe from './pages/PropriedadeDetalhe';
 import NovaAvaliacao from './pages/NovaAvaliacao';
 import Resultado from './pages/Resultado';
 import Historico from './pages/Historico';
@@ -35,6 +36,12 @@ function RequirePermission({ permission, children }) {
   return children;
 }
 
+function RequireAdmin({ children }) {
+  const { user } = useApp();
+  if (user?.role !== 'admin') return <Navigate to="/" replace />;
+  return children;
+}
+
 function AppRoutes() {
   const { loadSession, loadingAuth, isAuthenticated } = useApp();
 
@@ -57,12 +64,13 @@ function AppRoutes() {
         >
           <Route path="/" element={<RequirePermission permission="dashboard"><Dashboard /></RequirePermission>} />
           <Route path="/propriedades" element={<RequirePermission permission="propriedades"><Propriedades /></RequirePermission>} />
+          <Route path="/propriedades/:id" element={<RequirePermission permission="propriedades"><PropriedadeDetalhe /></RequirePermission>} />
           <Route path="/avaliacao/nova" element={<RequirePermission permission="avaliacoes"><NovaAvaliacao /></RequirePermission>} />
           <Route path="/avaliacao/:id" element={<RequirePermission permission="historico"><Resultado /></RequirePermission>} />
           <Route path="/historico" element={<RequirePermission permission="historico"><Historico /></RequirePermission>} />
           <Route path="/metodologia" element={<RequirePermission permission="metodologia"><Metodologia /></RequirePermission>} />
           <Route path="/guia" element={<RequirePermission permission="metodologia"><Guia /></RequirePermission>} />
-          <Route path="/usuarios" element={<RequirePermission permission="usuarios"><Usuarios /></RequirePermission>} />
+          <Route path="/usuarios" element={<RequireAdmin><Usuarios /></RequireAdmin>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
