@@ -17,10 +17,41 @@ body {
 
 /* Print styles */
 @media print {
+  @page { size: A4; margin: 14mm; }
+
+  body { background: #fff !important; }
+
   .MuiAppBar-root,
   .MuiDrawer-root,
+  .MuiBottomNavigation-root,
+  .MuiTabs-root,
+  .no-print,
   button {
     display: none !important;
+  }
+
+  /* Mostra todas as abas/tabpanels ocultas para impressão */
+  .print-resultado [role="tabpanel"] { display: block !important; }
+  .print-resultado .MuiTabs-root { display: none !important; }
+
+  .MuiCard-root,
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  .print-resultado .MuiCard-root { page-break-inside: avoid; }
+
+  /* Mostra todas as colunas escondidas em telas pequenas */
+  .print-resultado [class*="MuiTableCell-root"] {
+    display: table-cell !important;
+  }
+
+  /* Cards com gradiente: garante cores na impressão */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 

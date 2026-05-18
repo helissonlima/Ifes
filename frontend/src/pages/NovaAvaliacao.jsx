@@ -54,6 +54,7 @@ export default function NovaAvaliacao() {
   });
   const [respostas, setRespostas] = useState({}); // { [indicadorCodigo]: nota }
   const [respostasDetalhes, setRespostasDetalhes] = useState({}); // { [codigo]: { criterio, nome } }
+  const [observacoes, setObservacoes] = useState({}); // { [indicadorCodigo]: texto }
 
   useEffect(() => {
     Promise.all([
@@ -80,6 +81,10 @@ export default function NovaAvaliacao() {
   const handleRespostaChange = (dimensaoCodigo, indicadorCodigo, nota, nomeIndicador, criterio) => {
     setRespostas((r) => ({ ...r, [indicadorCodigo]: nota }));
     setRespostasDetalhes((d) => ({ ...d, [indicadorCodigo]: { dimensao: dimensaoCodigo, nome: nomeIndicador, criterio } }));
+  };
+
+  const handleObservacaoChange = (indicadorCodigo, texto) => {
+    setObservacoes((o) => ({ ...o, [indicadorCodigo]: texto }));
   };
 
   // Calcula índices por dimensão
@@ -168,6 +173,7 @@ export default function NovaAvaliacao() {
         indicador_nome: det.nome || codigo,
         nota,
         criterio_selecionado: det.criterio || '',
+        observacao: observacoes[codigo] || '',
       };
     });
 
@@ -363,9 +369,11 @@ export default function NovaAvaliacao() {
         <DimensaoStep
           dimensao={dimensoesLista[step - 1]}
           respostas={respostas}
+          observacoes={observacoes}
           onChange={(codigo, nota, nome, criterio) =>
             handleRespostaChange(dimensoesLista[step - 1].codigo, codigo, nota, nome, criterio)
           }
+          onObservacaoChange={handleObservacaoChange}
         />
       )}
 

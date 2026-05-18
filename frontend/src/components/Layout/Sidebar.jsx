@@ -3,7 +3,7 @@ import {
   Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Divider, Box, Typography, Tooltip,
 } from '@mui/material';
-import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers } from 'react-icons/fi';
+import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle } from 'react-icons/fi';
 import { useApp } from '../../context/AppContext';
 
 const MENU_ITEMS = [
@@ -12,6 +12,7 @@ const MENU_ITEMS = [
   { label: 'Nova Avaliação', icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
   { label: 'Histórico', icon: <FiList size={20} />, path: '/historico', permission: 'historico' },
   { label: 'Metodologia', icon: <FiBook size={20} />, path: '/metodologia', permission: 'metodologia' },
+  { label: 'Guia de Aplicação', icon: <FiHelpCircle size={20} />, path: '/guia', permission: 'metodologia' },
   { label: 'Usuários', icon: <FiUsers size={20} />, path: '/usuarios', permission: 'usuarios' },
 ];
 

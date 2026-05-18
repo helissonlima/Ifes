@@ -47,6 +47,8 @@ export const avaliacoesAPI = {
   salvarRespostas: (id, data) => api.put(`/avaliacoes/${id}/respostas`, data),
   excluir: (id) => api.delete(`/avaliacoes/${id}`),
   estatisticas: () => api.get('/avaliacoes/estatisticas'),
+  diagnostico: (id) => api.get(`/avaliacoes/${id}/diagnostico`),
+  timeline: (propriedadeId) => api.get(`/avaliacoes/timeline/${propriedadeId}`),
 };
 
 // Indicadores

@@ -10,6 +10,7 @@ import NovaAvaliacao from './pages/NovaAvaliacao';
 import Resultado from './pages/Resultado';
 import Historico from './pages/Historico';
 import Metodologia from './pages/Metodologia';
+import Guia from './pages/Guia';
 import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
 
@@ -60,6 +61,7 @@ function AppRoutes() {
           <Route path="/avaliacao/:id" element={<RequirePermission permission="historico"><Resultado /></RequirePermission>} />
           <Route path="/historico" element={<RequirePermission permission="historico"><Historico /></RequirePermission>} />
           <Route path="/metodologia" element={<RequirePermission permission="metodologia"><Metodologia /></RequirePermission>} />
+          <Route path="/guia" element={<RequirePermission permission="metodologia"><Guia /></RequirePermission>} />
           <Route path="/usuarios" element={<RequirePermission permission="usuarios"><Usuarios /></RequirePermission>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

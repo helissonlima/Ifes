@@ -1,7 +1,7 @@
 import { Box, Typography, LinearProgress, Chip, Alert } from '@mui/material';
 import IndicadorCard from './IndicadorCard';
 
-export default function DimensaoStep({ dimensao, respostas, onChange }) {
+export default function DimensaoStep({ dimensao, respostas, observacoes, onChange, onObservacaoChange }) {
   const total = dimensao.indicadores.length;
   const respondidos = dimensao.indicadores.filter((ind) => respostas[ind.codigo] !== undefined).length;
   const progresso = (respondidos / total) * 100;
@@ -67,7 +67,9 @@ export default function DimensaoStep({ dimensao, respostas, onChange }) {
           key={ind.codigo}
           indicador={ind}
           nota={respostas[ind.codigo]}
+          observacao={observacoes?.[ind.codigo]}
           onChange={(nota) => onChange(ind.codigo, nota, ind.nome, ind.criterios.find(c => c.nota === nota)?.descricao)}
+          onObservacaoChange={(texto) => onObservacaoChange?.(ind.codigo, texto)}
           corDimensao={dimensao.cor}
         />
       ))}

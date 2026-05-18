@@ -1,5 +1,12 @@
 const pool = require('../config/database');
-const { calcularIGS, calcularIndiceDimensao } = require('../models/indicadores');
+const {
+  DIMENSOES,
+  calcularIGS,
+  calcularIndiceDimensao,
+  avaliarStatusIndicador,
+  localizarIndicador,
+  calcularImpactoIGS,
+} = require('../models/indicadores');
 
 const listar = async (req, res) => {
   try {
@@ -202,4 +209,104 @@ const estatisticas = async (req, res) => {
   }
 };
 
-module.exports = { listar, buscarPorId, criar, salvarRespostas, excluir, estatisticas };
+// Diagnóstico automático: status, recomendações e plano de ação top-5 por impacto no IGS
+const diagnostico = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const avalResult = await pool.query(
+      `SELECT a.*, p.nome AS propriedade_nome, p.municipio, p.proprietario
+       FROM avaliacoes a JOIN propriedades p ON p.id = a.propriedade_id WHERE a.id = $1`,
+      [id]
+    );
+    if (avalResult.rows.length === 0) return res.status(404).json({ erro: 'Avaliação não encontrada' });
+    const avaliacao = avalResult.rows[0];
+
+    const respostas = (await pool.query(
+      `SELECT * FROM respostas_indicadores WHERE avaliacao_id = $1 ORDER BY dimensao, indicador_codigo`,
+      [id]
+    )).rows;
+
+    const itens = respostas.map((r) => {
+      const def = localizarIndicador(r.indicador_codigo) || {};
+      const status = avaliarStatusIndicador(r.nota);
+      const impacto = calcularImpactoIGS(r.indicador_codigo, r.nota);
+      return {
+        dimensao: r.dimensao,
+        dimensao_nome: def.dimensao_nome || r.dimensao,
+        indicador_codigo: r.indicador_codigo,
+        indicador_nome: r.indicador_nome,
+        nota: parseFloat(r.nota),
+        criterio_selecionado: r.criterio_selecionado,
+        observacao: r.observacao,
+        evidencia_esperada: def.evidencia_esperada || '',
+        status: status.status,
+        status_cor: status.cor,
+        prazo_sugerido: status.prazo,
+        recomendacao: status.recomendacao,
+        impacto_igs: impacto,
+      };
+    });
+
+    const porDimensao = {};
+    for (const it of itens) {
+      if (!porDimensao[it.dimensao]) porDimensao[it.dimensao] = { dimensao: it.dimensao, nome: it.dimensao_nome, itens: [] };
+      porDimensao[it.dimensao].itens.push(it);
+    }
+
+    // Plano top-5: maior impacto potencial no IGS
+    const topAcoes = [...itens].sort((a, b) => b.impacto_igs - a.impacto_igs).slice(0, 5);
+
+    // Resumo de dimensões com status
+    const resumoDimensoes = Object.values(DIMENSOES).map((d) => {
+      const valor = parseFloat(avaliacao[`indice_${d.codigo}`] || 0);
+      const status = avaliarStatusIndicador(valor);
+      return {
+        codigo: d.codigo,
+        nome: d.nome,
+        peso: d.peso,
+        cor: d.cor,
+        indice: valor,
+        contribuicao: parseFloat((valor * d.peso).toFixed(4)),
+        status: status.status,
+        status_cor: status.cor,
+      };
+    });
+
+    res.json({
+      avaliacao_id: id,
+      propriedade_nome: avaliacao.propriedade_nome,
+      municipio: avaliacao.municipio,
+      igs: parseFloat(avaliacao.igs || 0),
+      classificacao: avaliacao.classificacao,
+      resumo_dimensoes: resumoDimensoes,
+      diagnostico_por_dimensao: Object.values(porDimensao),
+      plano_acao_top5: topAcoes,
+    });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+};
+
+// Evolução temporal de uma propriedade
+const timelinePropriedade = async (req, res) => {
+  try {
+    const { propriedade_id } = req.params;
+    const result = await pool.query(
+      `SELECT id, data_avaliacao, igs, classificacao,
+              indice_ambiental, indice_economico, indice_social, indice_gestao_qualidade,
+              tecnico_responsavel, status
+       FROM avaliacoes
+       WHERE propriedade_id = $1 AND status = 'concluida'
+       ORDER BY data_avaliacao ASC`,
+      [propriedade_id]
+    );
+    res.json({ propriedade_id, total: result.rows.length, avaliacoes: result.rows });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+};
+
+module.exports = {
+  listar, buscarPorId, criar, salvarRespostas, excluir, estatisticas,
+  diagnostico, timelinePropriedade,
+};

@@ -230,6 +230,96 @@ export default function Metodologia() {
           </Grid>
         </CardContent>
       </Card>
+
+      {/* Tabela de Referência Rápida */}
+      <Card sx={{ mt: 2 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            Tabela de Referência Rápida — Critérios de Pontuação
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Exemplos de critérios por dimensão para apoiar a calibração da nota em campo.
+          </Typography>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 760 }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'primary.main' }}>
+                  {['Nota', 'Interpretação Geral', 'Ambiental', 'Econômica', 'Social', 'Gestão & Qualidade'].map((h) => (
+                    <TableCell key={h} sx={{ color: '#fff', fontWeight: 700 }}>{h}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[
+                  {
+                    nota: '0,00', cor: '#f44336',
+                    geral: 'Inexistente ou inadequado',
+                    amb: 'Erosão visível, solo exposto, sem práticas',
+                    eco: 'Prejuízo, produtividade < 50% da média',
+                    soc: 'Condições precárias, sem capacitação',
+                    gq: 'Sem registros, irregular',
+                  },
+                  {
+                    nota: '0,25', cor: '#FF9800',
+                    geral: 'Baixo desempenho',
+                    amb: 'Práticas insuficientes (<50%)',
+                    eco: 'Margem baixa, controle informal',
+                    soc: 'Infraestrutura limitada',
+                    gq: 'Registros incompletos',
+                  },
+                  {
+                    nota: '0,50', cor: '#FFC107',
+                    geral: 'Desempenho moderado',
+                    amb: 'Conservação parcial (~50%)',
+                    eco: 'Equilíbrio financeiro, média regional',
+                    soc: 'Condições razoáveis, capacitação periódica',
+                    gq: 'Planejamento parcial',
+                  },
+                  {
+                    nota: '0,75', cor: '#8BC34A',
+                    geral: 'Bom desempenho',
+                    amb: 'Boas práticas (>60%), monitoramento',
+                    eco: 'Boa relação custo-benefício, diversificação',
+                    soc: 'Boa qualidade de vida, envolvimento ativo',
+                    gq: 'Sistema organizado, planejamento anual',
+                  },
+                  {
+                    nota: '1,00', cor: '#4CAF50',
+                    geral: 'Excelente desempenho',
+                    amb: '3+ práticas integradas, excelência',
+                    eco: 'Alta eficiência, mercado premium',
+                    soc: 'Sucessão estruturada, excelente QV',
+                    gq: 'Digital + certificações múltiplas',
+                  },
+                ].map((r) => (
+                  <TableRow key={r.nota} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
+                    <TableCell>
+                      <Chip label={r.nota} size="small" sx={{ bgcolor: r.cor, color: '#fff', fontWeight: 800, fontFamily: 'monospace' }} />
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{r.geral}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.amb}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.eco}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.soc}</TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.gq}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+          <Box sx={{ mt: 2, p: 1.5, borderRadius: 2, bgcolor: '#FFF8E1', borderLeft: '4px solid #EF6C00' }}>
+            <Typography variant="caption" fontWeight={700} color="#EF6C00" display="block">
+              Notas importantes sobre pontuação
+            </Typography>
+            <Box component="ul" sx={{ pl: 2.5, my: 0.5, '& li': { fontSize: '0.78rem', color: 'text.secondary' } }}>
+              <li>Valores intermediários (ex: 0,35; 0,60; 0,85) são permitidos quando o desempenho está entre dois critérios.</li>
+              <li>Sempre registre a justificativa para notas extremas (&lt; 0,25 ou &gt; 0,75) no campo de observação.</li>
+              <li>Em caso de dúvida entre duas notas, opte pela mais conservadora (menor valor).</li>
+              <li>A nota 0,50 representa o padrão mínimo aceitável para sustentabilidade moderada.</li>
+              <li>Reavalie anualmente — o ICSR é sensível às mudanças de curto e médio prazo.</li>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 }
