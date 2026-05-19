@@ -52,13 +52,14 @@ async function getMediaProducao(req, res) {
 
     // 2. PAM tabela 1612: lavouras permanentes — café (em grão) total (código 2693)
     //    variáveis: 112=rendimento médio (kg/ha), 214=quantidade produzida (t), 215=área colhida (ha)
-    const anos = [2019, 2020, 2021, 2022, 2023].join('|');
+    //    "last7" retorna os 7 períodos mais recentes disponíveis no IBGE,
+    //    independente do ano calendário — sempre pega o dado mais atual publicado.
     const [dadosMun, dadosUF] = await Promise.all([
       ibge(
-        `https://servicodados.ibge.gov.br/api/v3/agregados/1612/periodos/${anos}/variaveis/112|214|215?localidades=N6[${munId}]&classificacao=782[2693]`,
+        `https://servicodados.ibge.gov.br/api/v3/agregados/1612/periodos/last7/variaveis/112|214|215?localidades=N6[${munId}]&classificacao=782[2693]`,
       ),
       ibge(
-        `https://servicodados.ibge.gov.br/api/v3/agregados/1612/periodos/${anos}/variaveis/112?localidades=N3[${ufId}]&classificacao=782[2693]`,
+        `https://servicodados.ibge.gov.br/api/v3/agregados/1612/periodos/last7/variaveis/112?localidades=N3[${ufId}]&classificacao=782[2693]`,
       ),
     ]);
 
