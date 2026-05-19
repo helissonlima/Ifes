@@ -1,16 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Stepper, Step, StepLabel, StepButton,
   Button, Card, CardContent, Grid, TextField, Autocomplete,
   CircularProgress, Alert, LinearProgress, Paper,
   useMediaQuery, useTheme, MobileStepper,
+  Dialog, DialogTitle, DialogContent, DialogActions, Chip, Tooltip,
 } from '@mui/material';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiSave } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifi, FiWifiOff, FiClock, FiTrash2 } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import DimensaoStep from '../components/Evaluation/DimensaoStep';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import {
+  salvarRascunhoLocal,
+  carregarRascunhoLocal,
+  limparRascunhoLocal,
+  temRascunhoLocal,
+  formatarDataRascunho,
+} from '../utils/avaliacaoCache';
 
 const DIMENSOES_ORDEM = ['economica', 'ambiental', 'social', 'gestao_qualidade'];
 
@@ -31,7 +40,8 @@ const formatPropriedadeOption = (propriedade) =>
 export default function NovaAvaliacao() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { notify } = useApp();
+  const { notify, user } = useApp();
+  const { isOnline, wasOffline, resetWasOffline } = useNetworkStatus();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isCompactStepper = useMediaQuery(theme.breakpoints.down('lg'));
@@ -45,6 +55,12 @@ export default function NovaAvaliacao() {
   const [avaliacaoId, setAvaliacaoId] = useState(null);
   const [erro, setErro] = useState('');
 
+  // Cache offline
+  const [ultimoSalvoLocal, setUltimoSalvoLocal] = useState(null);
+  const [syncPendente, setSyncPendente] = useState(false);
+  const [dialogRascunho, setDialogRascunho] = useState({ open: false, draft: null });
+  const autoSaveTimer = useRef(null);
+
   // Dados do formulário
   const [info, setInfo] = useState({
     propriedade: null,
@@ -56,6 +72,7 @@ export default function NovaAvaliacao() {
   const [respostasDetalhes, setRespostasDetalhes] = useState({}); // { [codigo]: { criterio, nome } }
   const [observacoes, setObservacoes] = useState({}); // { [indicadorCodigo]: texto }
 
+  // ── Carregamento inicial de dados ─────────────────────────────────────────
   useEffect(() => {
     Promise.all([
       propriedadesAPI.listar({ limit: 200 }),
@@ -63,6 +80,22 @@ export default function NovaAvaliacao() {
     ]).then(([p, ind]) => {
       setPropriedades(p.data.data);
       setDimensoes(ind.data.dimensoes);
+
+      // Verifica rascunho salvo ANTES de aplicar parâmetros da URL
+      const userId = user?.id;
+      if (userId && temRascunhoLocal(userId)) {
+        const draft = carregarRascunhoLocal(userId);
+        // Se vier parâmetro de URL e bater com o rascunho → restaura direto
+        const propId = searchParams.get('propriedade');
+        if (propId && draft?.info?.propriedade?.id === propId) {
+          restaurarRascunho(draft, p.data.data);
+        } else {
+          setDialogRascunho({ open: true, draft });
+        }
+        return;
+      }
+
+      // Sem rascunho: aplica parâmetros da URL normalmente
       const propId = searchParams.get('propriedade');
       if (propId) {
         const prop = p.data.data.find((x) => x.id === propId);
@@ -70,7 +103,82 @@ export default function NovaAvaliacao() {
       }
     }).catch((e) => setErro(e.message))
     .finally(() => setCarregando(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Auto-save no localStorage (debounce 1,5s) ────────────────────────────
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+
+    clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      const estado = {
+        step,
+        avaliacaoId,
+        info,
+        respostas,
+        respostasDetalhes,
+        observacoes,
+        syncPendente: true,
+      };
+      salvarRascunhoLocal(userId, estado);
+      setUltimoSalvoLocal(new Date().toISOString());
+      setSyncPendente(true);
+    }, 1500);
+
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [step, avaliacaoId, info, respostas, respostasDetalhes, observacoes, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Sincroniza com o servidor ao voltar online ────────────────────────────
+  useEffect(() => {
+    if (isOnline && wasOffline && syncPendente && info.propriedade) {
+      resetWasOffline();
+      notify('Conexão restaurada! Sincronizando com o servidor...', 'info');
+      salvarRascunhoServidor().then(() => {
+        setSyncPendente(false);
+      }).catch(() => {
+        // falha silenciosa — dados ainda estão no localStorage
+      });
+    }
+  }, [isOnline, wasOffline]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Funções de rascunho ───────────────────────────────────────────────────
+  const restaurarRascunho = (draft, listaPropriedades) => {
+    if (!draft) return;
+    // Reconecta o objeto propriedade à lista atualizada (pode ter mudado no servidor)
+    const propAtualizada = listaPropriedades
+      ? listaPropriedades.find((p) => p.id === draft.info?.propriedade?.id) ?? draft.info?.propriedade
+      : draft.info?.propriedade;
+
+    setInfo({ ...draft.info, propriedade: propAtualizada });
+    setRespostas(draft.respostas || {});
+    setRespostasDetalhes(draft.respostasDetalhes || {});
+    setObservacoes(draft.observacoes || {});
+    setStep(draft.step ?? 0);
+    setAvaliacaoId(draft.avaliacaoId ?? null);
+    setSyncPendente(draft.syncPendente ?? false);
+    setUltimoSalvoLocal(draft.timestamp ?? null);
+    setDialogRascunho({ open: false, draft: null });
+    notify('Rascunho restaurado! Continue de onde parou.', 'success');
+  };
+
+  const descartarRascunho = () => {
+    limparRascunhoLocal(user?.id);
+    setDialogRascunho({ open: false, draft: null });
+    // Aplica parâmetro URL se houver
+    const propId = searchParams.get('propriedade');
+    if (propId && propriedades.length > 0) {
+      const prop = propriedades.find((x) => x.id === propId);
+      if (prop) setInfo((i) => ({ ...i, propriedade: prop }));
+    }
+    notify('Rascunho descartado. Nova avaliação iniciada.');
+  };
+
+  const limparCacheAposEnvio = () => {
+    limparRascunhoLocal(user?.id);
+    setSyncPendente(false);
+    setUltimoSalvoLocal(null);
+  };
 
   const dimensoesLista = DIMENSOES_ORDEM.map((d) => dimensoes[d]).filter(Boolean);
   const clampProgress = (value) => {
@@ -115,27 +223,39 @@ export default function NovaAvaliacao() {
   const totalRespondidos = Object.keys(respostas).length;
   const totalIndicadores = Object.values(dimensoes).reduce((acc, d) => acc + (d?.indicadores?.length || 0), 0);
 
+  const salvarRascunhoServidor = async () => {
+    if (!info.propriedade) return;
+    const respostasArr = montarRespostasArray();
+    if (!avaliacaoId) {
+      const res = await avaliacoesAPI.criar({
+        propriedade_id: info.propriedade.id,
+        tecnico_responsavel: info.tecnico,
+        data_avaliacao: info.data,
+        observacoes: info.observacoes,
+        respostas: respostasArr,
+      });
+      setAvaliacaoId(res.data.id);
+    } else {
+      await avaliacoesAPI.salvarRespostas(avaliacaoId, { respostas: respostasArr });
+    }
+  };
+
   const salvarRascunho = async () => {
     if (!info.propriedade) { notify('Selecione uma propriedade primeiro', 'warning'); return; }
+    if (!isOnline) {
+      notify('Sem conexão — dados salvos localmente no dispositivo.', 'info');
+      return;
+    }
     setSalvando(true);
     try {
-      const respostasArr = montarRespostasArray();
-      if (!avaliacaoId) {
-        const res = await avaliacoesAPI.criar({
-          propriedade_id: info.propriedade.id,
-          tecnico_responsavel: info.tecnico,
-          data_avaliacao: info.data,
-          observacoes: info.observacoes,
-          respostas: respostasArr,
-        });
-        setAvaliacaoId(res.data.id);
-        notify('Rascunho salvo!');
-      } else {
-        await avaliacoesAPI.salvarRespostas(avaliacaoId, { respostas: respostasArr });
-        notify('Rascunho atualizado!');
-      }
-    } catch (e) { notify(e.message, 'error'); }
-    finally { setSalvando(false); }
+      await salvarRascunhoServidor();
+      setSyncPendente(false);
+      notify('Rascunho salvo no servidor!');
+    } catch (e) {
+      notify('Falha ao salvar no servidor. Dados mantidos localmente.', 'warning');
+    } finally {
+      setSalvando(false);
+    }
   };
 
   const concluir = async () => {
@@ -143,6 +263,10 @@ export default function NovaAvaliacao() {
     if (totalRespondidos < totalIndicadores) {
       const faltam = totalIndicadores - totalRespondidos;
       if (!window.confirm(`Ainda faltam ${faltam} indicador(es) para avaliar. Deseja concluir mesmo assim?`)) return;
+    }
+    if (!isOnline) {
+      notify('Sem conexão. Conecte-se à internet para concluir a avaliação. Os dados estão salvos localmente.', 'warning');
+      return;
     }
     setSalvando(true);
     try {
@@ -158,6 +282,7 @@ export default function NovaAvaliacao() {
         id = res.data.id;
       }
       await avaliacoesAPI.salvarRespostas(id, { respostas: respostasArr, concluir: true });
+      limparCacheAposEnvio();
       notify('Avaliação concluída com sucesso!', 'success');
       navigate(`/avaliacao/${id}`);
     } catch (e) { notify(e.message, 'error'); }
@@ -200,6 +325,63 @@ export default function NovaAvaliacao() {
 
   return (
     <Box>
+      {/* ── Banner offline ── */}
+      {!isOnline && (
+        <Alert
+          severity="warning"
+          icon={<FiWifiOff />}
+          sx={{ mb: 1.5, fontWeight: 600, borderRadius: 2 }}
+        >
+          <strong>Modo offline</strong> — sem conexão com a internet. Seus dados estão sendo
+          salvos automaticamente no dispositivo. Ao reconectar, a sincronização ocorrerá automaticamente.
+        </Alert>
+      )}
+
+      {/* ── Dialog: rascunho encontrado ── */}
+      <Dialog open={dialogRascunho.open} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <FiClock color="#F57F17" />
+          Rascunho encontrado
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="info" sx={{ mb: 1.5 }}>
+            Você tem uma avaliação em andamento salva neste dispositivo.
+          </Alert>
+          {dialogRascunho.draft && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              <Typography variant="body2">
+                <strong>Propriedade:</strong>{' '}
+                {dialogRascunho.draft.info?.propriedade?.nome || 'Não selecionada'}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Indicadores respondidos:</strong>{' '}
+                {Object.keys(dialogRascunho.draft.respostas || {}).length}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Último salvamento:</strong>{' '}
+                {formatarDataRascunho(dialogRascunho.draft.timestamp)}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button
+            startIcon={<FiTrash2 />}
+            onClick={descartarRascunho}
+            color="error"
+          >
+            Descartar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => restaurarRascunho(dialogRascunho.draft, propriedades)}
+          >
+            Continuar de onde parou
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Cabeçalho ── */}
       <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
         <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
         <Box sx={{ flexGrow: 1 }}>
@@ -208,13 +390,38 @@ export default function NovaAvaliacao() {
             {totalRespondidos}/{totalIndicadores} indicadores avaliados
           </Typography>
         </Box>
+
+        {/* Status de rede + último salvamento */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Tooltip title={isOnline ? 'Conectado ao servidor' : 'Offline — dados salvos localmente'}>
+            <Chip
+              size="small"
+              icon={isOnline ? <FiWifi size={13} /> : <FiWifiOff size={13} />}
+              label={isOnline ? (syncPendente ? 'Pendente sync' : 'Online') : 'Offline'}
+              color={isOnline ? (syncPendente ? 'warning' : 'success') : 'error'}
+              variant="outlined"
+            />
+          </Tooltip>
+          {ultimoSalvoLocal && (
+            <Tooltip title={`Salvo localmente em ${formatarDataRascunho(ultimoSalvoLocal)}`}>
+              <Chip
+                size="small"
+                icon={<FiClock size={13} />}
+                label="Salvo localmente"
+                variant="outlined"
+                color="default"
+              />
+            </Tooltip>
+          )}
+        </Box>
+
         <Button
           variant="outlined" startIcon={<FiSave />}
           onClick={salvarRascunho} disabled={salvando || !info.propriedade}
           size="small"
           sx={{ ml: { xs: 0, sm: 'auto' } }}
         >
-          {salvando ? <CircularProgress size={16} /> : 'Salvar rascunho'}
+          {salvando ? <CircularProgress size={16} /> : 'Salvar no servidor'}
         </Button>
       </Box>
 
@@ -417,17 +624,21 @@ export default function NovaAvaliacao() {
             Próximo
           </Button>
         ) : (
-          <Button
-            startIcon={<FiCheck />}
-            onClick={concluir}
-            variant="contained"
-            color="success"
-            disabled={salvando}
-            size="large"
-            fullWidth={isMobile}
-          >
-            {salvando ? <CircularProgress size={20} /> : 'Concluir Avaliação'}
-          </Button>
+          <Tooltip title={!isOnline ? 'Conecte-se à internet para concluir. Os dados estão salvos localmente.' : ''}>
+            <span>
+              <Button
+                startIcon={<FiCheck />}
+                onClick={concluir}
+                variant="contained"
+                color="success"
+                disabled={salvando || !isOnline}
+                size="large"
+                fullWidth={isMobile}
+              >
+                {salvando ? <CircularProgress size={20} /> : !isOnline ? 'Aguardando conexão…' : 'Concluir Avaliação'}
+              </Button>
+            </span>
+          </Tooltip>
         )}
       </Box>
     </Box>
