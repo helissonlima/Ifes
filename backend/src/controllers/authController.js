@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
+const { readSecret } = require('../config/secrets');
 
 const DEFAULT_PERMISSIONS = {
   dashboard: true,
@@ -26,7 +27,7 @@ function sanitizeUser(row) {
 }
 
 function signToken(user) {
-  const secret = process.env.JWT_SECRET || 'dev-secret-change-me';
+  const secret = readSecret('JWT_SECRET', 'dev-secret-change-me');
   return jwt.sign(
     {
       sub: user.id,

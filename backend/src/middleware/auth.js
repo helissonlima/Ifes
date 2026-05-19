@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { readSecret } = require('../config/secrets');
 
 function authRequired(req, res, next) {
   try {
@@ -6,7 +7,7 @@ function authRequired(req, res, next) {
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) return res.status(401).json({ erro: 'Não autenticado' });
 
-    const secret = process.env.JWT_SECRET || 'dev-secret-change-me';
+    const secret = readSecret('JWT_SECRET', 'dev-secret-change-me');
     const payload = jwt.verify(token, secret);
     req.user = payload;
     return next();

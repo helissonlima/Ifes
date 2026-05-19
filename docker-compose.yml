@@ -1,15 +1,28 @@
 services:
 
+  # ─── Bootstrap de Segredos ───────────────────────────────────────────────────
+  setup:
+    image: node:20-alpine
+    restart: "no"
+    command: ["node", "/scripts/init-secrets.js"]
+    volumes:
+      - secrets:/run/secrets
+      - ./scripts:/scripts:ro
+
   # ─── Banco de Dados ───────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    depends_on:
+      setup:
+        condition: service_completed_successfully
     environment:
       POSTGRES_DB:       ${DB_NAME:-sustentabilidade_rural}
       POSTGRES_USER:     ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - secrets:/run/secrets:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-sustentabilidade_rural}"]
       interval: 10s
@@ -21,6 +34,8 @@ services:
     build: ./backend
     restart: unless-stopped
     depends_on:
+      setup:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
     environment:
@@ -30,10 +45,12 @@ services:
       DB_PORT:           ${DB_PORT:-5432}
       DB_NAME:           ${DB_NAME:-sustentabilidade_rural}
       DB_USER:           ${DB_USER:-postgres}
-      DB_PASSWORD:       ${DB_PASSWORD}
-      JWT_SECRET:        ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      FRONTEND_URL:      http://localhost:${APP_PORT:-4300}
+      DB_PASSWORD_FILE:       /run/secrets/db_password
+      JWT_SECRET_FILE:        /run/secrets/jwt_secret
+      JWT_REFRESH_SECRET_FILE: /run/secrets/jwt_refresh_secret
+      FRONTEND_URL:      ${FRONTEND_URL:-https://cafe.h3info.com:4300}
+    volumes:
+      - secrets:/run/secrets:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/health || exit 1"]
       interval: 15s
@@ -56,3 +73,4 @@ services:
 # ─── Volumes ─────────────────────────────────────────────────────────────────
 volumes:
   pgdata:
+  secrets:

@@ -20,6 +20,18 @@ baseada na análise comparativa **ISA-EPAMIG** (MG) × **INCAPER** (ES).
 - Node.js ≥ 18
 - PostgreSQL ≥ 14
 
+## Docker Compose
+
+Se preferir subir tudo com Docker, `docker compose up` agora cria automaticamente
+um volume de segredos na primeira execução e gera chaves de 32 caracteres para
+o banco e para o JWT. Depois disso, os segredos ficam persistidos no volume
+`secrets` e são reutilizados nas próximas execuções.
+
+Para acesso externo, a URL pública do frontend deve ficar em
+`https://cafe.h3info.com:4300`. O `.env` e o backend usam esse valor para CORS.
+Se a terminação TLS acontecer em outro proxy, mantenha o mesmo host/porta no
+ambiente e ajuste apenas a infraestrutura de rede.
+
 ---
 
 ## Instalação
