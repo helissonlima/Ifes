@@ -7,7 +7,7 @@ import {
   Switch, FormControlLabel, useMediaQuery, useTheme,
 } from '@mui/material';
 import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
-import { MdOutlineSprout } from 'react-icons/md';
+import { MdGrain } from 'react-icons/md';
 import { axiosInstance } from '../services/api';
 import { useApp } from '../context/AppContext';
 
@@ -138,7 +138,7 @@ export default function Graos() {
       ) : graosFiltrados.length === 0 ? (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <MdOutlineSprout size={48} color="#aaa" />
+            <MdGrain size={48} color="#aaa" />
             <Typography variant="h6" color="text.secondary" mt={1}>Nenhum grão encontrado</Typography>
             <Button variant="contained" sx={{ mt: 2 }} onClick={abrirNovo} startIcon={<FiPlus />}>
               Adicionar primeiro grão

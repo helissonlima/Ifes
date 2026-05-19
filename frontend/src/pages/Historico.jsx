@@ -187,13 +187,13 @@ export default function Historico() {
                           { label: 'G&Q', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
                         ].map((d) => (
                           <Grid size={3} key={d.label}>
-                            <Typography variant="caption" color="text.secondary" display="block" textAlign="center">{d.label}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ textAlign: 'center' }}>{d.label}</Typography>
                             <LinearProgress
                               variant="determinate"
                               value={(d.val || 0) * 100}
                               sx={{ height: 6, borderRadius: 3, bgcolor: `${d.cor}22`, '& .MuiLinearProgress-bar': { bgcolor: d.cor } }}
                             />
-                            <Typography variant="caption" color={d.cor} fontWeight={700} display="block" textAlign="center">
+                            <Typography variant="caption" color={d.cor} fontWeight={700} display="block" sx={{ textAlign: 'center' }}>
                               {d.val ? `${(d.val * 100).toFixed(0)}%` : '—'}
                             </Typography>
                           </Grid>

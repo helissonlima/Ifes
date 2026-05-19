@@ -4,7 +4,7 @@ import {
   Divider, Box, Typography, Tooltip,
 } from '@mui/material';
 import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle, FiShield } from 'react-icons/fi';
-import { MdOutlineSprout } from 'react-icons/md';
+import { MdGrain } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
 
 const MENU_ITEMS = [
@@ -15,7 +15,7 @@ const MENU_ITEMS = [
   { label: 'Metodologia', icon: <FiBook size={20} />, path: '/metodologia', permission: 'metodologia' },
   { label: 'Guia de Aplicação', icon: <FiHelpCircle size={20} />, path: '/guia', permission: 'metodologia' },
   { label: 'Administração', icon: <FiShield size={20} />, path: '/usuarios', adminOnly: true },
-  { label: 'Gestão de Grãos', icon: <MdOutlineSprout size={20} />, path: '/graos', adminOnly: true },
+  { label: 'Gestão de Grãos', icon: <MdGrain size={20} />, path: '/graos', adminOnly: true },
 ];
 
 function SidebarContent({ onClose, isMobile }) {

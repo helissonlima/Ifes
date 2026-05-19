@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../context/AppContext';
+import loginBg from '../assets/login-bg.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -45,7 +46,22 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         py: { xs: 2, sm: 3 },
-        backgroundColor: '#f5f7fa',
+        backgroundImage: `url(${loginBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.25)',
+          backdropFilter: 'blur(2px)',
+          zIndex: 0,
+        },
+        '& > *': {
+          position: 'relative',
+          zIndex: 1,
+        }
       }}
     >
       <Container maxWidth="sm">
@@ -67,14 +83,14 @@ export default function Login() {
                 mx: 'auto',
               }}
             >
-              <Stack spacing={1.5} alignItems="center" mb={2.5}>
+              <Stack spacing={1.5} sx={{ alignItems: 'center', mb: 2.5 }}>
                 <Avatar sx={{ bgcolor: 'primary.main', width: 54, height: 54 }}>
                   <MdOutlineEco size={26} />
                 </Avatar>
-                <Typography variant="h5" fontWeight={800} textAlign="center">
+                <Typography variant="h5" fontWeight={800} sx={{ textAlign: 'center' }}>
                   SustentaCafe
                 </Typography>
-                <Typography variant="body2" color="text.secondary" textAlign="center">
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                   Acesse a plataforma com suas credenciais.
                 </Typography>
               </Stack>
