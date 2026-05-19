@@ -20,13 +20,13 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/graos', graosRoutes); // Rotas de grãos (parcialmente públicas, parcialmente autenticadas)
 
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+
 app.use(authRequired);
 app.use('/api/propriedades', propriedadesRoutes);
 app.use('/api/avaliacoes', avaliacoesRoutes);
 app.use('/api/indicadores', indicadoresRoutes);
 app.use('/api/producao', producaoRoutes);
-
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
