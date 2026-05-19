@@ -321,10 +321,12 @@ export default function Usuarios() {
                           {iniciais(u.nome)}
                         </Avatar>
                         <Box>
-                          <Typography variant="body2" fontWeight={700}>
-                            {u.nome}
-                            {isSelf && <Chip label="você" size="small" sx={{ ml: 1, height: 18, fontSize: '0.65rem' }} />}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                            <Typography variant="body2" fontWeight={700}>
+                              {u.nome}
+                            </Typography>
+                            {isSelf && <Chip label="você" size="small" sx={{ height: 18, fontSize: '0.65rem' }} />}
+                          </Box>
                           <Typography variant="caption" color="text.secondary">
                             cadastrado em {new Date(u.criado_em).toLocaleDateString('pt-BR')}
                           </Typography>
@@ -397,7 +399,7 @@ export default function Usuarios() {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField label="Nome completo *" fullWidth value={form.nome}
+              <TextField autoFocus label="Nome completo *" fullWidth value={form.nome}
                 onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))} />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -586,7 +588,7 @@ export default function Usuarios() {
           </Alert>
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={fecharExcluir} disabled={excluindo}>Cancelar</Button>
+          <Button autoFocus onClick={fecharExcluir} disabled={excluindo}>Cancelar</Button>
           <Button variant="contained" color="error" onClick={confirmarExcluir} disabled={excluindo}>
             {excluindo ? <CircularProgress size={20} /> : 'Excluir definitivamente'}
           </Button>
@@ -620,10 +622,12 @@ function UsuarioCard({ u, isSelf, onEdit, onResetSenha, onExcluir, onToggleAtivo
             {iniciais(u.nome)}
           </Avatar>
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Typography variant="subtitle1" fontWeight={700} noWrap>
-              {u.nome}
-              {isSelf && <Chip label="você" size="small" sx={{ ml: 1, height: 18, fontSize: '0.65rem' }} />}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Typography variant="subtitle1" fontWeight={700} noWrap>
+                {u.nome}
+              </Typography>
+              {isSelf && <Chip label="você" size="small" sx={{ height: 18, fontSize: '0.65rem' }} />}
+            </Box>
             <Typography variant="caption" color="text.secondary" noWrap display="block">{u.email}</Typography>
           </Box>
           <Switch checked={u.ativo} size="small" disabled={isSelf} onChange={onToggleAtivo} />

@@ -144,9 +144,11 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
             value={observacao || ''}
             onChange={(e) => onObservacaoChange?.(e.target.value)}
             sx={{ mt: 1.25 }}
-            slotProps={{ input: { sx: { fontSize: '0.85rem' } } }}
-            InputProps={{
-              startAdornment: <FiEdit3 style={{ marginRight: 6, marginTop: 4, opacity: 0.5 }} />,
+            slotProps={{
+              input: {
+                sx: { fontSize: '0.85rem' },
+                startAdornment: <FiEdit3 style={{ marginRight: 6, marginTop: 4, opacity: 0.5 }} />,
+              },
             }}
           />
         </Collapse>

@@ -8,14 +8,15 @@ import {
 } from '@mui/material';
 import {
   FiArrowLeft, FiClipboard, FiEye, FiMap, FiCalendar, FiUser, FiPhone, FiMail,
-  FiTrendingUp, FiTrendingDown, FiMinus, FiBarChart2, FiActivity,
+  FiTrendingUp, FiTrendingDown, FiMinus, FiBarChart2, FiActivity, FiDatabase,
+  FiRefreshCw,
 } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend, BarChart, Bar, Cell,
+  ResponsiveContainer, Legend, BarChart, Bar, Cell, ReferenceLine,
 } from 'recharts';
-import { propriedadesAPI, avaliacoesAPI } from '../services/api';
+import { propriedadesAPI, avaliacoesAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
 
@@ -50,6 +51,11 @@ export default function PropriedadeDetalhe() {
   const [comparativo, setComparativo] = useState(null);
   const [carregandoComp, setCarregandoComp] = useState(false);
 
+  // Produção regional (IBGE)
+  const [producao, setProducao] = useState(null);
+  const [carregandoProd, setCarregandoProd] = useState(false);
+  const [erroProd, setErroProd] = useState('');
+
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -80,6 +86,23 @@ export default function PropriedadeDetalhe() {
       setComparativo(null);
     }
   }, [idA, idB, notify]);
+
+  const carregarProducao = (prop) => {
+    if (!prop?.municipio || !prop?.estado) return;
+    setCarregandoProd(true);
+    setErroProd('');
+    producaoAPI.media(prop.municipio, prop.estado)
+      .then((r) => setProducao(r.data))
+      .catch((e) => setErroProd(e.message))
+      .finally(() => setCarregandoProd(false));
+  };
+
+  useEffect(() => {
+    if (tab === 3 && propriedade && !producao && !carregandoProd) {
+      carregarProducao(propriedade);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, propriedade]);
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress /></Box>;
   if (erro) return <Alert severity="error">{erro}</Alert>;
@@ -214,6 +237,7 @@ export default function PropriedadeDetalhe() {
             <Tab icon={<FiClipboard size={16} />} iconPosition="start" label="Histórico" sx={{ fontWeight: 600, minHeight: 44 }} />
             <Tab icon={<FiBarChart2 size={16} />} iconPosition="start" label="Evolução" sx={{ fontWeight: 600, minHeight: 44 }} disabled={timelineData.length === 0} />
             <Tab icon={<FiActivity size={16} />} iconPosition="start" label="Comparar avaliações" sx={{ fontWeight: 600, minHeight: 44 }} disabled={concluidas.length < 2} />
+            <Tab icon={<FiDatabase size={16} />} iconPosition="start" label="Produção Regional" sx={{ fontWeight: 600, minHeight: 44 }} />
           </Tabs>
 
           {/* TAB 0 — Histórico */}
@@ -359,6 +383,20 @@ export default function PropriedadeDetalhe() {
                 <Comparativo comp={comparativo} />
               )}
             </Box>
+          )}
+
+          {/* TAB 3 — Produção Regional */}
+          {tab === 3 && (
+            <ProducaoRegional
+              propriedade={propriedade}
+              dados={producao}
+              carregando={carregandoProd}
+              erro={erroProd}
+              onRecarregar={() => {
+                setProducao(null);
+                carregarProducao(propriedade);
+              }}
+            />
           )}
         </CardContent>
       </Card>
@@ -539,6 +577,194 @@ function Comparativo({ comp }) {
             </TableBody>
           </Table>
         </Box>
+      </Paper>
+    </Box>
+  );
+}
+
+function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }) {
+  if (carregando) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6, gap: 1.5 }}>
+        <CircularProgress />
+        <Typography variant="body2" color="text.secondary">
+          Consultando IBGE — Produção Agrícola Municipal…
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (erro) {
+    return (
+      <Alert
+        severity="warning"
+        sx={{ mb: 2 }}
+        action={
+          <Button size="small" startIcon={<FiRefreshCw size={14} />} onClick={onRecarregar}>
+            Tentar novamente
+          </Button>
+        }
+      >
+        {erro}
+      </Alert>
+    );
+  }
+
+  if (!dados) return null;
+
+  const rendAtual = dados.rendimento_atual;
+  const rendUFAtual = dados.rendimento_uf_atual;
+  const areaCafe = parseFloat(propriedade?.area_cafe) || null;
+  const producaoEstimada = rendAtual && areaCafe ? (rendAtual.valor * areaCafe) / 1000 : null;
+
+  // Merge município + UF por ano para o gráfico
+  const anosMap = {};
+  dados.rendimento_municipio.forEach((d) => {
+    anosMap[d.ano] = { ano: d.ano, municipio: d.valor };
+  });
+  dados.rendimento_uf.forEach((d) => {
+    anosMap[d.ano] = { ...(anosMap[d.ano] || { ano: d.ano }), uf: d.valor };
+  });
+  const chartData = Object.values(anosMap).sort((a, b) => a.ano - b.ano);
+
+  const fmtKg = (v) => v != null ? `${v.toLocaleString('pt-BR')} kg/ha` : '—';
+
+  return (
+    <Box>
+      {/* Cards de resumo */}
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '4px solid #1B5E20' }}>
+            <Typography variant="caption" color="text.secondary" display="block">
+              Rendimento médio — {dados.municipio}
+            </Typography>
+            <Typography variant="h4" fontWeight={900} color="#1B5E20" sx={{ my: 0.5 }}>
+              {rendAtual ? rendAtual.valor.toLocaleString('pt-BR') : '—'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              kg/ha {rendAtual ? `(${rendAtual.ano})` : ''}
+            </Typography>
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '4px solid #1565C0' }}>
+            <Typography variant="caption" color="text.secondary" display="block">
+              Rendimento médio — {dados.uf}
+            </Typography>
+            <Typography variant="h4" fontWeight={900} color="#1565C0" sx={{ my: 0.5 }}>
+              {rendUFAtual ? rendUFAtual.valor.toLocaleString('pt-BR') : '—'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              kg/ha {rendUFAtual ? `(${rendUFAtual.ano})` : ''}
+            </Typography>
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2, textAlign: 'center',
+              borderTop: `4px solid ${producaoEstimada ? '#6A1B9A' : '#9E9E9E'}`,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" display="block">
+              Produção estimada (propriedade)
+            </Typography>
+            <Typography variant="h4" fontWeight={900} color={producaoEstimada ? '#6A1B9A' : 'text.disabled'} sx={{ my: 0.5 }}>
+              {producaoEstimada ? producaoEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '—'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {producaoEstimada
+                ? `toneladas · ${areaCafe} ha × ${rendAtual?.valor?.toLocaleString('pt-BR')} kg/ha`
+                : 'Informe a área de café na propriedade'}
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Comparativo com estado */}
+      {rendAtual && rendUFAtual && (
+        <Alert
+          severity={rendAtual.valor >= rendUFAtual.valor ? 'success' : 'warning'}
+          sx={{ mb: 2 }}
+          icon={rendAtual.valor >= rendUFAtual.valor ? <FiTrendingUp /> : <FiTrendingDown />}
+        >
+          O município <strong>{dados.municipio}</strong> apresenta rendimento médio de{' '}
+          <strong>{fmtKg(rendAtual.valor)}</strong>{' '}
+          {rendAtual.valor >= rendUFAtual.valor ? (
+            <>acima da média estadual ({fmtKg(rendUFAtual.valor)})</>
+          ) : (
+            <>abaixo da média estadual ({fmtKg(rendUFAtual.valor)}) — diferença de{' '}
+              <strong>{fmtKg(rendUFAtual.valor - rendAtual.valor)}</strong></>
+          )}.
+        </Alert>
+      )}
+
+      {/* Gráfico de evolução do rendimento */}
+      {chartData.length > 1 && (
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+            Evolução do Rendimento Médio (kg/ha) — Café
+          </Typography>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <XAxis dataKey="ano" tick={{ fontSize: 12 }} />
+              <YAxis unit=" kg" tick={{ fontSize: 11 }} />
+              <RTooltip formatter={(v, name) => [`${v?.toLocaleString('pt-BR')} kg/ha`, name]} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="municipio" name={`Município (${dados.municipio})`} fill="#1B5E20" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="uf" name={`Estado (${dados.uf})`} fill="#1565C0" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Paper>
+      )}
+
+      {/* Tabela de histórico */}
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+          Dados Históricos — Município de {dados.municipio}
+        </Typography>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'action.hover' }}>
+                <TableCell sx={{ fontWeight: 700 }}>Ano</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Rendimento médio (kg/ha)</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Quantidade produzida (t)</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Área colhida (ha)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {dados.rendimento_municipio.slice().reverse().map((r) => {
+                const prod = dados.producao_municipio.find((p) => p.ano === r.ano);
+                const area = dados.area_colhida_municipio.find((a) => a.ano === r.ano);
+                const isLatest = r.ano === rendAtual?.ano;
+                return (
+                  <TableRow key={r.ano} sx={{ bgcolor: isLatest ? '#E8F5E9' : 'inherit' }}>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={isLatest ? 700 : 400}>
+                        {r.ano} {isLatest && <Chip label="mais recente" size="small" color="success" sx={{ ml: 0.5, height: 18, fontSize: '0.65rem' }} />}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={isLatest ? 700 : 400} color={isLatest ? '#1B5E20' : 'inherit'}>
+                        {r.valor.toLocaleString('pt-BR')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{prod ? prod.valor.toLocaleString('pt-BR') : '—'}</TableCell>
+                    <TableCell>{area ? area.valor.toLocaleString('pt-BR') : '—'}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Box>
+        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1.5 }}>
+          Fonte: {dados.fonte} · Cultura: {dados.cultura}
+        </Typography>
       </Paper>
     </Box>
   );

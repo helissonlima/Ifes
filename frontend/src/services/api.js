@@ -61,4 +61,9 @@ export const indicadoresAPI = {
   dimensoes: () => api.get('/indicadores/dimensoes'),
 };
 
+// Produção regional (IBGE)
+export const producaoAPI = {
+  media: (municipio, estado) => api.get('/producao/media', { params: { municipio, estado } }),
+};
+
 export default api;

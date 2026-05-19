@@ -373,6 +373,7 @@ export default function NovaAvaliacao() {
             Descartar
           </Button>
           <Button
+            autoFocus
             variant="contained"
             onClick={() => restaurarRascunho(dialogRascunho.draft, propriedades)}
           >

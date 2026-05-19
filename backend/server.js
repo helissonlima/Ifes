@@ -8,6 +8,7 @@ const propriedadesRoutes = require('./src/routes/propriedades');
 const avaliacoesRoutes = require('./src/routes/avaliacoes');
 const indicadoresRoutes = require('./src/routes/indicadores');
 const authRoutes = require('./src/routes/auth');
+const producaoRoutes = require('./src/routes/producao');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +22,7 @@ app.use(authRequired);
 app.use('/api/propriedades', propriedadesRoutes);
 app.use('/api/avaliacoes', avaliacoesRoutes);
 app.use('/api/indicadores', indicadoresRoutes);
+app.use('/api/producao', producaoRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 

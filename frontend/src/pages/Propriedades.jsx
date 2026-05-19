@@ -19,7 +19,7 @@ const FORM_INICIAL = {
   area_total: '', area_cafe: '', telefone: '', email: '',
 };
 
-function FormPropriedade({ dados, onChange }) {
+function FormPropriedade({ dados, onChange, autoFocus }) {
   const f = (field) => (e) => onChange({ ...dados, [field]: e.target.value });
 
   const handleTelefone = (e) => {
@@ -35,7 +35,7 @@ function FormPropriedade({ dados, onChange }) {
   return (
     <Grid container spacing={2} sx={{ pt: 1 }}>
       <Grid size={12}>
-        <TextField label="Nome da Propriedade *" fullWidth value={dados.nome} onChange={f('nome')} />
+        <TextField autoFocus={autoFocus} label="Nome da Propriedade *" fullWidth value={dados.nome} onChange={f('nome')} />
       </Grid>
       <Grid size={8}>
         <TextField label="Município *" fullWidth value={dados.municipio} onChange={f('municipio')} />
@@ -301,7 +301,7 @@ export default function Propriedades() {
           {dialog.editando ? 'Editar Propriedade' : 'Nova Propriedade'}
         </DialogTitle>
         <DialogContent>
-          <FormPropriedade dados={form} onChange={setForm} />
+          <FormPropriedade dados={form} onChange={setForm} autoFocus />
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
           <Button onClick={fecharDialog} disabled={salvando}>Cancelar</Button>
