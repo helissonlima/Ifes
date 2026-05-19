@@ -124,18 +124,20 @@ export default function Guia() {
             {ETAPAS.map((e, i) => (
               <Step key={e.titulo} expanded>
                 <StepLabel
-                  StepIconComponent={() => (
-                    <Box
-                      sx={{
-                        width: 32, height: 32, borderRadius: '50%',
-                        bgcolor: e.cor, color: '#fff',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 800,
-                      }}
-                    >
-                      {i + 1}
-                    </Box>
-                  )}
+                  slots={{
+                    stepIcon: () => (
+                      <Box
+                        sx={{
+                          width: 32, height: 32, borderRadius: '50%',
+                          bgcolor: e.cor, color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 800,
+                        }}
+                      >
+                        {i + 1}
+                      </Box>
+                    ),
+                  }}
                 >
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                     <Typography fontWeight={700} color={e.cor}>{e.titulo}</Typography>

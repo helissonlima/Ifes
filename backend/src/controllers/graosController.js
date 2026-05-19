@@ -173,6 +173,102 @@ class GraosController {
       res.status(500).json({ erro: 'Erro ao remover grão' });
     }
   }
+
+  /**
+   * Sincroniza o catálogo de culturas com o IBGE SIDRA PAM (Produção Agrícola Municipal).
+   *
+   * Nota: O INCAPER não possui API pública — os dados do SISPREÇO são acessíveis
+   * apenas via formulário web com termo de uso. O IBGE SIDRA PAM é a fonte oficial
+   * equivalente e pública, contendo as mesmas culturas reportadas pelos municípios
+   * do ES, e é utilizado pelo próprio INCAPER para embasamento de políticas públicas.
+   *
+   * Endpoint IBGE utilizado: tabela 5457 (Lavouras temp. e permanentes)
+   *   variável 214 (quantidade produzida), localidade N3[32] (Espírito Santo)
+   */
+  static async sincronizarIBGE(req, res) {
+    try {
+      const url =
+        'https://servicodados.ibge.gov.br/api/v3/agregados/5457/periodos/2023|2024/variaveis/214' +
+        '?localidades=N3[32]&classificacao=782[all]';
+
+      const response = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(20000),
+      });
+
+      if (!response.ok) throw new Error(`IBGE retornou HTTP ${response.status}`);
+
+      const data = await response.json();
+      const variavel = data.find((v) => String(v.id) === '214');
+      if (!variavel?.resultados) throw new Error('Formato de resposta IBGE inesperado');
+
+      // Extrai culturas com produção registrada no ES
+      const culturas = [];
+      for (const resultado of variavel.resultados) {
+        const catObj = resultado.classificacoes?.[0]?.categoria;
+        if (!catObj) continue;
+        const [catId, nomeCompleto] = Object.entries(catObj)[0];
+        if (!nomeCompleto || nomeCompleto === 'Total') continue;
+
+        const serie = resultado.series?.[0]?.serie ?? {};
+        const temDados = Object.values(serie).some((v) => v && v !== '...' && v !== '-');
+        if (!temDados) continue; // Sem produção no ES
+
+        // Gera código a partir do nome (ex: "Feijão (em grão)" → "FEIJAO")
+        const codigo = nomeCompleto
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .toUpperCase()
+          .replace(/\([^)]*\)/g, '')
+          .replace(/[^A-Z0-9\s]/g, '')
+          .trim()
+          .replace(/\s+/g, '_')
+          .replace(/_+/g, '_')
+          .slice(0, 20);
+
+        const anosDisponiveis = Object.entries(serie)
+          .filter(([, v]) => v && v !== '...' && v !== '-')
+          .map(([ano]) => ano)
+          .sort()
+          .join(', ');
+
+        culturas.push({
+          nome: nomeCompleto,
+          codigo,
+          descricao: `Fonte: IBGE PAM/ES (cat. ${catId}). Dados disponíveis: ${anosDisponiveis}.`,
+        });
+      }
+
+      // Upsert no banco — ignora conflitos de nome/código já existentes
+      let inseridos = 0;
+      let ignorados = 0;
+      for (const c of culturas) {
+        try {
+          const r = await db.query(
+            `INSERT INTO graos (nome, codigo, descricao, ativo)
+             VALUES ($1, $2, $3, TRUE)
+             ON CONFLICT DO NOTHING
+             RETURNING id`,
+            [c.nome, c.codigo, c.descricao],
+          );
+          if (r.rows.length > 0) inseridos++;
+          else ignorados++;
+        } catch {
+          ignorados++;
+        }
+      }
+
+      res.json({
+        mensagem: `Sincronização concluída: ${inseridos} cultura(s) importada(s) do IBGE PAM/ES.`,
+        total_ibge: culturas.length,
+        inseridos,
+        ignorados,
+        culturas,
+      });
+    } catch (error) {
+      console.error('Erro ao sincronizar com IBGE:', error);
+      res.status(500).json({ erro: 'Falha ao buscar dados do IBGE: ' + error.message });
+    }
+  }
 }
 
 module.exports = GraosController;

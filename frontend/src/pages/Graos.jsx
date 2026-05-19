@@ -6,7 +6,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Switch, FormControlLabel, useMediaQuery, useTheme,
 } from '@mui/material';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX, FiRefreshCw } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
 import { axiosInstance } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -51,12 +51,13 @@ export default function Graos() {
   const [form, setForm] = useState(FORM_INICIAL);
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState(null);
+  const [sincronizando, setSincronizando] = useState(false);
 
   const carregar = async () => {
     setLoading(true);
     setErro('');
     try {
-      const res = await axiosInstance.get('/api/graos/admin/todos');
+      const res = await axiosInstance.get('/graos/admin/todos');
       setGraos(res.data);
     } catch (e) {
       setErro('Erro ao carregar grãos: ' + (e.response?.data?.erro || e.message));
@@ -83,10 +84,10 @@ export default function Graos() {
     setSalvando(true);
     try {
       if (dialog.editando) {
-        await axiosInstance.put(`/api/graos/admin/${dialog.editando.id}/atualizar`, form);
+        await axiosInstance.put(`/graos/admin/${dialog.editando.id}/atualizar`, form);
         notify('Grão atualizado!');
       } else {
-        await axiosInstance.post('/api/graos/admin/criar', form);
+        await axiosInstance.post('/graos/admin/criar', form);
         notify('Grão criado!');
       }
       fecharDialog();
@@ -98,11 +99,24 @@ export default function Graos() {
     }
   };
 
+  const sincronizarIBGE = async () => {
+    setSincronizando(true);
+    try {
+      const res = await axiosInstance.post('/graos/admin/sincronizar-ibge');
+      notify(`${res.data.mensagem} (${res.data.total_ibge} culturas no ES, ${res.data.ignorados} já existiam)`, 'success');
+      carregar();
+    } catch (e) {
+      notify(e.response?.data?.erro || e.message, 'error');
+    } finally {
+      setSincronizando(false);
+    }
+  };
+
   const excluir = async (id) => {
     if (!window.confirm('Excluir este grão? Propriedades que o utilizam não serão afetadas.')) return;
     setExcluindo(id);
     try {
-      await axiosInstance.delete(`/api/graos/admin/${id}/deletar`);
+      await axiosInstance.delete(`/graos/admin/${id}/deletar`);
       notify('Grão excluído.');
       carregar();
     } catch (e) {
@@ -120,7 +134,18 @@ export default function Graos() {
           <Typography variant="body2" color="text.secondary">{graos.length} grão(s) cadastrado(s)</Typography>
         </Box>
         {!isMobile && (
-          <Button variant="contained" startIcon={<FiPlus />} onClick={abrirNovo}>Novo Grão</Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={sincronizando ? <CircularProgress size={16} /> : <FiRefreshCw />}
+              onClick={sincronizarIBGE}
+              disabled={sincronizando}
+              title="Importa culturas com produção registrada no Espírito Santo via IBGE PAM"
+            >
+              {sincronizando ? 'Sincronizando…' : 'Sincronizar com IBGE'}
+            </Button>
+            <Button variant="contained" startIcon={<FiPlus />} onClick={abrirNovo}>Novo Grão</Button>
+          </Box>
         )}
       </Box>
 

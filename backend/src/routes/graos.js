@@ -7,6 +7,7 @@ const router = express.Router();
 // Rotas admin (mais específicas, colocadas antes de rotas genéricas)
 router.get('/admin/todos', authRequired, (req, res, next) => GraosController.listarTodos(req, res));
 router.post('/admin/criar', authRequired, (req, res, next) => GraosController.criar(req, res));
+router.post('/admin/sincronizar-ibge', authRequired, (req, res, next) => GraosController.sincronizarIBGE(req, res));
 router.put('/admin/:id/atualizar', authRequired, (req, res, next) => GraosController.atualizar(req, res));
 router.delete('/admin/:id/deletar', authRequired, (req, res, next) => GraosController.deletar(req, res));
 
