@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { runMigrations } = require('./src/config/migrations');
 const { bootstrapAuth } = require('./src/config/authBootstrap');
 const { authRequired } = require('./src/middleware/auth');
 
@@ -33,7 +34,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ erro: 'Erro interno do servidor' });
 });
 
-bootstrapAuth()
+runMigrations()
+  .then(() => bootstrapAuth())
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🚀 API rodando em http://localhost:${PORT}`);
