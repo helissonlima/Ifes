@@ -16,10 +16,15 @@ services:
     depends_on:
       setup:
         condition: service_completed_successfully
+    entrypoint:
+      - sh
+      - -ec
+      - |
+        export POSTGRES_PASSWORD="$(cat /run/secrets/db_password)"
+        exec docker-entrypoint.sh postgres
     environment:
       POSTGRES_DB:       ${DB_NAME:-sustentabilidade_rural}
       POSTGRES_USER:     ${DB_USER:-postgres}
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - pgdata:/var/lib/postgresql/data
       - secrets:/run/secrets:ro
