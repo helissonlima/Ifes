@@ -27,6 +27,8 @@ export default function Historico() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
+  const [filtroTecnico, setFiltroTecnico] = useState('');
+  const [filtroLocalizacao, setFiltroLocalizacao] = useState('');
   const [search, setSearch] = useState('');
   const [excluindo, setExcluindo] = useState(null);
 
@@ -40,13 +42,29 @@ export default function Historico() {
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  const filtradas = avaliacoes.filter((a) =>
-    !search ||
-    a.propriedade_nome?.toLowerCase().includes(search.toLowerCase()) ||
-    a.municipio?.toLowerCase().includes(search.toLowerCase()) ||
-    a.proprietario?.toLowerCase().includes(search.toLowerCase()) ||
-    a.tecnico_responsavel?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtradas = avaliacoes.filter((a) => {
+    // Filtro de status
+    if (filtroStatus && a.status !== filtroStatus) return false;
+    // Filtro de técnico
+    if (filtroTecnico && a.tecnico_responsavel !== filtroTecnico) return false;
+    // Filtro de localização (município/estado)
+    if (filtroLocalizacao) {
+      const [munic, estado] = filtroLocalizacao.split('/');
+      if (a.municipio !== munic || a.estado !== estado) return false;
+    }
+    // Busca genérica
+    if (!search) return true;
+    return (
+      a.propriedade_nome?.toLowerCase().includes(search.toLowerCase()) ||
+      a.municipio?.toLowerCase().includes(search.toLowerCase()) ||
+      a.proprietario?.toLowerCase().includes(search.toLowerCase()) ||
+      a.tecnico_responsavel?.toLowerCase().includes(search.toLowerCase())
+    );
+  });
+
+  // Extrai listas únicas para filtros
+  const tecnicos = [...new Set(avaliacoes.map((a) => a.tecnico_responsavel).filter(Boolean))].sort();
+  const localizacoes = [...new Set(avaliacoes.map((a) => `${a.municipio}/${a.estado}`).filter(Boolean))].sort();
 
   const excluir = async (id) => {
     if (!window.confirm('Excluir esta avaliação permanentemente?')) return;
@@ -76,16 +94,23 @@ export default function Historico() {
       {/* Filtros */}
       <Card sx={{ mb: 2 }}>
         <CardContent sx={{ pb: '12px !important' }}>
-          <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+          <Grid container spacing={1.5} sx={{ alignItems: 'center' }}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth size="small"
-                placeholder="Buscar propriedade, município, técnico..."
+                placeholder="Buscar propriedade, município, proprietário..."
                 value={search} onChange={(e) => setSearch(e.target.value)}
                 slotProps={{ input: { startAdornment: <InputAdornment position="start"><FiSearch /></InputAdornment> } }}
               />
             </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Chip
+                icon={<FiFilter size={14} />}
+                label={`${filtradas.length} resultado(s)`}
+                color="primary" variant="outlined" size="small"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
                 <Select value={filtroStatus} label="Status" onChange={(e) => setFiltroStatus(e.target.value)}>
@@ -95,12 +120,27 @@ export default function Historico() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <Chip
-                icon={<FiFilter size={14} />}
-                label={`${filtradas.length} resultado(s)`}
-                color="primary" variant="outlined" size="small"
-              />
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Técnico</InputLabel>
+                <Select value={filtroTecnico} label="Técnico" onChange={(e) => setFiltroTecnico(e.target.value)}>
+                  <MenuItem value="">Todos</MenuItem>
+                  {tecnicos.map((t) => (
+                    <MenuItem key={t} value={t}>{t}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Localização</InputLabel>
+                <Select value={filtroLocalizacao} label="Localização" onChange={(e) => setFiltroLocalizacao(e.target.value)}>
+                  <MenuItem value="">Todos</MenuItem>
+                  {localizacoes.map((loc) => (
+                    <MenuItem key={loc} value={loc}>{loc}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </CardContent>

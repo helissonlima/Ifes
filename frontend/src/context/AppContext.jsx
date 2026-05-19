@@ -2,7 +2,18 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import { Snackbar, Alert } from '@mui/material';
 import { authAPI, setAuthToken } from '../services/api';
 
-const AppContext = createContext(null);
+const defaultContextValue = {
+  notify: () => {},
+  user: null,
+  loadingAuth: true,
+  isAuthenticated: false,
+  loadSession: async () => {},
+  login: async () => {},
+  logout: () => {},
+  hasPermission: () => false,
+};
+
+const AppContext = createContext(defaultContextValue);
 const TOKEN_KEY = 'sustenta_token';
 
 export function AppProvider({ children }) {

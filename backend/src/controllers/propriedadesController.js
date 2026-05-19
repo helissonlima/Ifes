@@ -54,14 +54,14 @@ const buscarPorId = async (req, res) => {
 
 const criar = async (req, res) => {
   try {
-    const { nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email } = req.body;
+    const { nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep } = req.body;
     if (!nome || !municipio || !proprietario) {
       return res.status(400).json({ erro: 'Nome, município e proprietário são obrigatórios' });
     }
     const result = await pool.query(
-      `INSERT INTO propriedades (nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [nome, municipio, estado || 'ES', proprietario, area_total, area_cafe, latitude, longitude, telefone, email]
+      `INSERT INTO propriedades (nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
+      [nome, municipio, estado || 'ES', proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -72,12 +72,13 @@ const criar = async (req, res) => {
 const atualizar = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email } = req.body;
+    const { nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep } = req.body;
     const result = await pool.query(
       `UPDATE propriedades SET nome=$1, municipio=$2, estado=$3, proprietario=$4,
-       area_total=$5, area_cafe=$6, latitude=$7, longitude=$8, telefone=$9, email=$10
-       WHERE id=$11 RETURNING *`,
-      [nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, id]
+       area_total=$5, area_cafe=$6, latitude=$7, longitude=$8, telefone=$9, email=$10,
+       rua=$11, numero=$12, complemento=$13, bairro=$14, cep=$15
+       WHERE id=$16 RETURNING *`,
+      [nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep, id]
     );
     if (result.rows.length === 0) return res.status(404).json({ erro: 'Propriedade não encontrada' });
     res.json(result.rows[0]);

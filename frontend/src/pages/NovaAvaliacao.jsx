@@ -81,6 +81,11 @@ export default function NovaAvaliacao() {
       setPropriedades(p.data.data);
       setDimensoes(ind.data.dimensoes);
 
+      // Preenche técnico responsável com o nome do usuário logado
+      if (user?.nome) {
+        setInfo((i) => ({ ...i, tecnico: user.nome }));
+      }
+
       // Verifica rascunho salvo ANTES de aplicar parâmetros da URL
       const userId = user?.id;
       if (userId && temRascunhoLocal(userId)) {
@@ -549,8 +554,10 @@ export default function NovaAvaliacao() {
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Técnico Responsável"
-                  fullWidth value={info.tecnico}
-                  onChange={(e) => setInfo((i) => ({ ...i, tecnico: e.target.value }))}
+                  fullWidth
+                  value={info.tecnico}
+                  disabled
+                  helperText="Preenchido automaticamente com seu nome de usuário"
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>

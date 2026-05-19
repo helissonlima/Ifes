@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiEye } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
-import { maskTelefone, maskUF, erroEmail } from '../utils/masks';
+import { maskTelefone, maskUF, maskCEP, erroEmail } from '../utils/masks';
 import { propriedadesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
@@ -17,6 +17,7 @@ import IGSBadge from '../components/Common/IGSBadge';
 const FORM_INICIAL = {
   nome: '', municipio: '', estado: 'ES', proprietario: '',
   area_total: '', area_cafe: '', telefone: '', email: '',
+  rua: '', numero: '', complemento: '', bairro: '', cep: '',
 };
 
 function FormPropriedade({ dados, onChange, autoFocus }) {
@@ -30,17 +31,24 @@ function FormPropriedade({ dados, onChange, autoFocus }) {
     onChange({ ...dados, estado: maskUF(e.target.value) });
   };
 
+  const handleCEP = (e) => {
+    onChange({ ...dados, cep: maskCEP(e.target.value) });
+  };
+
   const emailErro = erroEmail(dados.email);
 
   return (
     <Grid container spacing={2} sx={{ pt: 1 }}>
       <Grid size={12}>
+        <Typography variant="subtitle2" fontWeight={700} color="primary">Informações Básicas</Typography>
+      </Grid>
+      <Grid size={12}>
         <TextField autoFocus={autoFocus} label="Nome da Propriedade *" fullWidth value={dados.nome} onChange={f('nome')} />
       </Grid>
-      <Grid size={8}>
+      <Grid size={6}>
         <TextField label="Município *" fullWidth value={dados.municipio} onChange={f('municipio')} />
       </Grid>
-      <Grid size={4}>
+      <Grid size={6}>
         <TextField
           label="UF"
           fullWidth
@@ -52,6 +60,38 @@ function FormPropriedade({ dados, onChange, autoFocus }) {
       </Grid>
       <Grid size={12}>
         <TextField label="Nome do Proprietário *" fullWidth value={dados.proprietario} onChange={f('proprietario')} />
+      </Grid>
+      
+      <Grid size={12}>
+        <Divider sx={{ my: 1 }} />
+        <Typography variant="subtitle2" fontWeight={700} color="primary">Endereço Completo</Typography>
+      </Grid>
+      <Grid size={12}>
+        <TextField label="Rua/Via" fullWidth value={dados.rua} onChange={f('rua')} />
+      </Grid>
+      <Grid size={6}>
+        <TextField label="Número" fullWidth value={dados.numero} onChange={f('numero')} />
+      </Grid>
+      <Grid size={6}>
+        <TextField label="Complemento" fullWidth value={dados.complemento} onChange={f('complemento')} placeholder="Apto., casa, lote..." />
+      </Grid>
+      <Grid size={6}>
+        <TextField label="Bairro" fullWidth value={dados.bairro} onChange={f('bairro')} />
+      </Grid>
+      <Grid size={6}>
+        <TextField
+          label="CEP"
+          fullWidth
+          value={dados.cep}
+          onChange={handleCEP}
+          placeholder="XXXXX-XXX"
+          slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 9 } }}
+        />
+      </Grid>
+
+      <Grid size={12}>
+        <Divider sx={{ my: 1 }} />
+        <Typography variant="subtitle2" fontWeight={700} color="primary">Áreas de Cultivo</Typography>
       </Grid>
       <Grid size={6}>
         <TextField
@@ -72,6 +112,11 @@ function FormPropriedade({ dados, onChange, autoFocus }) {
           slotProps={{ htmlInput: { inputMode: 'decimal', min: 0, step: '0.01' } }}
           type="number"
         />
+      </Grid>
+
+      <Grid size={12}>
+        <Divider sx={{ my: 1 }} />
+        <Typography variant="subtitle2" fontWeight={700} color="primary">Contato</Typography>
       </Grid>
       <Grid size={6}>
         <TextField

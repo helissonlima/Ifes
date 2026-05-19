@@ -14,6 +14,7 @@ import Metodologia from './pages/Metodologia';
 import Guia from './pages/Guia';
 import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
+import Graos from './pages/Graos';
 
 function CenterLoading() {
   return (
@@ -71,6 +72,7 @@ function AppRoutes() {
           <Route path="/metodologia" element={<RequirePermission permission="metodologia"><Metodologia /></RequirePermission>} />
           <Route path="/guia" element={<RequirePermission permission="metodologia"><Guia /></RequirePermission>} />
           <Route path="/usuarios" element={<RequireAdmin><Usuarios /></RequireAdmin>} />
+          <Route path="/graos" element={<RequireAdmin><Graos /></RequireAdmin>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
