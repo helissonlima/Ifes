@@ -20,10 +20,10 @@ const COR_NOTA = {
   0: '#f44336', 0.25: '#FF9800', 0.5: '#FFC107', 0.75: '#8BC34A', 1: '#4CAF50',
 };
 const DIM_INFO = {
-  ambiental: { nome: 'Ambiental', cor: '#4CAF50', peso: 35 },
-  economica: { nome: 'Econômica', cor: '#2196F3', peso: 30 },
-  social: { nome: 'Social', cor: '#FF9800', peso: 20 },
-  gestao_qualidade: { nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 15 },
+  ambiental:       { nome: 'Ambiental',         cor: '#4CAF50', peso: 35, campo: 'indice_ambiental' },
+  economica:       { nome: 'Econômica',          cor: '#2196F3', peso: 30, campo: 'indice_economico' },
+  social:          { nome: 'Social',             cor: '#FF9800', peso: 20, campo: 'indice_social' },
+  gestao_qualidade:{ nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 15, campo: 'indice_gestao_qualidade' },
 };
 
 const STATUS_ICON = {
@@ -70,11 +70,11 @@ export default function Resultado() {
     return acc;
   }, {});
 
-  const dadosBarChart = Object.entries(DIM_INFO).map(([cod, info]) => ({
+  const dadosBarChart = Object.entries(DIM_INFO).map(([, info]) => ({
     nome: info.nome,
     cor: info.cor,
     peso: info.peso,
-    valor: Math.round((avaliacao[`indice_${cod}`] || 0) * 100),
+    valor: Math.round((avaliacao[info.campo] || 0) * 100),
   }));
 
   const timelineData = timeline.map((t) => ({
@@ -142,8 +142,7 @@ export default function Resultado() {
             <CardContent>
               <Typography variant="h6" fontWeight={700} gutterBottom>Índices por Dimensão</Typography>
               {Object.entries(DIM_INFO).map(([cod, info]) => {
-                const campo = `indice_${cod}`;
-                const valor = avaliacao[campo] || 0;
+                const valor = avaliacao[info.campo] || 0;
                 return (
                   <Box key={cod} sx={{ mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>

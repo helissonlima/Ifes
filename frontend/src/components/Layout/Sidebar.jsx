@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Drawer, List, ListItemButton, ListItemIcon, ListItemText,
-  Divider, Box, Typography, Tooltip,
+  Divider, Box, Typography,
 } from '@mui/material';
 import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle, FiShield } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
@@ -38,31 +38,30 @@ function SidebarContent({ onClose, isMobile }) {
           const active = location.pathname === item.path ||
             (item.path !== '/' && location.pathname.startsWith(item.path));
           return (
-            <Tooltip key={item.path} title="" placement="right">
-              <ListItemButton
-                onClick={() => handleNav(item.path)}
-                selected={active}
-                sx={{
-                  borderRadius: 2,
-                  mb: 0.5,
-                  '&.Mui-selected': {
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    '& .MuiListItemIcon-root': { color: 'white' },
-                    '&:hover': { bgcolor: 'primary.dark' },
-                  },
-                  '&:hover': { bgcolor: 'action.hover' },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 38, color: active ? 'inherit' : 'text.secondary' }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  slotProps={{ primary: { style: { fontWeight: active ? 700 : 500, fontSize: '0.9rem' } } }}
-                />
-              </ListItemButton>
-            </Tooltip>
+            <ListItemButton
+              key={item.path}
+              onClick={() => handleNav(item.path)}
+              selected={active}
+              sx={{
+                borderRadius: 2,
+                mb: 0.5,
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '& .MuiListItemIcon-root': { color: 'white' },
+                  '&:hover': { bgcolor: 'primary.dark' },
+                },
+                '&:hover': { bgcolor: 'action.hover' },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 38, color: active ? 'inherit' : 'text.secondary' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                slotProps={{ primary: { style: { fontWeight: active ? 700 : 500, fontSize: '0.9rem' } } }}
+              />
+            </ListItemButton>
           );
         })}
       </List>

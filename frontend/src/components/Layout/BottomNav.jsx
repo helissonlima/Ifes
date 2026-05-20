@@ -4,10 +4,10 @@ import { FiHome, FiMap, FiClipboard, FiList, FiBook, FiShield } from 'react-icon
 import { useApp } from '../../context/AppContext';
 
 const NAV_ITEMS = [
-  { label: 'Inicio',       icon: <FiHome size={20} />,      path: '/', permission: 'dashboard' },
+  { label: 'Início',       icon: <FiHome size={20} />,      path: '/', permission: 'dashboard' },
   { label: 'Propriedades', icon: <FiMap size={20} />,       path: '/propriedades', permission: 'propriedades' },
   { label: 'Avaliar',      icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
-  { label: 'Historico',    icon: <FiList size={20} />,      path: '/historico', permission: 'historico' },
+  { label: 'Histórico',    icon: <FiList size={20} />,      path: '/historico', permission: 'historico' },
   { label: 'Metodologia',  icon: <FiBook size={20} />,      path: '/metodologia', permission: 'metodologia' },
   { label: 'Admin',        icon: <FiShield size={20} />,    path: '/usuarios', adminOnly: true },
 ];

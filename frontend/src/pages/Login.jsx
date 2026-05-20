@@ -88,7 +88,7 @@ export default function Login() {
                   <MdOutlineEco size={26} />
                 </Avatar>
                 <Typography variant="h5" fontWeight={800} sx={{ textAlign: 'center' }}>
-                  SustentaCafe
+                  SustentaCafé
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                   Acesse a plataforma com suas credenciais.

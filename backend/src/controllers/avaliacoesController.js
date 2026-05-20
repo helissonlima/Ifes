@@ -21,7 +21,7 @@ const listar = async (req, res) => {
     const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
 
     const query = `
-      SELECT a.*, p.nome AS propriedade_nome, p.municipio, p.proprietario
+      SELECT a.*, p.nome AS propriedade_nome, p.municipio, p.estado, p.proprietario
       FROM avaliacoes a
       JOIN propriedades p ON p.id = a.propriedade_id
       ${whereClause}
@@ -257,8 +257,15 @@ const diagnostico = async (req, res) => {
     const topAcoes = [...itens].sort((a, b) => b.impacto_igs - a.impacto_igs).slice(0, 5);
 
     // Resumo de dimensões com status
+    const CAMPO_INDICE_DIAG = {
+      ambiental: 'indice_ambiental',
+      economica: 'indice_economico',
+      social: 'indice_social',
+      gestao_qualidade: 'indice_gestao_qualidade',
+    };
+
     const resumoDimensoes = Object.values(DIMENSOES).map((d) => {
-      const valor = parseFloat(avaliacao[`indice_${d.codigo}`] || 0);
+      const valor = parseFloat(avaliacao[CAMPO_INDICE_DIAG[d.codigo]] || 0);
       const status = avaliarStatusIndicador(valor);
       return {
         codigo: d.codigo,
@@ -313,13 +320,20 @@ const comparar = async (req, res) => {
     const num = (v) => parseFloat(v) || 0;
     const delta = (x, y) => parseFloat((num(y) - num(x)).toFixed(4));
 
+    const CAMPO_INDICE = {
+      ambiental: 'indice_ambiental',
+      economica: 'indice_economico',
+      social: 'indice_social',
+      gestao_qualidade: 'indice_gestao_qualidade',
+    };
+
     const dimensoesDelta = [
       { codigo: 'ambiental', nome: 'Ambiental', cor: '#4CAF50', peso: 0.35 },
       { codigo: 'economica', nome: 'Econômica', cor: '#2196F3', peso: 0.30 },
       { codigo: 'social', nome: 'Social', cor: '#FF9800', peso: 0.20 },
       { codigo: 'gestao_qualidade', nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 0.15 },
     ].map((d) => {
-      const campo = `indice_${d.codigo}`;
+      const campo = CAMPO_INDICE[d.codigo];
       return {
         ...d,
         a: num(av1[campo]),

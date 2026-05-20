@@ -205,13 +205,11 @@ export default function Graos() {
       ) : (
         <TableContainer component={Paper}>
           <Table>
-            <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Nome</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Código</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Descrição</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 80 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 120 }}>Ações</TableCell>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'primary.main' }}>
+                {['Nome', 'Código', 'Descrição', 'Status', 'Ações'].map((h) => (
+                  <TableCell key={h} sx={{ color: 'white', fontWeight: 700 }}>{h}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
