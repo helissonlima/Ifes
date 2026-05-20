@@ -2,6 +2,7 @@
     "chat.tools.terminal.autoApprove": {
         "npm install": true,
         "brew": true,
-        "true": true
+        "true": true,
+        "docker compose": true
     }
 }

@@ -235,6 +235,8 @@ class GraosController {
           nome: nomeCompleto,
           codigo,
           descricao: `Fonte: IBGE PAM/ES (cat. ${catId}). Dados disponíveis: ${anosDisponiveis}.`,
+          ibge_categoria: catId,
+          ibge_tabela: '5457',
         });
       }
 
@@ -244,11 +246,11 @@ class GraosController {
       for (const c of culturas) {
         try {
           const r = await db.query(
-            `INSERT INTO graos (nome, codigo, descricao, ativo)
-             VALUES ($1, $2, $3, TRUE)
+            `INSERT INTO graos (nome, codigo, descricao, ibge_categoria, ibge_tabela, ativo)
+             VALUES ($1, $2, $3, $4, $5, TRUE)
              ON CONFLICT DO NOTHING
              RETURNING id`,
-            [c.nome, c.codigo, c.descricao],
+            [c.nome, c.codigo, c.descricao, c.ibge_categoria, c.ibge_tabela],
           );
           if (r.rows.length > 0) inseridos++;
           else ignorados++;

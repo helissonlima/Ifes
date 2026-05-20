@@ -12,6 +12,7 @@ import {
   FiRefreshCw,
 } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
+import MapPicker from '../components/Common/MapPicker';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   ResponsiveContainer, Legend, BarChart, Bar, Cell, ReferenceLine,
@@ -238,6 +239,7 @@ export default function PropriedadeDetalhe() {
             <Tab icon={<FiBarChart2 size={16} />} iconPosition="start" label="Evolução" sx={{ fontWeight: 600, minHeight: 44 }} disabled={timelineData.length === 0} />
             <Tab icon={<FiActivity size={16} />} iconPosition="start" label="Comparar avaliações" sx={{ fontWeight: 600, minHeight: 44 }} disabled={concluidas.length < 2} />
             <Tab icon={<FiDatabase size={16} />} iconPosition="start" label="Produção Regional" sx={{ fontWeight: 600, minHeight: 44 }} />
+            <Tab icon={<FiMap size={16} />} iconPosition="start" label="Localização" sx={{ fontWeight: 600, minHeight: 44 }} />
           </Tabs>
 
           {/* TAB 0 — Histórico */}
@@ -397,6 +399,11 @@ export default function PropriedadeDetalhe() {
                 carregarProducao(propriedade);
               }}
             />
+          )}
+
+          {/* TAB 4 — Localização */}
+          {tab === 4 && (
+            <LocalizacaoTab propriedade={propriedade} />
           )}
         </CardContent>
       </Card>
@@ -766,6 +773,54 @@ function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }
           Fonte: {dados.fonte} · Cultura: {dados.cultura}
         </Typography>
       </Paper>
+    </Box>
+  );
+}
+
+function LocalizacaoTab({ propriedade }) {
+  const hasCoords = propriedade.latitude != null && propriedade.longitude != null;
+  const enderecoCompleto = [
+    propriedade.rua,
+    propriedade.numero ? `nº ${propriedade.numero}` : null,
+    propriedade.complemento,
+    propriedade.bairro,
+    `${propriedade.municipio}/${propriedade.estado}`,
+    'Brasil',
+  ].filter(Boolean).join(', ');
+
+  return (
+    <Box>
+      {!hasCoords && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Nenhuma coordenada registrada para esta propriedade. Edite a propriedade e use o mapa para definir a localização.
+        </Alert>
+      )}
+
+      {/* Endereço completo */}
+      {enderecoCompleto && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <FiMap size={16} color="#666" />
+          <Typography variant="body2" color="text.secondary">{enderecoCompleto}</Typography>
+        </Box>
+      )}
+
+      {/* Mapa */}
+      <MapPicker
+        lat={propriedade.latitude}
+        lng={propriedade.longitude}
+        onChange={() => {}}
+        readOnly
+        height={420}
+      />
+
+      {!hasCoords && (
+        <Box sx={{ textAlign: 'center', mt: 3, py: 2, border: '2px dashed', borderColor: 'divider', borderRadius: 2 }}>
+          <FiMap size={32} color="#aaa" />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Edite a propriedade para adicionar a localização no mapa
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

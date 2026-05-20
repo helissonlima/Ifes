@@ -63,9 +63,15 @@ export const indicadoresAPI = {
   dimensoes: () => api.get('/indicadores/dimensoes'),
 };
 
+// Grãos
+export const graosAPI = {
+  listarAtivos: () => api.get('/graos'),
+};
+
 // Produção regional (IBGE)
 export const producaoAPI = {
-  media: (municipio, estado) => api.get('/producao/media', { params: { municipio, estado } }),
+  media: (municipio, estado, grao_id) =>
+    api.get('/producao/media', { params: { municipio, estado, ...(grao_id ? { grao_id } : {}) } }),
 };
 
 export default api;

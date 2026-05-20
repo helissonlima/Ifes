@@ -3,7 +3,7 @@ const db = require('../config/database');
 class Graos {
   static async listarAtivos() {
     const query = `
-      SELECT id, nome, codigo, descricao, ativo, criado_em
+      SELECT id, nome, codigo, descricao, ativo, ibge_categoria, ibge_tabela, criado_em
       FROM graos
       WHERE ativo = TRUE
       ORDER BY nome
