@@ -3,6 +3,7 @@
         "npm install": true,
         "brew": true,
         "true": true,
-        "docker compose": true
+        "docker compose": true,
+        "git rm": true
     }
 }

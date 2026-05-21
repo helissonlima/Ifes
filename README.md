@@ -175,3 +175,20 @@ Ifes/
 ---
 
 Desenvolvido com base na análise comparativa ISA-EPAMIG / INCAPER — Microrregião do Caparaó.
+
+---
+
+## Licença
+
+Este projeto usa licença proprietária. Consulte o arquivo `LICENSE`.
+
+---
+
+## Publicação Segura no GitHub
+
+Antes de publicar este repositório:
+
+1. Garanta que arquivos `.env` não estão versionados.
+2. Mantenha apenas `.env.example` com valores de exemplo.
+3. Defina `ADMIN_EMAIL` e `ADMIN_PASSWORD` no ambiente de execução.
+4. Troque (rotate) segredos já utilizados anteriormente (JWT e senha de banco).

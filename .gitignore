@@ -1,5 +1,16 @@
 # Segredos — nunca commitar
 .env
+**/.env
+.env.*
+!.env.example
+**/.env.*
+!**/.env.example
+
+# Chaves/arquivos locais sensíveis
+*.pem
+*.key
+*.p12
+*.pfx
 
 # Dependências
 node_modules/

@@ -39,8 +39,8 @@ async function bootstrapAuth() {
       FOR EACH ROW EXECUTE FUNCTION atualizar_timestamp_usuarios();
   `);
 
-  const adminEmail = 'helisson@outlook.com';
-  const adminPassword = 'Lima7662';
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'change-me-now';
   const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [adminEmail]);
 
   await pool.query(
