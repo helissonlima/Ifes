@@ -130,38 +130,24 @@ export default function Dashboard() {
 
       <Card sx={{ mb: 3, border: '1px solid', borderColor: 'rgba(46,125,50,0.12)' }}>
         <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
-          <Grid container spacing={2.5} sx={{ alignItems: 'center' }}>
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>
-                Prioridade operacional
-              </Typography>
-              <Typography variant="h5" fontWeight={800} sx={{ mt: 0.5, mb: 1 }}>
-                {classificacaoMedia ? `ICSR médio em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 700, lineHeight: 1.65, mb: 2 }}>
-                {dimensaoPrioritaria
-                  ? `A dimensão com menor desempenho atual é ${dimensaoPrioritaria.label}. Use este painel para preparar a próxima visita e concentrar a conversa nos indicadores com maior potencial de melhoria.`
-                  : 'Cadastre e conclua avaliações para transformar este painel em uma leitura operacional do território.'}
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {classificacaoMedia && <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />}
-                {dimensaoPrioritaria && (
-                  <Chip icon={<FiTarget size={13} />} label={`Foco imediato: ${dimensaoPrioritaria.label}`} variant="outlined" />
-                )}
-                <Chip icon={<FiTrendingUp size={13} />} label={`${stats?.avaliacoes_concluidas ?? 0} avaliações concluídas`} variant="outlined" color="success" />
-              </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 5 }}>
-              <Box sx={{ display: 'grid', gap: 1.5, justifyItems: { xs: 'stretch', md: 'end' } }}>
-                <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
-                  Iniciar nova avaliação
-                </Button>
-                <Button variant="outlined" endIcon={<FiArrowRight />} onClick={() => navigate('/historico')}>
-                  Revisar avaliações concluídas
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+          <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>
+            Diagnóstico Operacional
+          </Typography>
+          <Typography variant="h5" fontWeight={800} sx={{ mt: 0.75, mb: 1.5 }}>
+            {classificacaoMedia ? `ICSR médio em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.65, mb: 2.5 }}>
+            {dimensaoPrioritaria
+              ? `A dimensão com menor desempenho atual é ${dimensaoPrioritaria.label}. Use este painel para preparar a próxima visita e concentrar a conversa nos indicadores com maior potencial de melhoria.`
+              : 'Cadastre e conclua avaliações para transformar este painel em uma leitura operacional do território.'}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+            {classificacaoMedia && <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />}
+            {dimensaoPrioritaria && (
+              <Chip icon={<FiTarget size={13} />} label={`Foco: ${dimensaoPrioritaria.label}`} variant="outlined" />
+            )}
+            <Chip icon={<FiTrendingUp size={13} />} label={`${stats?.avaliacoes_concluidas ?? 0} avaliações`} variant="outlined" color="success" />
+          </Box>
         </CardContent>
       </Card>
 
@@ -225,7 +211,7 @@ export default function Dashboard() {
                   icon={<FiClipboard size={28} />}
                   title="Nenhuma avaliação concluída"
                   description="Cadastre uma propriedade rural e inicie a primeira avaliação ICSR para ver os resultados aqui."
-                  actionLabel="Criar primeira avaliação"
+                  actionLabel="Iniciar avaliação"
                   onAction={() => navigate('/avaliacao/nova')}
                   small
                 />
@@ -311,7 +297,7 @@ export default function Dashboard() {
                   icon={<MdOutlineEco size={36} />}
                   title="Nenhuma avaliação concluída"
                   description="Conclua a primeira avaliação para ver a distribuição por classificação de sustentabilidade."
-                  actionLabel="Nova avaliação"
+                  actionLabel="Iniciar avaliação"
                   onAction={() => navigate('/avaliacao/nova')}
                   small
                 />

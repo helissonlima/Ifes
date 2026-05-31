@@ -461,7 +461,7 @@ export default function Propriedades() {
               icon={<FiMap size={40} />}
               title="Nenhuma propriedade cadastrada"
               description="Cadastre as propriedades rurais antes de iniciar as avaliações ICSR. Cada propriedade terá seu histórico de avaliações e evolução de sustentabilidade."
-              actionLabel="Cadastrar primeira propriedade"
+              actionLabel="Cadastrar propriedade"
               onAction={abrirNovo}
             />
           </CardContent>
