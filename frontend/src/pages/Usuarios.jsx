@@ -601,7 +601,7 @@ export default function Usuarios() {
 function StatBox({ icon, label, value, cor }) {
   return (
     <Grid size={{ xs: 6, md: 3 }}>
-      <Paper variant="outlined" sx={{ p: 1.5, borderLeft: `4px solid ${cor}` }}>
+      <Paper variant="outlined" sx={{ p: 1.5, borderTop: `3px solid ${cor}` }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box sx={{ color: cor }}>{icon}</Box>
           <Typography variant="caption" color="text.secondary" fontWeight={600}>{label}</Typography>

@@ -1,4 +1,5 @@
-// Definição completa dos indicadores e critérios baseados no ICSR (ISA-EPAMIG / INCAPER)
+// Definição completa dos indicadores e critérios — ICSR Versão Revisada (Ponderada)
+// ISA-EPAMIG / INCAPER — Integração com indicadores internacionais (CSDDD, GRI, ODS)
 const DIMENSOES = {
   ambiental: {
     codigo: 'ambiental',
@@ -9,6 +10,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_conservacao_solo',
         nome: 'Conservação do Solo',
+        peso: 0.15,
         criterio: 'Uso de curvas de nível, cobertura e manejo conservacionista',
         evidencia_esperada: 'Visual: erosão, curvas de nível, cobertura vegetal, croqui, projeto topográfico',
         criterios: [
@@ -22,6 +24,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_manejo_agua',
         nome: 'Manejo da Água',
+        peso: 0.15,
         criterio: 'Uso racional e proteção hídrica',
         evidencia_esperada: 'Medidor de água, sistema de reuso, tratamento de efluentes, laudo de eficiência hídrica',
         criterios: [
@@ -35,6 +38,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_app_rl',
         nome: 'APP e Reserva Legal',
+        peso: 0.15,
         criterio: 'Percentual regularizado e conservado',
         evidencia_esperada: 'CAR ativo, imagem de satélite, cercamento das APPs, plano de manejo',
         criterios: [
@@ -48,6 +52,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_residuos',
         nome: 'Gestão de Resíduos',
+        peso: 0.10,
         criterio: 'Destinação adequada de resíduos sólidos e embalagens',
         evidencia_esperada: 'Composteira, comprovante Campo Limpo, registros de destinação, certificação',
         criterios: [
@@ -61,6 +66,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_defensivos',
         nome: 'Uso Racional de Defensivos',
+        peso: 0.12,
         criterio: 'Receituário agronômico e redução de uso',
         evidencia_esperada: 'Receituário atualizado, caderneta de campo, registros, controle biológico',
         criterios: [
@@ -74,6 +80,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_mip',
         nome: 'Manejo Integrado de Pragas (MIP)',
+        peso: 0.10,
         criterio: 'Aplicação de MIP e monitoramento sistemático',
         evidencia_esperada: 'Armadilhas, registros semanais, plano MIP, laudo técnico',
         criterios: [
@@ -87,6 +94,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_irrigacao',
         nome: 'Irrigação Eficiente',
+        peso: 0.08,
         criterio: 'Uso de tecnologias eficientes e monitoramento',
         evidencia_esperada: 'Sistema de gotejamento, tensiômetros, fertirrigação, registros de eficiência',
         criterios: [
@@ -100,6 +108,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_nascentes',
         nome: 'Proteção de Nascentes',
+        peso: 0.08,
         criterio: 'Existência e conservação das nascentes',
         evidencia_esperada: 'Cercamento, replantio nativo, laudo de qualidade da água',
         criterios: [
@@ -113,6 +122,7 @@ const DIMENSOES = {
       {
         codigo: 'amb_cobertura_vegetal',
         nome: 'Cobertura Vegetal',
+        peso: 0.07,
         criterio: 'Percentual de cobertura vegetal na propriedade',
         evidencia_esperada: 'Mapa de uso do solo, imagem de satélite, inventário vegetal',
         criterios: [
@@ -135,6 +145,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_produtividade',
         nome: 'Produtividade',
+        peso: 0.15,
         criterio: 'Sacas por hectare comparadas à média regional (CONAB/EMATER)',
         evidencia_esperada: 'Registros de colheita, dados regionais CONAB/EMATER',
         criterios: [
@@ -148,6 +159,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_comercializacao',
         nome: 'Eficiência de Comercialização',
+        peso: 0.15,
         criterio: 'Diversidade de canais e agregação de valor',
         evidencia_esperada: 'Contratos, notas fiscais, certificações',
         criterios: [
@@ -161,6 +173,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_diversidade_renda',
         nome: 'Diversidade de Renda',
+        peso: 0.15,
         criterio: 'Número de fontes de renda da propriedade',
         evidencia_esperada: 'Registros de venda de produtos secundários, CNPJ',
         criterios: [
@@ -174,6 +187,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_custo_producao',
         nome: 'Custo de Produção',
+        peso: 0.15,
         criterio: 'Relação custo/receita (C/R)',
         evidencia_esperada: 'Demonstrativo de resultado, fluxo de caixa',
         criterios: [
@@ -187,6 +201,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_patrimonio',
         nome: 'Evolução Patrimonial',
+        peso: 0.12,
         criterio: 'Crescimento patrimonial nos últimos 5 anos',
         evidencia_esperada: 'Declaração, registro de aquisições, laudo de avaliação',
         criterios: [
@@ -200,6 +215,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_qualidade_cafe',
         nome: 'Qualidade do Café',
+        peso: 0.15,
         criterio: 'Classificação e certificação do café produzido',
         evidencia_esperada: 'Laudo de classificação, Q-Grader, certificação de origem',
         criterios: [
@@ -213,6 +229,7 @@ const DIMENSOES = {
       {
         codigo: 'eco_planejamento_financeiro',
         nome: 'Planejamento Financeiro',
+        peso: 0.13,
         criterio: 'Existência de controle financeiro e fluxo de caixa',
         evidencia_esperada: 'Planilha estruturada, orçamento, análise de cenários',
         criterios: [
@@ -235,6 +252,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_capacitacao',
         nome: 'Capacitação Técnica',
+        peso: 0.12,
         criterio: 'Participação em cursos e treinamentos',
         evidencia_esperada: 'Certificados, registros de participação, mentoria',
         criterios: [
@@ -248,6 +266,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_seguranca_trabalho',
         nome: 'Segurança do Trabalho',
+        peso: 0.18,
         criterio: 'Uso de EPI e adequação trabalhista',
         evidencia_esperada: 'Estoque EPI, certificados de treinamento, registros',
         criterios: [
@@ -261,6 +280,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_sucessao_familiar',
         nome: 'Sucessão Familiar',
+        peso: 0.18,
         criterio: 'Participação de jovens e continuidade da atividade',
         evidencia_esperada: 'Entrevista família, documento de sucessão, observação',
         criterios: [
@@ -274,6 +294,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_qualidade_vida',
         nome: 'Qualidade de Vida',
+        peso: 0.15,
         criterio: 'Acesso à saúde, educação e infraestrutura',
         evidencia_esperada: 'Visual moradia, entrevista, acesso a serviços',
         criterios: [
@@ -287,6 +308,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_organizacao',
         nome: 'Organização Produtiva',
+        peso: 0.12,
         criterio: 'Participação em cooperativas e associações',
         evidencia_esperada: 'Carteira de associado, registros de assembleias, cargos',
         criterios: [
@@ -300,6 +322,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_saneamento',
         nome: 'Infraestrutura Sanitária',
+        peso: 0.12,
         criterio: 'Condições sanitárias da propriedade',
         evidencia_esperada: 'Visual banheiros, fossa, sistema de tratamento',
         criterios: [
@@ -313,6 +336,7 @@ const DIMENSOES = {
       {
         codigo: 'soc_assistencia_tecnica',
         nome: 'Assistência Técnica',
+        peso: 0.13,
         criterio: 'Frequência de acompanhamento técnico',
         evidencia_esperada: 'Registro de visitas, plano técnico, projetos',
         criterios: [
@@ -326,15 +350,18 @@ const DIMENSOES = {
     ],
   },
 
+  // Dimensão renomeada: IGQ → IGQG (Gestão, Qualidade e Governança)
+  // Código mantido como 'gestao_qualidade' para compatibilidade com dados existentes
   gestao_qualidade: {
     codigo: 'gestao_qualidade',
-    nome: 'Gestão e Qualidade',
+    nome: 'Gestão, Qualidade e Governança',
     peso: 0.15,
     cor: '#9C27B0',
     indicadores: [
       {
         codigo: 'gq_rastreabilidade',
         nome: 'Rastreabilidade',
+        peso: 0.15,
         criterio: 'Registros produtivos e operacionais por lote',
         evidencia_esperada: 'Caderno de campo, sistema digital, QR code',
         criterios: [
@@ -348,6 +375,7 @@ const DIMENSOES = {
       {
         codigo: 'gq_pos_colheita',
         nome: 'Pós-Colheita',
+        peso: 0.15,
         criterio: 'Boas práticas de secagem e benefício',
         evidencia_esperada: 'Terreiro, secador, monitoramento de umidade',
         criterios: [
@@ -361,6 +389,7 @@ const DIMENSOES = {
       {
         codigo: 'gq_armazenamento',
         nome: 'Armazenamento',
+        peso: 0.10,
         criterio: 'Estrutura adequada e controle de qualidade',
         evidencia_esperada: 'Barracão, silos, monitoramento de pragas',
         criterios: [
@@ -374,6 +403,7 @@ const DIMENSOES = {
       {
         codigo: 'gq_planejamento_produtivo',
         nome: 'Planejamento Produtivo',
+        peso: 0.15,
         criterio: 'Planejamento anual das atividades',
         evidencia_esperada: 'Calendário anual, orçamento, metas, revisão',
         criterios: [
@@ -387,6 +417,7 @@ const DIMENSOES = {
       {
         codigo: 'gq_registros_tecnicos',
         nome: 'Registros Técnicos',
+        peso: 0.10,
         criterio: 'Controle de aplicações, produtividade e custos',
         evidencia_esperada: 'Caderneta, planilhas, sistema digital',
         criterios: [
@@ -400,6 +431,7 @@ const DIMENSOES = {
       {
         codigo: 'gq_conformidade_ambiental',
         nome: 'Conformidade Ambiental',
+        peso: 0.10,
         criterio: 'Atendimento às exigências legais',
         evidencia_esperada: 'CAR, licenças, certificação ambiental',
         criterios: [
@@ -413,6 +445,7 @@ const DIMENSOES = {
       {
         codigo: 'gq_certificacoes',
         nome: 'Certificações',
+        peso: 0.10,
         criterio: 'Participação em programas de certificação',
         evidencia_esperada: 'Certificados vigentes (Orgânico, Fair Trade, etc.)',
         criterios: [
@@ -421,6 +454,36 @@ const DIMENSOES = {
           { nota: 0.50, descricao: 'Processo de adequação em andamento' },
           { nota: 0.75, descricao: 'Parcial; uma certificação obtida' },
           { nota: 1.00, descricao: 'Múltiplas certificações consolidadas' },
+        ],
+      },
+      // IGQG.8 — Novo indicador de Transparência e Due Diligence (CSDDD/UE, GRI 2, Pacto Global ONU)
+      {
+        codigo: 'igqg_transparencia_due_diligence',
+        nome: 'Transparência e Due Diligence',
+        peso: 0.10,
+        criterio: 'Mapeamento de cadeia de valor, identificação e mitigação de riscos socioambientais',
+        evidencia_esperada: 'Relatório de sustentabilidade, auditorias de fornecedores, certificação de cadeia (Fair Trade, B Corp), lista de fornecedores',
+        criterios: [
+          { nota: 0.00, descricao: 'Sem transparência; não sabe origem de insumos, sem registros de fornecedores' },
+          { nota: 0.25, descricao: 'Consciência inicial; reconhece riscos na cadeia, mas sem mapeamento ou plano de ação' },
+          { nota: 0.50, descricao: 'Mapeamento parcial; fornecedores principais identificados, sem avaliação de riscos' },
+          { nota: 0.75, descricao: 'Due diligence básica; mapeamento com avaliação de riscos socioambientais e compromissos formais' },
+          { nota: 1.00, descricao: 'Due diligence consolidada; cadeia mapeada, riscos documentados, plano de mitigação, auditorias, relatório público' },
+        ],
+      },
+      // IGQG.9 — Novo indicador de Participação de Stakeholders (FPIC, OIT 169, GRI 2-29)
+      {
+        codigo: 'igqg_participacao_stakeholders',
+        nome: 'Participação de Stakeholders',
+        peso: 0.05,
+        criterio: 'Mecanismos de governança participativa com trabalhadores, família e comunidade',
+        evidencia_esperada: 'Documentos de governança, atas de reuniões, acordos de FPIC, relatório de engajamento de stakeholders',
+        criterios: [
+          { nota: 0.00, descricao: 'Gestão fechada; decisões individuais, sem consulta a trabalhadores, família ou comunidade' },
+          { nota: 0.25, descricao: 'Consulta esporádica; diálogo ocasional com família, sem estrutura ou registro' },
+          { nota: 0.50, descricao: 'Participação familiar; decisões compartilhadas com família, sem envolvimento de trabalhadores ou comunidade' },
+          { nota: 0.75, descricao: 'Participação ampliada; consulta regular a trabalhadores e comunidade, respeito a comunidades tradicionais' },
+          { nota: 1.00, descricao: 'Governança participativa consolidada; mecanismos formais, FPIC documentado, transparência nas decisões' },
         ],
       },
     ],
@@ -435,12 +498,11 @@ const ESCALA_IGS = [
   { min: 0.81, max: 1.00, classificacao: 'Alta', cor: '#4CAF50', descricao: 'Excelência; referência regional, mercados premium' },
 ];
 
-// Status de avaliação por nota (usado no diagnóstico automático)
 const STATUS_INDICADOR = [
-  { max: 0.25, status: 'CRÍTICO', cor: '#f44336', prazo: 'Imediato (0-3 meses)', recomendacao: 'Intervenção urgente necessária. Consultoria especializada recomendada.' },
-  { max: 0.50, status: 'ATENÇÃO', cor: '#FF9800', prazo: 'Curto prazo (3-6 meses)', recomendacao: 'Plano de melhoria estruturado. Capacitação técnica indicada.' },
-  { max: 0.75, status: 'BOM',     cor: '#8BC34A', prazo: 'Médio prazo (6-12 meses)', recomendacao: 'Boas práticas consolidadas. Buscar aprimoramento contínuo.' },
-  { max: 1.01, status: 'EXCELENTE', cor: '#2E7D32', prazo: 'Manter (12+ meses)', recomendacao: 'Desempenho exemplar. Servir de referência para outros produtores.' },
+  { max: 0.25, status: 'CRÍTICO',   cor: '#f44336', prazo: 'Imediato (0-3 meses)',     recomendacao: 'Intervenção urgente necessária. Consultoria especializada recomendada.' },
+  { max: 0.50, status: 'ATENÇÃO',   cor: '#FF9800', prazo: 'Curto prazo (3-6 meses)',  recomendacao: 'Plano de melhoria estruturado. Capacitação técnica indicada.' },
+  { max: 0.75, status: 'BOM',       cor: '#8BC34A', prazo: 'Médio prazo (6-12 meses)', recomendacao: 'Boas práticas consolidadas. Buscar aprimoramento contínuo.' },
+  { max: 1.01, status: 'EXCELENTE', cor: '#2E7D32', prazo: 'Manter (12+ meses)',       recomendacao: 'Desempenho exemplar. Servir de referência para outros produtores.' },
 ];
 
 function avaliarStatusIndicador(nota) {
@@ -454,13 +516,36 @@ function calcularIGS(ie, ia, is_, igq) {
   return { igs: parseFloat(igs.toFixed(4)), classificacao: faixa.classificacao };
 }
 
-function calcularIndiceDimensao(respostas) {
+// Calcula média ponderada dos indicadores de uma dimensão.
+// respostas: array de objetos { indicador_codigo, nota }
+// dimCodigo: chave da dimensão em DIMENSOES (ex: 'ambiental')
+function calcularIndiceDimensao(dimCodigo, respostas) {
   if (!respostas || respostas.length === 0) return 0;
-  const soma = respostas.reduce((acc, r) => acc + parseFloat(r.nota), 0);
-  return parseFloat((soma / respostas.length).toFixed(4));
+
+  const dim = DIMENSOES[dimCodigo];
+  if (!dim) {
+    // fallback: média simples
+    const soma = respostas.reduce((acc, r) => acc + parseFloat(r.nota), 0);
+    return parseFloat((soma / respostas.length).toFixed(4));
+  }
+
+  const pesoMap = {};
+  for (const ind of dim.indicadores) {
+    pesoMap[ind.codigo] = ind.peso;
+  }
+
+  let somaPesos = 0;
+  let somaPonderada = 0;
+  for (const r of respostas) {
+    const peso = pesoMap[r.indicador_codigo] ?? 0;
+    somaPesos += peso;
+    somaPonderada += parseFloat(r.nota) * peso;
+  }
+
+  if (somaPesos === 0) return 0;
+  return parseFloat((somaPonderada / somaPesos).toFixed(4));
 }
 
-// Encontra a definição do indicador a partir de seu código
 function localizarIndicador(codigo) {
   for (const dim of Object.values(DIMENSOES)) {
     const ind = dim.indicadores.find((i) => i.codigo === codigo);
@@ -469,13 +554,13 @@ function localizarIndicador(codigo) {
   return null;
 }
 
-// Calcula impacto potencial no IGS: peso_dimensao / total_indicadores_dimensao * (1 - nota)
+// Impacto potencial no IGS: peso_dimensao × peso_interno_indicador × (1 - nota)
 function calcularImpactoIGS(codigo, nota) {
   const ind = localizarIndicador(codigo);
   if (!ind) return 0;
   const dim = DIMENSOES[ind.dimensao];
-  const peso = dim.peso / dim.indicadores.length;
-  return parseFloat((peso * (1 - Number(nota))).toFixed(4));
+  const pesoIndicador = ind.peso || (1 / dim.indicadores.length);
+  return parseFloat((dim.peso * pesoIndicador * (1 - Number(nota))).toFixed(4));
 }
 
 module.exports = {

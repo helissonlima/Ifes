@@ -5,8 +5,17 @@ import {
 import { FiCheckSquare, FiEdit3, FiChevronDown, FiChevronUp, FiCheck } from 'react-icons/fi';
 
 const LABEL_NOTA = { 0: '0,00', 0.25: '0,25', 0.5: '0,50', 0.75: '0,75', 1: '1,00' };
+// Cores de fundo/acento para cada nota
 const COR_NOTA = {
   0: '#f44336', 0.25: '#FF9800', 0.5: '#FFC107', 0.75: '#8BC34A', 1: '#4CAF50',
+};
+// Cores de texto acessíveis em fundo branco (≥4.5:1)
+const COR_NOTA_TEXTO = {
+  0: '#b71c1c', 0.25: '#e65100', 0.5: '#8B6000', 0.75: '#33691e', 1: '#1B5E20',
+};
+// Cores de texto para fundo do badge colorido selecionado (≥4.5:1 sobre a cor de fundo)
+const COR_BADGE_SELECIONADO = {
+  0: '#fff', 0.25: '#3E1F00', 0.5: '#5D4000', 0.75: '#1B3A00', 1: '#1B5E20',
 };
 const NIVEL = {
   0: 'Crítico', 0.25: 'Insuficiente', 0.5: 'Regular', 0.75: 'Bom', 1: 'Excelente',
@@ -28,7 +37,18 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: corDimensao, mt: 0.8, flexShrink: 0 }} />
           <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="subtitle2" fontWeight={700}>{indicador.nome}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+              <Typography variant="subtitle2" fontWeight={700}>{indicador.nome}</Typography>
+              {indicador.peso !== undefined && (
+                <Box sx={{
+                  px: 0.75, py: 0.1, borderRadius: 1,
+                  bgcolor: corDimensao + '1A', color: corDimensao,
+                  fontSize: '0.65rem', fontWeight: 700, lineHeight: 1.8,
+                }}>
+                  peso {Math.round(indicador.peso * 100)}%
+                </Box>
+              )}
+            </Box>
             <Typography variant="caption" color="text.secondary">{indicador.criterio}</Typography>
           </Box>
           {nota !== undefined && (
@@ -72,8 +92,8 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                   px: 0.5,
                   py: 0.2,
                   borderRadius: 1,
-                  bgcolor: selected ? cor : cor + '2A',
-                  color: selected ? '#fff' : cor,
+                  bgcolor: selected ? cor : cor + '18',
+                  color: selected ? COR_BADGE_SELECIONADO[c.nota] : COR_NOTA_TEXTO[c.nota],
                   fontSize: '0.68rem',
                   fontWeight: 800,
                   flexShrink: 0,
@@ -85,7 +105,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
 
                 {/* Level label + description */}
                 <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                  <Typography component="span" sx={{ fontSize: '0.74rem', fontWeight: 700, color: cor, mr: 0.5 }}>
+                  <Typography component="span" sx={{ fontSize: '0.74rem', fontWeight: 700, color: COR_NOTA_TEXTO[c.nota], mr: 0.5 }}>
                     {NIVEL[c.nota]}:
                   </Typography>
                   <Typography component="span" sx={{

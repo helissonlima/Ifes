@@ -16,7 +16,7 @@ const DIMENSOES = [
   { key: 'media_economica', label: 'Econômica', cor: '#2196F3', peso: '30%' },
   { key: 'media_ambiental', label: 'Ambiental', cor: '#4CAF50', peso: '35%' },
   { key: 'media_social', label: 'Social', cor: '#FF9800', peso: '20%' },
-  { key: 'media_gestao', label: 'Gestão e Qualidade', cor: '#9C27B0', peso: '15%' },
+  { key: 'media_gestao', label: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: '15%' },
 ];
 
 export default function Dashboard() {
@@ -51,10 +51,10 @@ export default function Dashboard() {
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" fontWeight={800} color="primary.dark">
-            Dashboard
+            Visão Geral
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Índice de Sustentabilidade Rural — ISA-EPAMIG / INCAPER
+            ICSR — Índice Consolidado de Sustentabilidade Rural · ISA-EPAMIG / INCAPER
           </Typography>
         </Box>
         <Button
@@ -91,7 +91,7 @@ export default function Dashboard() {
         </Grid>
         <Grid size={{ xs: 6, md: 3 }}>
           <StatCard
-            title="IGS Médio"
+            title="ICSR Médio"
             value={stats?.media_igs ? `${(stats.media_igs * 100).toFixed(1)}%` : '—'}
             subtitle="média geral"
             icon={<MdOutlineEco size={22} />}
@@ -101,7 +101,7 @@ export default function Dashboard() {
         <Grid size={{ xs: 6, md: 3 }}>
           <StatCard
             title="Indicadores"
-            value="30"
+            value="32"
             subtitle="em 4 dimensões"
             icon={<FiBarChart2 size={22} />}
             color="secondary.main"
@@ -115,7 +115,7 @@ export default function Dashboard() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700} gutterBottom>
-                IGS Médio Geral
+                ICSR Médio Geral
               </Typography>
               <IGSGauge
                 igs={stats?.media_igs ?? 0}

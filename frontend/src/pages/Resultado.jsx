@@ -19,11 +19,15 @@ import IGSBadge from '../components/Common/IGSBadge';
 const COR_NOTA = {
   0: '#f44336', 0.25: '#FF9800', 0.5: '#FFC107', 0.75: '#8BC34A', 1: '#4CAF50',
 };
+// Cores de texto acessíveis (≥4.5:1 em fundo branco)
+const COR_NOTA_TEXTO = {
+  0: '#b71c1c', 0.25: '#e65100', 0.5: '#8B6000', 0.75: '#33691e', 1: '#1B5E20',
+};
 const DIM_INFO = {
   ambiental:       { nome: 'Ambiental',         cor: '#4CAF50', peso: 35, campo: 'indice_ambiental' },
   economica:       { nome: 'Econômica',          cor: '#2196F3', peso: 30, campo: 'indice_economico' },
   social:          { nome: 'Social',             cor: '#FF9800', peso: 20, campo: 'indice_social' },
-  gestao_qualidade:{ nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 15, campo: 'indice_gestao_qualidade' },
+  gestao_qualidade:{ nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 15, campo: 'indice_gestao_qualidade' },
 };
 
 const STATUS_ICON = {
@@ -79,11 +83,11 @@ export default function Resultado() {
 
   const timelineData = timeline.map((t) => ({
     data: new Date(t.data_avaliacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' }),
-    IGS: Math.round((Number(t.igs) || 0) * 100),
+    ICSR: Math.round((Number(t.igs) || 0) * 100),
     Ambiental: Math.round((Number(t.indice_ambiental) || 0) * 100),
     Econômica: Math.round((Number(t.indice_economico) || 0) * 100),
     Social: Math.round((Number(t.indice_social) || 0) * 100),
-    'Gestão e Qualidade': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
+    'IGQG': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
   }));
 
   return (
@@ -117,10 +121,10 @@ export default function Resultado() {
             </Grid>
             <Grid size={{ xs: 12, sm: 8 }}>
               <Typography variant="h6" fontWeight={700} sx={{ color: 'rgba(255,255,255,0.85)', mb: 1 }}>
-                Índice Geral de Sustentabilidade
+                ICSR — Índice Consolidado de Sustentabilidade Rural
               </Typography>
               <Typography variant="h3" fontWeight={900} sx={{ color: 'white', lineHeight: 1 }}>
-                {avaliacao.igs ? `${(avaliacao.igs * 100).toFixed(1)}%` : '—'}
+                {avaliacao.igs ? `ICSR ${(avaliacao.igs * 100).toFixed(1)}%` : '—'}
               </Typography>
               <IGSBadge classificacao={avaliacao.classificacao} size="medium" />
               <Divider sx={{ my: 1.5, borderColor: 'rgba(255,255,255,0.2)' }} />
@@ -169,7 +173,7 @@ export default function Resultado() {
               <Divider sx={{ my: 1.5 }} />
               <Box sx={{ p: 1.5, bgcolor: 'primary.50', borderRadius: 2, textAlign: 'center' }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                  IGS = (Amb. × 35%) + (Econ. × 30%) + (Soc. × 20%) + (G&Q × 15%)
+                  ICSR = (Amb. × 35%) + (Econ. × 30%) + (Soc. × 20%) + (IGQG × 15%) — Médias ponderadas
                 </Typography>
               </Box>
             </CardContent>
@@ -218,7 +222,7 @@ export default function Resultado() {
               <Typography variant="h6" fontWeight={800}>Diagnóstico Automático</Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Análise de fortalezas, fragilidades e recomendações priorizadas por impacto no IGS.
+              Análise de fortalezas, fragilidades e recomendações priorizadas por impacto no ICSR.
             </Typography>
 
             {/* Plano de ação top-5 */}
@@ -236,7 +240,7 @@ export default function Resultado() {
                     <TableCell sx={{ fontWeight: 700 }}>Indicador</TableCell>
                     <TableCell sx={{ fontWeight: 700, width: 80 }}>Nota</TableCell>
                     <TableCell sx={{ fontWeight: 700, width: 110 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700, width: 110, display: { xs: 'none', md: 'table-cell' } }}>Impacto IGS</TableCell>
+                    <TableCell sx={{ fontWeight: 700, width: 110, display: { xs: 'none', md: 'table-cell' } }}>Impacto ICSR</TableCell>
                     <TableCell sx={{ fontWeight: 700, display: { xs: 'none', sm: 'table-cell' } }}>Prazo sugerido</TableCell>
                   </TableRow>
                 </TableHead>
@@ -274,7 +278,7 @@ export default function Resultado() {
                 </TableBody>
               </Table>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                * Impacto IGS = potencial de ganho no índice geral se este indicador atingir nota 1,00.
+                * Impacto ICSR = potencial de ganho no índice consolidado se este indicador atingir nota 1,00.
               </Typography>
             </Paper>
 
@@ -309,7 +313,7 @@ export default function Resultado() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Typography variant="body2" fontWeight={800} color={COR_NOTA[it.nota] || '#9E9E9E'}>
+                            <Typography variant="body2" fontWeight={800} sx={{ color: COR_NOTA_TEXTO[it.nota] || '#616161' }}>
                               {(it.nota * 100).toFixed(0)}%
                             </Typography>
                           </TableCell>
@@ -356,11 +360,11 @@ export default function Resultado() {
                 <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
                 <RTooltip />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="IGS" stroke="#1B5E20" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="ICSR" stroke="#1B5E20" strokeWidth={3} dot={{ r: 4 }} />
                 <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="Econômica" stroke="#2196F3" strokeWidth={2} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="Social" stroke="#FF9800" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="Gestão e Qualidade" stroke="#9C27B0" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="IGQG" stroke="#9C27B0" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

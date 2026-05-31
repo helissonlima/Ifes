@@ -3,13 +3,14 @@ import IndicadorCard from './IndicadorCard';
 
 export default function DimensaoStep({ dimensao, respostas, observacoes, onChange, onObservacaoChange }) {
   const total = dimensao.indicadores.length;
-  const respondidos = dimensao.indicadores.filter((ind) => respostas[ind.codigo] !== undefined).length;
+  const respondidosArr = dimensao.indicadores.filter((ind) => respostas[ind.codigo] !== undefined);
+  const respondidos = respondidosArr.length;
   const progresso = (respondidos / total) * 100;
-
-  const media = respondidos > 0
-    ? dimensao.indicadores
-        .filter((ind) => respostas[ind.codigo] !== undefined)
-        .reduce((acc, ind) => acc + respostas[ind.codigo], 0) / respondidos
+  const somaPesos = respondidosArr.reduce((acc, ind) => acc + (ind.peso || 0), 0);
+  const media = respondidosArr.length > 0
+    ? somaPesos > 0
+      ? respondidosArr.reduce((acc, ind) => acc + respostas[ind.codigo] * (ind.peso || 0), 0) / somaPesos
+      : respondidosArr.reduce((acc, ind) => acc + respostas[ind.codigo], 0) / respondidosArr.length
     : null;
 
   return (

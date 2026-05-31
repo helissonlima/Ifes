@@ -28,7 +28,7 @@ const DIM_INFO = {
   ambiental: { nome: 'Ambiental', cor: '#4CAF50', peso: 35 },
   economica: { nome: 'Econômica', cor: '#2196F3', peso: 30 },
   social: { nome: 'Social', cor: '#FF9800', peso: 20 },
-  gestao_qualidade: { nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 15 },
+  gestao_qualidade: { nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 15 },
 };
 
 const fmtData = (d) => new Date(d).toLocaleDateString('pt-BR');
@@ -113,11 +113,11 @@ export default function PropriedadeDetalhe() {
   const timelineData = concluidas.map((t) => ({
     data: new Date(t.data_avaliacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' }),
     id: t.id,
-    IGS: Math.round((Number(t.igs) || 0) * 100),
+    ICSR: Math.round((Number(t.igs) || 0) * 100),
     Ambiental: Math.round((Number(t.indice_ambiental) || 0) * 100),
     Econômica: Math.round((Number(t.indice_economico) || 0) * 100),
     Social: Math.round((Number(t.indice_social) || 0) * 100),
-    'Gestão e Qualidade': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
+    'IGQG': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
   }));
 
   const primeira = concluidas[0];
@@ -181,7 +181,7 @@ export default function PropriedadeDetalhe() {
                 <>
                   <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)' }}>Última avaliação concluída</Typography>
                   <Typography variant="h3" fontWeight={900} sx={{ lineHeight: 1.05 }}>
-                    {(Number(ultima.igs) * 100).toFixed(1)}%
+                    ICSR {(Number(ultima.igs) * 100).toFixed(1)}%
                   </Typography>
                   <Box sx={{ mt: 0.5 }}>
                     <IGSBadge classificacao={ultima.classificacao} size="medium" />
@@ -275,7 +275,7 @@ export default function PropriedadeDetalhe() {
                 <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'primary.main' }}>
-                      {['Data', 'Técnico', 'Ambiental', 'Econômica', 'Social', 'G&Q', 'IGS', 'Status', 'Ações'].map((h) => (
+                      {['Data', 'Técnico', 'Ambiental', 'Econômica', 'Social', 'IGQG', 'ICSR', 'Status', 'Ações'].map((h) => (
                         <TableCell key={h} sx={{ color: '#fff', fontWeight: 700 }}>{h}</TableCell>
                       ))}
                     </TableRow>
@@ -339,11 +339,11 @@ export default function PropriedadeDetalhe() {
                   <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
                   <RTooltip />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="IGS" stroke="#1B5E20" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="ICSR" stroke="#1B5E20" strokeWidth={3} dot={{ r: 4 }} />
                   <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
                   <Line type="monotone" dataKey="Econômica" stroke="#2196F3" strokeWidth={2} dot={{ r: 3 }} />
                   <Line type="monotone" dataKey="Social" stroke="#FF9800" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Gestão e Qualidade" stroke="#9C27B0" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="IGQG" stroke="#9C27B0" strokeWidth={2} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </Box>
@@ -359,7 +359,7 @@ export default function PropriedadeDetalhe() {
                     <Select value={idA} label="Avaliação A (antes)" onChange={(e) => setIdA(e.target.value)}>
                       {concluidas.map((a) => (
                         <MenuItem key={a.id} value={a.id} disabled={a.id === idB}>
-                          {fmtData(a.data_avaliacao)} — IGS {(Number(a.igs) * 100).toFixed(1)}%
+                          {fmtData(a.data_avaliacao)} — ICSR {(Number(a.igs) * 100).toFixed(1)}%
                         </MenuItem>
                       ))}
                     </Select>
@@ -371,7 +371,7 @@ export default function PropriedadeDetalhe() {
                     <Select value={idB} label="Avaliação B (depois)" onChange={(e) => setIdB(e.target.value)}>
                       {concluidas.map((a) => (
                         <MenuItem key={a.id} value={a.id} disabled={a.id === idA}>
-                          {fmtData(a.data_avaliacao)} — IGS {(Number(a.igs) * 100).toFixed(1)}%
+                          {fmtData(a.data_avaliacao)} — ICSR {(Number(a.igs) * 100).toFixed(1)}%
                         </MenuItem>
                       ))}
                     </Select>
@@ -462,7 +462,7 @@ function Comparativo({ comp }) {
       {/* Cabeçalho IGS */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderLeft: '4px solid #90A4AE' }}>
+          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '3px solid #90A4AE' }}>
             <Typography variant="caption" color="text.secondary" display="block">Avaliação A</Typography>
             <Typography variant="caption" color="text.secondary">{fmtData(comp.a.data)}</Typography>
             <Typography variant="h4" fontWeight={900} sx={{ mt: 0.5 }}>
@@ -473,8 +473,8 @@ function Comparativo({ comp }) {
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderLeft: `4px solid ${comp.delta_igs >= 0 ? '#2E7D32' : '#C62828'}` }}>
-            <Typography variant="caption" color="text.secondary" display="block">Variação do IGS</Typography>
+          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: `3px solid ${comp.delta_igs >= 0 ? '#2E7D32' : '#C62828'}` }}>
+            <Typography variant="caption" color="text.secondary" display="block">Variação do ICSR</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1 }}>
               {comp.delta_igs >= 0 ? <FiTrendingUp size={26} color="#2E7D32" /> : <FiTrendingDown size={26} color="#C62828" />}
               <Typography variant="h4" fontWeight={900} color={comp.delta_igs >= 0 ? '#2E7D32' : '#C62828'}>
@@ -489,7 +489,7 @@ function Comparativo({ comp }) {
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderLeft: '4px solid #2E7D32' }}>
+          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '3px solid #2E7D32' }}>
             <Typography variant="caption" color="text.secondary" display="block">Avaliação B</Typography>
             <Typography variant="caption" color="text.secondary">{fmtData(comp.b.data)}</Typography>
             <Typography variant="h4" fontWeight={900} sx={{ mt: 0.5 }}>

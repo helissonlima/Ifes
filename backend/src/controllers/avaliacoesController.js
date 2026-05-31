@@ -154,10 +154,10 @@ async function calcularEPersistirIndices(client, avaliacaoId, respostas) {
     porDimensao[r.dimensao].push(r);
   }
 
-  const ie = calcularIndiceDimensao(porDimensao['economica'] || []);
-  const ia = calcularIndiceDimensao(porDimensao['ambiental'] || []);
-  const is_ = calcularIndiceDimensao(porDimensao['social'] || []);
-  const igq = calcularIndiceDimensao(porDimensao['gestao_qualidade'] || []);
+  const ie = calcularIndiceDimensao('economica', porDimensao['economica'] || []);
+  const ia = calcularIndiceDimensao('ambiental', porDimensao['ambiental'] || []);
+  const is_ = calcularIndiceDimensao('social', porDimensao['social'] || []);
+  const igq = calcularIndiceDimensao('gestao_qualidade', porDimensao['gestao_qualidade'] || []);
   const { igs, classificacao } = calcularIGS(ie, ia, is_, igq);
 
   await client.query(
@@ -331,7 +331,7 @@ const comparar = async (req, res) => {
       { codigo: 'ambiental', nome: 'Ambiental', cor: '#4CAF50', peso: 0.35 },
       { codigo: 'economica', nome: 'Econômica', cor: '#2196F3', peso: 0.30 },
       { codigo: 'social', nome: 'Social', cor: '#FF9800', peso: 0.20 },
-      { codigo: 'gestao_qualidade', nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 0.15 },
+      { codigo: 'gestao_qualidade', nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 0.15 },
     ].map((d) => {
       const campo = CAMPO_INDICE[d.codigo];
       return {

@@ -19,7 +19,7 @@ export default function DimensaoChart({ economica, ambiental, social, gestao }) 
             tick={{ fontSize: 12, fontWeight: 600, fill: '#555' }}
           />
           <Radar
-            name="IGS"
+            name="ICSR"
             dataKey="valor"
             stroke="#2E7D32"
             fill="#4CAF50"

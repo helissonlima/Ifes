@@ -184,7 +184,7 @@ export default function Historico() {
                           { label: 'Ec', val: av.indice_economico, cor: COR_DIMS.economico },
                           { label: 'Am', val: av.indice_ambiental, cor: COR_DIMS.ambiental },
                           { label: 'So', val: av.indice_social, cor: COR_DIMS.social },
-                          { label: 'G&Q', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
+                          { label: 'IGQG', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
                         ].map((d) => (
                           <Grid size={3} key={d.label}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ textAlign: 'center' }}>{d.label}</Typography>
@@ -229,7 +229,7 @@ export default function Historico() {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: 'primary.main' }}>
-                {['Propriedade', 'Município', 'Data', 'Técnico', 'Econômica', 'Ambiental', 'Social', 'G&Q', 'IGS', 'Status', 'Ações'].map((h) => (
+                {['Propriedade', 'Município', 'Data', 'Técnico', 'Econômica', 'Ambiental', 'Social', 'IGQG', 'ICSR', 'Status', 'Ações'].map((h) => (
                   <TableCell key={h} sx={{ color: 'white', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</TableCell>
                 ))}
               </TableRow>

@@ -200,13 +200,17 @@ export default function NovaAvaliacao() {
     setObservacoes((o) => ({ ...o, [indicadorCodigo]: texto }));
   };
 
-  // Calcula índices por dimensão
+  // Calcula média ponderada por dimensão (usa os pesos internos dos indicadores)
   const calcularIndiceDimensao = (dimCodigo) => {
     if (!dimensoes[dimCodigo]) return null;
     const inds = dimensoes[dimCodigo].indicadores;
     const respondidos = inds.filter((i) => respostas[i.codigo] !== undefined);
     if (respondidos.length === 0) return null;
-    return respondidos.reduce((acc, i) => acc + respostas[i.codigo], 0) / respondidos.length;
+    const somaPesos = respondidos.reduce((acc, i) => acc + (i.peso || 0), 0);
+    if (somaPesos === 0) {
+      return respondidos.reduce((acc, i) => acc + respostas[i.codigo], 0) / respondidos.length;
+    }
+    return respondidos.reduce((acc, i) => acc + respostas[i.codigo] * (i.peso || 0), 0) / somaPesos;
   };
 
   const calcularIGS = () => {
@@ -321,7 +325,7 @@ export default function NovaAvaliacao() {
   const STEP_LABELS = ['Informações', ...dimensoesLista.map((d) => d.nome), 'Revisão'];
   const STEP_LABELS_STEPPER = STEP_LABELS.map((label) => {
     if (label === 'Informações') return 'Info';
-    if (label === 'Gestão e Qualidade') return 'Gestão';
+    if (label === 'Gestão, Qualidade e Governança') return 'IGQG';
     return label;
   });
   const stepAtualLabel = STEP_LABELS[step] || 'Revisão';
@@ -492,21 +496,59 @@ export default function NovaAvaliacao() {
           </Stepper>
         </Box>
       ) : (
-        <MobileStepper
-          variant="text"
-          steps={STEP_LABELS.length}
-          position="static"
-          activeStep={step}
-          sx={{ mb: 1.5, bgcolor: 'transparent', p: 0 }}
-          nextButton={<span />}
-          backButton={<span />}
-        />
+        /* Mobile: indicador de dimensão proeminente */
+        <Box sx={{ mb: 1.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {step >= 1 && step <= dimensoesLista.length && (
+                <Box sx={{
+                  width: 10, height: 10, borderRadius: '50%',
+                  bgcolor: dimensoesLista[step - 1]?.cor,
+                  flexShrink: 0,
+                }} />
+              )}
+              <Typography variant="body2" fontWeight={800} color={
+                step >= 1 && step <= dimensoesLista.length
+                  ? dimensoesLista[step - 1]?.cor
+                  : 'primary.dark'
+              }>
+                {stepAtualLabel}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              {Math.min(step + 1, STEP_LABELS.length)}/{STEP_LABELS.length}
+            </Typography>
+          </Box>
+          {/* Trilho de dots compacto */}
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {STEP_LABELS.map((_, idx) => {
+              const dimCor = idx >= 1 && idx <= dimensoesLista.length
+                ? dimensoesLista[idx - 1]?.cor
+                : '#2E7D32';
+              return (
+                <Box
+                  key={idx}
+                  sx={{
+                    height: 4,
+                    borderRadius: 2,
+                    flexGrow: 1,
+                    bgcolor: idx < step ? dimCor : idx === step ? dimCor : '#e0e0e0',
+                    opacity: idx < step ? 0.45 : 1,
+                    transition: 'background-color 0.2s',
+                  }}
+                />
+              );
+            })}
+          </Box>
+        </Box>
       )}
 
       {/* Progresso do step atual */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
         <Typography variant="caption" color="text.secondary" fontWeight={600}>
-          Etapa {Math.min(step + 1, STEP_LABELS.length)} de {STEP_LABELS.length}: {stepAtualLabel}
+          {step >= 1 && step <= dimensoesLista.length
+            ? `${dimensoesLista[step - 1]?.indicadores?.length || 0} indicadores · peso ${Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%`
+            : `Etapa ${Math.min(step + 1, STEP_LABELS.length)} de ${STEP_LABELS.length}`}
         </Typography>
         <Typography variant="caption" color="text.secondary" fontWeight={700}>
           {Math.round(progressoEtapa)}%
@@ -689,7 +731,7 @@ function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao,
         <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 2.5 } }}>
           <MdOutlineEco size={36} color={COR_CLASS[classificacao]} />
           <Typography variant="h4" fontWeight={800} color={COR_CLASS[classificacao]} sx={{ mt: 0.75 }}>
-            IGS: {(igs * 100).toFixed(1)}%
+            ICSR: {(igs * 100).toFixed(1)}%
           </Typography>
           <Typography variant="h6" fontWeight={700} color={COR_CLASS[classificacao]}>
             {classificacao} Sustentabilidade

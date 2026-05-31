@@ -9,9 +9,19 @@ const COR_MAPA = {
   'Alta': '#4CAF50',
 };
 
+// Cores de texto acessíveis para cada classificação (mínimo 4.5:1 sobre branco)
+const COR_TEXTO_MAPA = {
+  'Muito Baixa': '#c62828',
+  'Baixa':       '#e65100',
+  'Moderada':    '#8B6000',
+  'Boa':         '#33691e',
+  'Alta':        '#2E7D32',
+};
+
 export default function IGSGauge({ igs, classificacao, size = 200 }) {
   const pct = igs != null ? Math.round(igs * 100) : 0;
   const cor = COR_MAPA[classificacao] || '#9E9E9E';
+  const corTexto = COR_TEXTO_MAPA[classificacao] || '#424242';
   const data = [{ value: pct }];
 
   return (
@@ -41,7 +51,7 @@ export default function IGSGauge({ igs, classificacao, size = 200 }) {
           textAlign: 'center',
         }}
       >
-        <Typography variant="h4" fontWeight={800} color={cor} sx={{ lineHeight: 1 }}>
+        <Typography variant="h4" fontWeight={800} sx={{ lineHeight: 1, color: corTexto }}>
           {pct}%
         </Typography>
         <Typography variant="caption" fontWeight={600} color="text.secondary">

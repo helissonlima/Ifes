@@ -24,9 +24,9 @@ const DIMENSOES = [
     indicadores: ['Capacitação Técnica', 'Segurança do Trabalho', 'Sucessão Familiar', 'Qualidade de Vida', 'Organização Produtiva', 'Infraestrutura Sanitária', 'Assistência Técnica'],
   },
   {
-    nome: 'Gestão e Qualidade', cor: '#9C27B0', peso: 15,
-    descricao: 'Avalia o nível de rastreabilidade, conformidade, certificações e gestão operacional da produção de café.',
-    indicadores: ['Rastreabilidade', 'Pós-Colheita', 'Armazenamento', 'Planejamento Produtivo', 'Registros Técnicos', 'Conformidade Ambiental', 'Certificações'],
+    nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 15,
+    descricao: 'Avalia rastreabilidade, gestão operacional, certificações, conformidade e governança (transparência, due diligence de cadeia e participação de stakeholders). Inclui indicadores de compliance com CSDDD/UE, GRI e Pacto Global ONU.',
+    indicadores: ['Rastreabilidade', 'Pós-Colheita', 'Armazenamento', 'Planejamento Produtivo', 'Registros Técnicos', 'Conformidade Ambiental', 'Certificações', 'Transparência e Due Diligence', 'Participação de Stakeholders'],
   },
 ];
 
@@ -71,7 +71,7 @@ export default function Metodologia() {
       {/* Instrumentos base */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '100%', borderLeft: '4px solid #1565C0' }}>
+          <Card sx={{ height: '100%', borderTop: '3px solid #1565C0' }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700} color="#1565C0">ISA – EPAMIG</Typography>
               <Typography variant="caption" color="text.secondary">Minas Gerais · Índice de Sustentabilidade em Agroecossistemas</Typography>
@@ -89,7 +89,7 @@ export default function Metodologia() {
           </Card>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '100%', borderLeft: '4px solid #2E7D32' }}>
+          <Card sx={{ height: '100%', borderTop: '3px solid #2E7D32' }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700} color="#2E7D32">INCAPER</Typography>
               <Typography variant="caption" color="text.secondary">Espírito Santo · Sistema de Indicadores da Cafeicultura Sustentável</Typography>
@@ -112,7 +112,7 @@ export default function Metodologia() {
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Typography variant="h6" fontWeight={700} gutterBottom>
-            Fórmula do Índice Geral de Sustentabilidade (IGS)
+            Fórmula do ICSR — Versão Revisada com Médias Ponderadas
           </Typography>
           <Paper
             sx={{
@@ -121,7 +121,10 @@ export default function Metodologia() {
             }}
           >
             <Typography variant="h5" fontWeight={800} color="primary.dark" fontFamily="monospace">
-              IGS = (IE × 0,30) + (IA × 0,35) + (IS × 0,20) + (IGQ × 0,15)
+              ICSR = (IA × 0,35) + (IE × 0,30) + (IS × 0,20) + (IGQG × 0,15)
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              Cada subíndice é calculado por média ponderada dos seus indicadores internos.
             </Typography>
           </Paper>
           <Grid container spacing={2}>
@@ -175,7 +178,7 @@ export default function Metodologia() {
       {/* Dimensões - Accordions */}
       <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>Dimensões e Indicadores</Typography>
       {DIMENSOES.map((d) => (
-        <Accordion key={d.nome} sx={{ mb: 1, borderLeft: `4px solid ${d.cor}`, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+        <Accordion key={d.nome} sx={{ mb: 1, borderRadius: '8px !important', border: `1px solid ${d.cor}44`, '&:before': { display: 'none' } }}>
           <AccordionSummary expandIcon={<FiChevronDown />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', pr: 2 }}>
               <Box>
@@ -306,7 +309,7 @@ export default function Metodologia() {
               </TableBody>
             </Table>
           </Box>
-          <Box sx={{ mt: 2, p: 1.5, borderRadius: 2, bgcolor: '#FFF8E1', borderLeft: '4px solid #EF6C00' }}>
+          <Box sx={{ mt: 2, p: 1.5, borderRadius: 2, bgcolor: '#FFF8E1', border: '1px solid #EF6C0055' }}>
             <Typography variant="caption" fontWeight={700} color="#EF6C00" display="block">
               Notas importantes sobre pontuação
             </Typography>
