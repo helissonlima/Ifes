@@ -55,7 +55,7 @@ runMigrations()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🚀 API rodando em http://localhost:${PORT}`);
-      console.log(`📊 Sistema de Sustentabilidade Rural ISA-EPAMIG/INCAPER`);
+      console.log(`📊 Sistema de Sustentabilidade Rural referência metodológica regional`);
     });
   })
   .catch((err) => {

@@ -1,6 +1,6 @@
 -- =====================================================
 -- Migração 004: ICSR Versão Revisada — Pesos Ponderados e IGQG
--- Revisão metodológica: ISA-EPAMIG / INCAPER
+-- Revisão metodológica: referência metodológica regional
 -- Adequação aos indicadores internacionais (CSDDD, GRI, ODS)
 -- =====================================================
 -- Esta migração documenta as alterações metodológicas implementadas

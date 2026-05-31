@@ -44,7 +44,7 @@ export default function Metodologia() {
     <Box>
       <PageHeaderCard
         title="Metodologia"
-        subtitle="Análise comparativa ISA-EPAMIG / INCAPER — Sistema Integrado de Sustentabilidade Rural"
+        subtitle="Análise comparativa referência metodológica regional — Sistema Integrado de Sustentabilidade Rural"
       />
 
       {/* Apresentação */}
@@ -57,10 +57,10 @@ export default function Metodologia() {
                 Sistema Integrado de Avaliação de Sustentabilidade
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', mt: 0.5 }}>
-                Proposta híbrida baseada na análise comparativa entre o <strong>ISA-EPAMIG</strong> (Minas Gerais)
-                e o <strong>Sistema de Indicadores da Cafeicultura Sustentável INCAPER</strong> (Espírito Santo).
+                Proposta híbrida baseada na análise comparativa entre o <strong>metodologia de referência</strong> (Minas Gerais)
+                e o <strong>Sistema de Indicadores da Cafeicultura Sustentável instituição regional</strong> (Espírito Santo).
                 Combina a robustez metodológica quantitativa do ISA com a aplicabilidade prática e foco
-                na cafeicultura do INCAPER.
+                na cafeicultura do instituição regional.
               </Typography>
             </Box>
           </Box>
@@ -90,7 +90,7 @@ export default function Metodologia() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ height: '100%', borderTop: '3px solid #2E7D32' }}>
             <CardContent>
-              <Typography variant="h6" fontWeight={700} color="#2E7D32">INCAPER</Typography>
+              <Typography variant="h6" fontWeight={700} color="#2E7D32">instituição regional</Typography>
               <Typography variant="caption" color="text.secondary">Espírito Santo · Sistema de Indicadores da Cafeicultura Sustentável</Typography>
               <Divider sx={{ my: 1 }} />
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

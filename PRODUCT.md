@@ -6,11 +6,11 @@ product
 
 ## Users
 
-Técnicos de campo vinculados a órgãos de extensão rural (EMATER, INCAPER, EPAMIG) e pesquisadores do IFES. Usam o sistema em visitas a propriedades rurais — frequentemente com conectividade instável ou ausente — para registrar avaliações do ICSR. Contexto: campo, sol, tela pequena, pressa. Nível de letramento digital variado; muitos operam o sistema esporadicamente entre visitas.
+Técnicos de campo vinculados a órgãos de extensão rural (EMATER, instituição regional, EPAMIG) e pesquisadores do IFES. Usam o sistema em visitas a propriedades rurais — frequentemente com conectividade instável ou ausente — para registrar avaliações do ICSR. Contexto: campo, sol, tela pequena, pressa. Nível de letramento digital variado; muitos operam o sistema esporadicamente entre visitas.
 
 ## Product Purpose
 
-Instrumento digital de avaliação de sustentabilidade rural baseado no ICSR (Índice Consolidado de Sustentabilidade Rural), integração ISA-EPAMIG / INCAPER. Substitui planilhas e formulários físicos, calcula automaticamente os subíndices ponderados e o ICSR final, gera diagnóstico e recomendações por propriedade. Sucesso: técnico conclui uma avaliação completa em campo em ≤ 7h, com ou sem internet, e o resultado é imediatamente compreensível pelo produtor.
+Instrumento digital de avaliação de sustentabilidade rural baseado no ICSR (Índice Consolidado de Sustentabilidade Rural), integração referência metodológica regional. Substitui planilhas e formulários físicos, calcula automaticamente os subíndices ponderados e o ICSR final, gera diagnóstico e recomendações por propriedade. Sucesso: técnico conclui uma avaliação completa em campo em ≤ 7h, com ou sem internet, e o resultado é imediatamente compreensível pelo produtor.
 
 ## Brand Personality
 

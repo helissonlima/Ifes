@@ -1,7 +1,7 @@
 # SustentaCafé — Sistema de Avaliação de Sustentabilidade Rural
 
 Plataforma web/mobile para avaliação do Índice de Sustentabilidade Rural (IGS),
-baseada na análise comparativa **ISA-EPAMIG** (MG) × **INCAPER** (ES).
+baseada na análise comparativa **metodologia de referência** (MG) × **instituição regional** (ES).
 
 ---
 
@@ -85,7 +85,7 @@ Interface disponível em: `http://localhost:5173`
 | **Nova Avaliação** | Wizard multi-etapas com os 30 indicadores em 4 dimensões |
 | **Resultado** | Relatório completo com gauge IGS, gráficos e detalhamento |
 | **Histórico** | Listagem filtrável de todas as avaliações |
-| **Metodologia** | Documentação da metodologia ISA-EPAMIG/INCAPER |
+| **Metodologia** | Documentação da metodologia referência metodológica regional |
 
 ---
 
@@ -174,7 +174,7 @@ Ifes/
 
 ---
 
-Desenvolvido com base na análise comparativa ISA-EPAMIG / INCAPER — Microrregião do Caparaó.
+Desenvolvido com base na análise comparativa referência metodológica regional — Microrregião do Caparaó.
 
 ---
 

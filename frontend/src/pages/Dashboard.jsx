@@ -91,7 +91,7 @@ export default function Dashboard() {
     <Box>
       <PageHeaderCard
         title="Visão Geral"
-        subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · ISA-EPAMIG / INCAPER"
+        subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · referência metodológica regional"
         actions={(
           <Button
             variant="contained"

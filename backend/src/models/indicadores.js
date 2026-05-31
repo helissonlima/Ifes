@@ -1,5 +1,5 @@
 // Definição completa dos indicadores e critérios — ICSR Versão Revisada (Ponderada)
-// ISA-EPAMIG / INCAPER — Integração com indicadores internacionais (CSDDD, GRI, ODS)
+// referência metodológica regional — Integração com indicadores internacionais (CSDDD, GRI, ODS)
 const DIMENSOES = {
   ambiental: {
     codigo: 'ambiental',

@@ -95,7 +95,7 @@ export default function Guia() {
     <Box>
       <PageHeaderCard
         title="Guia de Aplicação"
-        subtitle="Passo a passo para aplicar o ICSR em uma propriedade rural — adaptado da metodologia ISA-EPAMIG/INCAPER."
+        subtitle="Passo a passo para aplicar o ICSR em uma propriedade rural — adaptado da metodologia referência metodológica regional."
       />
 
       {/* Apresentação */}

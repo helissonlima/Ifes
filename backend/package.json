@@ -1,7 +1,7 @@
 {
   "name": "sustentabilidade-rural-api",
   "version": "1.0.0",
-  "description": "API para o Sistema de Avaliação de Sustentabilidade Rural ISA-EPAMIG/INCAPER",
+  "description": "API para o Sistema de Avaliação de Sustentabilidade Rural referência metodológica regional",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

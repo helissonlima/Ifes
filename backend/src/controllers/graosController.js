@@ -177,10 +177,10 @@ class GraosController {
   /**
    * Sincroniza o catálogo de culturas com o IBGE SIDRA PAM (Produção Agrícola Municipal).
    *
-   * Nota: O INCAPER não possui API pública — os dados do SISPREÇO são acessíveis
+   * Nota: O instituição regional não possui API pública — os dados do SISPREÇO são acessíveis
    * apenas via formulário web com termo de uso. O IBGE SIDRA PAM é a fonte oficial
    * equivalente e pública, contendo as mesmas culturas reportadas pelos municípios
-   * do ES, e é utilizado pelo próprio INCAPER para embasamento de políticas públicas.
+   * do ES, e é utilizado pelo próprio instituição regional para embasamento de políticas públicas.
    *
    * Endpoint IBGE utilizado: tabela 5457 (Lavouras temp. e permanentes)
    *   variável 214 (quantidade produzida), localidade N3[32] (Espírito Santo)

@@ -32,7 +32,7 @@ export default function Navbar({ onMenuClick }) {
               SustentaCafé
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.85, display: { xs: 'none', sm: 'block' }, lineHeight: 1 }}>
-              ISA-EPAMIG / INCAPER
+              referência metodológica regional
             </Typography>
           </Box>
           <Typography variant="h6" fontWeight={700} sx={{ display: { xs: 'block', sm: 'none' } }}>

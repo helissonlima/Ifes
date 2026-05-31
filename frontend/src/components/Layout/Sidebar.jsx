@@ -69,7 +69,7 @@ function SidebarContent({ onClose, isMobile }) {
       <Divider />
       <Box sx={{ p: 2, textAlign: 'center' }}>
         <Typography variant="caption" color="text.disabled">
-          ISA-EPAMIG · INCAPER
+          referência metodológica regional
         </Typography>
         <br />
         <Typography variant="caption" color="text.disabled">

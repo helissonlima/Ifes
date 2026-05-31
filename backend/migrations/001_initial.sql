@@ -1,6 +1,6 @@
 -- =====================================================
 -- Sistema de Avaliação de Sustentabilidade Rural
--- ISA-EPAMIG / INCAPER - Migração Inicial
+-- referência metodológica regional - Migração Inicial
 -- =====================================================
 
 -- Extensões
