@@ -18,6 +18,7 @@ import {
   salvarRascunhoLocal,
   carregarRascunhoLocal,
   limparRascunhoLocal,
+  atualizarSyncPendenteLocal,
   temRascunhoLocal,
   formatarDataRascunho,
 } from '../utils/avaliacaoCache';
@@ -62,6 +63,7 @@ export default function NovaAvaliacao() {
   const [syncPendente, setSyncPendente] = useState(false);
   const [dialogRascunho, setDialogRascunho] = useState({ open: false, draft: null });
   const autoSaveTimer = useRef(null);
+  const sincronizandoAutoRef = useRef(false);
 
   // Dados do formulário
   const [info, setInfo] = useState({
@@ -96,6 +98,11 @@ export default function NovaAvaliacao() {
       const userId = user?.id;
       if (userId && temRascunhoLocal(userId)) {
         const draft = carregarRascunhoLocal(userId);
+        // Se houver pendência e conexão, restaura direto para disparar sincronização automática.
+        if (isOnline && draft?.syncPendente && draft?.info?.propriedade) {
+          restaurarRascunho(draft, p.data.data);
+          return;
+        }
         // Se vier parâmetro de URL e bater com o rascunho → restaura direto
         const propId = searchParams.get('propriedade');
         if (propId && draft?.info?.propriedade?.id === propId) {
@@ -114,7 +121,7 @@ export default function NovaAvaliacao() {
       }
     }).catch((e) => setErro(friendlyError(e)))
     .finally(() => setCarregando(false));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-save no localStorage (debounce 1,5s) ────────────────────────────
   useEffect(() => {
@@ -167,14 +174,15 @@ export default function NovaAvaliacao() {
   useEffect(() => {
     if (isOnline && wasOffline && syncPendente && info.propriedade) {
       resetWasOffline();
-      notify('Conexão restaurada! Sincronizando com o servidor...', 'info');
-      salvarRascunhoServidor().then(() => {
-        setSyncPendente(false);
-      }).catch(() => {
-        // falha silenciosa — dados ainda estão no localStorage
-      });
+      sincronizarAutomaticamente();
     }
-  }, [isOnline, wasOffline]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline, wasOffline, syncPendente, info.propriedade]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Se abrir a tela já com internet e houver pendência local, sincroniza em segundo plano.
+  useEffect(() => {
+    if (!isOnline || !syncPendente || !info.propriedade || carregando) return;
+    sincronizarAutomaticamente({ silencioso: true });
+  }, [isOnline, syncPendente, info.propriedade, carregando]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Funções de rascunho ───────────────────────────────────────────────────
   const restaurarRascunho = (draft, listaPropriedades) => {
@@ -275,6 +283,27 @@ export default function NovaAvaliacao() {
     }
   };
 
+  const sincronizarAutomaticamente = async ({ silencioso = false } = {}) => {
+    if (!isOnline || !syncPendente || !info.propriedade) return false;
+    if (sincronizandoAutoRef.current) return false;
+
+    sincronizandoAutoRef.current = true;
+    if (!silencioso) notify('Conexão restaurada! Sincronizando automaticamente...', 'info');
+
+    try {
+      await salvarRascunhoServidor();
+      setSyncPendente(false);
+      atualizarSyncPendenteLocal(user?.id, false);
+      if (!silencioso) notify('Sincronização automática concluída com sucesso.', 'success');
+      return true;
+    } catch {
+      atualizarSyncPendenteLocal(user?.id, true);
+      return false;
+    } finally {
+      sincronizandoAutoRef.current = false;
+    }
+  };
+
   const salvarRascunho = async () => {
     if (!info.propriedade) { notify('Selecione uma propriedade primeiro', 'warning'); return; }
     if (!isOnline) {
@@ -285,8 +314,10 @@ export default function NovaAvaliacao() {
     try {
       await salvarRascunhoServidor();
       setSyncPendente(false);
+      atualizarSyncPendenteLocal(user?.id, false);
       notify('Rascunho salvo no servidor!');
     } catch (e) {
+      atualizarSyncPendenteLocal(user?.id, true);
       notify('Falha ao salvar no servidor. Dados mantidos localmente.', 'warning');
     } finally {
       setSalvando(false);

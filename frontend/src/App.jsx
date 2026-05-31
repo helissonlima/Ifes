@@ -1,21 +1,22 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material';
 import theme from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import MainLayout from './components/Layout/MainLayout';
-import AcessoNegado from './pages/AcessoNegado';
-import Dashboard from './pages/Dashboard';
-import Propriedades from './pages/Propriedades';
-import PropriedadeDetalhe from './pages/PropriedadeDetalhe';
-import NovaAvaliacao from './pages/NovaAvaliacao';
-import Resultado from './pages/Resultado';
-import Historico from './pages/Historico';
-import Metodologia from './pages/Metodologia';
-import Guia from './pages/Guia';
-import Login from './pages/Login';
-import Usuarios from './pages/Usuarios';
-import Graos from './pages/Graos';
+
+const AcessoNegado = lazy(() => import('./pages/AcessoNegado'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Propriedades = lazy(() => import('./pages/Propriedades'));
+const PropriedadeDetalhe = lazy(() => import('./pages/PropriedadeDetalhe'));
+const NovaAvaliacao = lazy(() => import('./pages/NovaAvaliacao'));
+const Resultado = lazy(() => import('./pages/Resultado'));
+const Historico = lazy(() => import('./pages/Historico'));
+const Metodologia = lazy(() => import('./pages/Metodologia'));
+const Guia = lazy(() => import('./pages/Guia'));
+const Login = lazy(() => import('./pages/Login'));
+const Usuarios = lazy(() => import('./pages/Usuarios'));
+const Graos = lazy(() => import('./pages/Graos'));
 
 function CenterLoading({ title = 'Carregando sistema', description = 'Preparando sessão, permissões e dados iniciais.' }) {
   return (
@@ -63,11 +64,17 @@ function AppRoutes() {
 
   if (loadingAuth) return <CenterLoading title="Restaurando sessão" description="Verificando autenticação e permissões disponíveis para este perfil." />;
 
+  const withLazy = (children) => (
+    <Suspense fallback={<CenterLoading title="Carregando página" description="Otimizando recursos para esta tela." />}>
+      {children}
+    </Suspense>
+  );
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/acesso-negado" element={<AcessoNegado />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : withLazy(<Login />)} />
+        <Route path="/acesso-negado" element={withLazy(<AcessoNegado />)} />
         <Route
           element={(
             <RequireAuth>
@@ -75,16 +82,16 @@ function AppRoutes() {
             </RequireAuth>
           )}
         >
-          <Route path="/" element={<RequirePermission permission="dashboard"><Dashboard /></RequirePermission>} />
-          <Route path="/propriedades" element={<RequirePermission permission="propriedades"><Propriedades /></RequirePermission>} />
-          <Route path="/propriedades/:id" element={<RequirePermission permission="propriedades"><PropriedadeDetalhe /></RequirePermission>} />
-          <Route path="/avaliacao/nova" element={<RequirePermission permission="avaliacoes"><NovaAvaliacao /></RequirePermission>} />
-          <Route path="/avaliacao/:id" element={<RequirePermission permission="historico"><Resultado /></RequirePermission>} />
-          <Route path="/historico" element={<RequirePermission permission="historico"><Historico /></RequirePermission>} />
-          <Route path="/metodologia" element={<RequirePermission permission="metodologia"><Metodologia /></RequirePermission>} />
-          <Route path="/guia" element={<RequirePermission permission="metodologia"><Guia /></RequirePermission>} />
-          <Route path="/usuarios" element={<RequireAdmin><Usuarios /></RequireAdmin>} />
-          <Route path="/graos" element={<RequireAdmin><Graos /></RequireAdmin>} />
+          <Route path="/" element={<RequirePermission permission="dashboard">{withLazy(<Dashboard />)}</RequirePermission>} />
+          <Route path="/propriedades" element={<RequirePermission permission="propriedades">{withLazy(<Propriedades />)}</RequirePermission>} />
+          <Route path="/propriedades/:id" element={<RequirePermission permission="propriedades">{withLazy(<PropriedadeDetalhe />)}</RequirePermission>} />
+          <Route path="/avaliacao/nova" element={<RequirePermission permission="avaliacoes">{withLazy(<NovaAvaliacao />)}</RequirePermission>} />
+          <Route path="/avaliacao/:id" element={<RequirePermission permission="historico">{withLazy(<Resultado />)}</RequirePermission>} />
+          <Route path="/historico" element={<RequirePermission permission="historico">{withLazy(<Historico />)}</RequirePermission>} />
+          <Route path="/metodologia" element={<RequirePermission permission="metodologia">{withLazy(<Metodologia />)}</RequirePermission>} />
+          <Route path="/guia" element={<RequirePermission permission="metodologia">{withLazy(<Guia />)}</RequirePermission>} />
+          <Route path="/usuarios" element={<RequireAdmin>{withLazy(<Usuarios />)}</RequireAdmin>} />
+          <Route path="/graos" element={<RequireAdmin>{withLazy(<Graos />)}</RequireAdmin>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

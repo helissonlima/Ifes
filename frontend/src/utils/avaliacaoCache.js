@@ -57,6 +57,17 @@ export function limparRascunhoLocal(userId) {
   localStorage.removeItem(chave(userId));
 }
 
+/** Atualiza apenas o status de sincronização pendente do rascunho local */
+export function atualizarSyncPendenteLocal(userId, syncPendente) {
+  if (!userId) return;
+  const draft = carregarRascunhoLocal(userId);
+  if (!draft) return;
+  salvarRascunhoLocal(userId, {
+    ...draft,
+    syncPendente: Boolean(syncPendente),
+  });
+}
+
 /** Verifica se existe rascunho com dados preenchidos para o usuário */
 export function temRascunhoLocal(userId) {
   if (!userId) return false;
