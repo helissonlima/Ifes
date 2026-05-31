@@ -39,16 +39,24 @@ export default function MainLayout() {
         sx={{
           flexGrow: 1,
           pt: { xs: 8, sm: 9 },
-          px: { xs: 2, sm: 3 },
-          pb: { xs: 12, md: 4 },
-          ml: { md: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
-          transition: 'margin-left 180ms ease-out',
-          maxWidth: '100%',
-          overflow: 'hidden',
+          pb: { xs: 12, md: 6 },
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <SystemStatusBanner />
-        <Outlet />
+        <Box
+          sx={{
+            px: { xs: 2, sm: 4, md: 6 },
+            py: 0,
+            width: '100%',
+            maxWidth: '1400px',
+            mx: 'auto',
+          }}
+        >
+          <SystemStatusBanner />
+          <Outlet />
+        </Box>
       </Box>
       {isMobile && <BottomNav />}
     </Box>

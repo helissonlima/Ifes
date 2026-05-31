@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../context/AppContext';
+import loginBg from '../assets/login-bg.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -46,7 +47,9 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         py: { xs: 2, sm: 3 },
-        background: 'radial-gradient(circle at top, rgba(76,175,80,0.18), transparent 34%), linear-gradient(180deg, #f6fbf2 0%, #edf5e8 100%)',
+        backgroundImage: `linear-gradient(rgba(9, 30, 14, 0.42), rgba(9, 30, 14, 0.34)), radial-gradient(circle at top, rgba(76,175,80,0.22), transparent 34%), url(${loginBg})`,
+        backgroundSize: 'cover, auto, cover',
+        backgroundPosition: 'center, center, center',
       }}
     >
       <Container maxWidth="sm">

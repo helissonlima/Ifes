@@ -43,6 +43,10 @@ const theme = createTheme({
         root: {
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           borderRadius: 12,
+          transition: 'box-shadow 200ms ease, transform 200ms ease',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+          },
         },
       },
     },
@@ -52,6 +56,14 @@ const theme = createTheme({
           textTransform: 'none',
           fontWeight: 600,
           borderRadius: 8,
+          transition: 'all 200ms ease',
+          '&:hover': {
+            transform: 'translateY(-1px)',
+          },
+        },
+        sizeLarge: {
+          padding: '12px 24px',
+          fontSize: '1rem',
         },
       },
     },
@@ -64,6 +76,47 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            transition: 'all 200ms ease',
+            '&:hover': {
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(0, 0, 0, 0.23)',
+              },
+            },
+            '&.Mui-focused': {
+              '& .MuiOutlinedInput-notchedOutline': {
+                boxShadow: '0 0 0 3px rgba(46, 125, 50, 0.1)',
+              },
+            },
+          },
+        },
+      },
+    },
+    MuiStepper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'transparent',
+          padding: '0 0 24px 0',
+        },
+      },
+    },
+    MuiStepIcon: {
+      styleOverrides: {
+        root: {
+          fontSize: '2.5rem',
+          '&.Mui-active': {
+            color: '#2E7D32',
+            filter: 'drop-shadow(0 2px 8px rgba(46, 125, 50, 0.3))',
+          },
+          '&.Mui-completed': {
+            color: '#4CAF50',
+          },
         },
       },
     },

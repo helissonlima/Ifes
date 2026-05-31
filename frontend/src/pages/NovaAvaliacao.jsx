@@ -74,6 +74,10 @@ export default function NovaAvaliacao() {
   const [respostasDetalhes, setRespostasDetalhes] = useState({}); // { [codigo]: { criterio, nome } }
   const [observacoes, setObservacoes] = useState({}); // { [indicadorCodigo]: texto }
 
+  // Cálculos que dependem do estado (usados em useEffects)
+  const totalRespondidos = Object.keys(respostas).length;
+  const totalIndicadores = Object.values(dimensoes).reduce((acc, d) => acc + (d?.indicadores?.length || 0), 0);
+
   // ── Carregamento inicial de dados ─────────────────────────────────────────
   useEffect(() => {
     Promise.all([
@@ -254,9 +258,6 @@ export default function NovaAvaliacao() {
     return 'Alta';
   };
 
-  const totalRespondidos = Object.keys(respostas).length;
-  const totalIndicadores = Object.values(dimensoes).reduce((acc, d) => acc + (d?.indicadores?.length || 0), 0);
-
   const salvarRascunhoServidor = async () => {
     if (!info.propriedade) return;
     const respostasArr = montarRespostasArray();
@@ -417,11 +418,11 @@ export default function NovaAvaliacao() {
       </Dialog>
 
       {/* ── Cabeçalho ── */}
-      <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2, mb: 3, flexWrap: 'wrap' }}>
         <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">Nova Avaliação ICSR</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="h4" fontWeight={800} color="primary.dark">Nova Avaliação ICSR</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {totalRespondidos}/{totalIndicadores} indicadores avaliados
           </Typography>
         </Box>
@@ -603,10 +604,10 @@ export default function NovaAvaliacao() {
 
       {/* Conteúdo dos steps */}
       {step === 0 && (
-        <Card>
-          <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom>Informações da Avaliação</Typography>
-            <Grid container spacing={1.5}>
+        <Card sx={{ mb: 2.5 }}>
+          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2.5 }}>Informações da Avaliação</Typography>
+            <Grid container spacing={2.5}>
               <Grid size={12}>
                 <Autocomplete
                   options={propriedades}
@@ -689,13 +690,15 @@ export default function NovaAvaliacao() {
       )}
 
       {/* Botões de navegação */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, gap: 1.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3.5, gap: 2 }}>
         <Button
           startIcon={<FiArrowLeft />}
           onClick={() => setStep((s) => s - 1)}
           disabled={step === 0}
           variant="outlined"
           fullWidth={isMobile}
+          size="large"
+          sx={{ minWidth: isMobile ? 'auto' : 140 }}
         >
           Anterior
         </Button>
@@ -711,12 +714,14 @@ export default function NovaAvaliacao() {
             }}
             variant="contained"
             fullWidth={isMobile}
+            size="large"
+            sx={{ minWidth: isMobile ? 'auto' : 140 }}
           >
             Próximo
           </Button>
         ) : (
           <Tooltip title={!isOnline ? 'Conecte-se à internet para concluir. Os dados estão salvos localmente.' : ''}>
-            <span>
+            <span style={{ flex: 1 }}>
               <Button
                 startIcon={<FiCheck />}
                 onClick={concluir}
@@ -725,6 +730,7 @@ export default function NovaAvaliacao() {
                 disabled={salvando || !isOnline}
                 size="large"
                 fullWidth={isMobile}
+                sx={{ minWidth: isMobile ? 'auto' : 180 }}
               >
                 {salvando ? <CircularProgress size={20} /> : !isOnline ? 'Aguardando conexão…' : 'Concluir Avaliação'}
               </Button>

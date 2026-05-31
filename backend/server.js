@@ -15,7 +15,23 @@ const graosRoutes = require('./src/routes/graos');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+const allowedOrigins = new Set([
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+  process.env.FRONTEND_URL,
+].filter(Boolean));
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`Origem não permitida por CORS: ${origin}`));
+  },
+}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);

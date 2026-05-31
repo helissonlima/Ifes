@@ -93,10 +93,10 @@ export default function Sidebar({ open, onClose, width, isMobile }) {
     </Drawer>
   ) : (
     <Drawer
-      variant="persistent"
+      variant="permanent"
       open={open}
       sx={{
-        width: open ? width : 0,
+        width: width,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width,
@@ -104,6 +104,8 @@ export default function Sidebar({ open, onClose, width, isMobile }) {
           borderRight: '1px solid rgba(0,0,0,0.08)',
           top: 64,
           height: 'calc(100% - 64px)',
+          transform: open ? 'translateX(0)' : `translateX(-${width}px)`,
+          transition: 'transform 180ms ease-out',
         },
       }}
     >

@@ -28,13 +28,13 @@
 
 -- Atualiza a função SQL de cálculo para referência (o cálculo real é feito em Node.js)
 CREATE OR REPLACE FUNCTION calcular_igs(
-    p_ie DECIMAL, p_ia DECIMAL, p_is DECIMAL, p_igqg DECIMAL
+    p_ie DECIMAL, p_ia DECIMAL, p_is DECIMAL, p_igq DECIMAL
 ) RETURNS TABLE(igs DECIMAL, classificacao VARCHAR) AS $$
 DECLARE
     v_igs DECIMAL;
 BEGIN
     -- Fórmula ICSR: cada subíndice já chega como média ponderada interna
-    v_igs := (p_ie * 0.30) + (p_ia * 0.35) + (p_is * 0.20) + (p_igqg * 0.15);
+    v_igs := (p_ie * 0.30) + (p_ia * 0.35) + (p_is * 0.20) + (p_igq * 0.15);
     RETURN QUERY SELECT
         ROUND(v_igs, 4),
         CASE

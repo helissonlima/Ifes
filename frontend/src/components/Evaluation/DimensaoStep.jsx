@@ -19,12 +19,12 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
       {/* Cabeçalho da dimensão */}
       <Box
         sx={{
-          p: 2, mb: 2, borderRadius: 2,
+          p: 2.5, mb: 3, borderRadius: 2,
           background: `linear-gradient(135deg, ${dimensao.cor}22 0%, ${dimensao.cor}11 100%)`,
           border: `1px solid ${dimensao.cor}44`,
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <Typography variant="h6" fontWeight={800} color={dimensao.cor}>
@@ -40,7 +40,7 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
                 </Box>
               </Tooltip>
             </Box>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
               Peso no ICSR: {Math.round(dimensao.peso * 100)}% · {total} indicadores · média ponderada
             </Typography>
           </Box>
@@ -48,7 +48,7 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
             <Chip
               label={`${respondidos}/${total}`}
               size="small"
-              sx={{ bgcolor: dimensao.cor, color: '#fff', fontWeight: 700, mb: 0.5 }}
+              sx={{ bgcolor: dimensao.cor, color: '#fff', fontWeight: 700, mb: 0.75 }}
             />
             {media !== null && (
               <Typography variant="caption" color="text.secondary" display="block">
@@ -69,23 +69,25 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
       </Box>
 
       {respondidos < total && (
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert severity="info" sx={{ mb: 2.5 }}>
           Avalie todos os {total} indicadores para calcular o índice desta dimensão.
         </Alert>
       )}
 
       {/* Lista de indicadores */}
-      {dimensao.indicadores.map((ind) => (
-        <IndicadorCard
-          key={ind.codigo}
-          indicador={ind}
-          nota={respostas[ind.codigo]}
-          observacao={observacoes?.[ind.codigo]}
-          onChange={(nota) => onChange(ind.codigo, nota, ind.nome, ind.criterios.find(c => c.nota === nota)?.descricao)}
-          onObservacaoChange={(texto) => onObservacaoChange?.(ind.codigo, texto)}
-          corDimensao={dimensao.cor}
-        />
-      ))}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        {dimensao.indicadores.map((ind) => (
+          <IndicadorCard
+            key={ind.codigo}
+            indicador={ind}
+            nota={respostas[ind.codigo]}
+            observacao={observacoes?.[ind.codigo]}
+            onChange={(nota) => onChange(ind.codigo, nota, ind.nome, ind.criterios.find(c => c.nota === nota)?.descricao)}
+            onObservacaoChange={(texto) => onObservacaoChange?.(ind.codigo, texto)}
+            corDimensao={dimensao.cor}
+          />
+        ))}
+      </Box>
     </Box>
   );
 }
