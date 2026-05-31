@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Stepper, Step, StepLabel, StepButton,
   Button, Card, CardContent, Grid, TextField, Autocomplete,
-  CircularProgress, Alert, LinearProgress, Paper,
+  CircularProgress, Alert, LinearProgress, Paper, Skeleton,
   useMediaQuery, useTheme,
   Dialog, DialogTitle, DialogContent, DialogActions, Chip, Tooltip,
 } from '@mui/material';
@@ -12,6 +12,7 @@ import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import DimensaoStep from '../components/Evaluation/DimensaoStep';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useEvaluationKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import {
@@ -384,7 +385,13 @@ export default function NovaAvaliacao() {
       })()
     : 100;
 
-  if (carregando) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress /></Box>;
+  if (carregando) return (
+    <Box>
+      <Skeleton variant="rectangular" height={88} sx={{ borderRadius: 2, mb: 1.5 }} />
+      <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
+      <Skeleton variant="rectangular" height={320} sx={{ borderRadius: 2 }} />
+    </Box>
+  );
 
   const STEP_LABELS = ['Informações', ...dimensoesLista.map((d) => d.nome), 'Revisão'];
   const STEP_LABELS_STEPPER = STEP_LABELS.map((label) => {
@@ -456,23 +463,14 @@ export default function NovaAvaliacao() {
       </Dialog>
 
       {/* ── Cabeçalho ── */}
-      <Card
-        sx={{
-          mb: 3,
-          border: '1px solid',
-          borderColor: 'rgba(27, 94, 32, 0.16)',
-          background: 'linear-gradient(135deg, #F6FBF6 0%, #FFFFFF 100%)',
-        }}
-      >
-        <CardContent sx={{ p: { xs: 2, md: 2.5 }, '&:last-child': { pb: { xs: 2, md: 2.5 } } }}>
-          <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2, flexWrap: 'wrap' }}>
-            <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h4" fontWeight={800} color="primary.dark">Nova Avaliação ICSR</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                Preencha os indicadores para acompanhar o progresso da avaliação.
-              </Typography>
-            </Box>
+      <PageHeaderCard
+        title="Nova Avaliação ICSR"
+        subtitle="Preencha os indicadores de cada dimensão. Seus dados são salvos automaticamente."
+        actions={(
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">
+              Voltar
+            </Button>
             <Tooltip title="Ver critérios de pontuação e guia de aplicação">
               <Button
                 component="a"
@@ -481,8 +479,8 @@ export default function NovaAvaliacao() {
                 rel="noopener noreferrer"
                 size="small"
                 startIcon={<FiHelpCircle size={14} />}
-                sx={{ color: 'text.secondary', borderColor: 'divider' }}
                 variant="outlined"
+                sx={{ color: 'text.secondary', borderColor: 'divider' }}
               >
                 Guia
               </Button>
@@ -490,18 +488,19 @@ export default function NovaAvaliacao() {
             <Tooltip title="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
               <span>
                 <Button
-                  variant="outlined" startIcon={<FiSave />}
-                  onClick={salvarRascunho} disabled={salvando || !info.propriedade}
+                  variant="outlined"
+                  startIcon={<FiSave />}
+                  onClick={salvarRascunho}
+                  disabled={salvando || !info.propriedade}
                   size="small"
-                  sx={{ ml: { xs: 0, sm: 'auto' } }}
                 >
-                {salvando ? <CircularProgress size={16} /> : 'Salvar'}
+                  {salvando ? <CircularProgress size={16} /> : 'Salvar'}
                 </Button>
               </span>
             </Tooltip>
           </Box>
-        </CardContent>
-      </Card>
+        )}
+      />
 
       {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
 
@@ -666,7 +665,7 @@ export default function NovaAvaliacao() {
               </Grid>
               {info.propriedade && (
                 <Grid size={12}>
-                  <Paper sx={{ p: 1.25, bgcolor: 'primary.50', borderRadius: 2 }} variant="outlined">
+                  <Paper sx={{ p: 1.25, bgcolor: '#F1F8E9', borderRadius: 2 }} variant="outlined">
                     <Typography variant="caption" color="text.secondary">
                       Proprietário: {info.propriedade.proprietario || 'Não informado'} · Área café: {formatAreaCafe(info.propriedade.area_cafe)}
                     </Typography>

@@ -6,6 +6,7 @@ import {
 import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle, FiShield } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
+import { useGeolocation } from '../../hooks/useGeolocation';
 
 const MENU_ITEMS = [
   { label: 'Dashboard', icon: <FiHome size={20} />, path: '/', permission: 'dashboard' },
@@ -22,6 +23,7 @@ function SidebarContent({ onClose, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { hasPermission, user } = useApp();
+  const { localidade } = useGeolocation();
   const visibleItems = MENU_ITEMS.filter((item) => (
     item.adminOnly ? user?.role === 'admin' : hasPermission(item.permission)
   ));
@@ -73,7 +75,7 @@ function SidebarContent({ onClose, isMobile }) {
         </Typography>
         <br />
         <Typography variant="caption" color="text.disabled">
-          Caparaó · Minas Gerais / ES
+          {localidade || 'Caparaó · Minas Gerais / ES'}
         </Typography>
       </Box>
     </Box>
@@ -93,19 +95,19 @@ export default function Sidebar({ open, onClose, width, isMobile }) {
     </Drawer>
   ) : (
     <Drawer
-      variant="permanent"
+      variant="persistent"
       open={open}
       sx={{
-        width: width,
+        width: open ? width : 0,
         flexShrink: 0,
+        transition: 'width 180ms ease-out',
+        overflow: 'hidden',
         '& .MuiDrawer-paper': {
           width,
           boxSizing: 'border-box',
           borderRight: '1px solid rgba(0,0,0,0.08)',
           top: 64,
           height: 'calc(100% - 64px)',
-          transform: open ? 'translateX(0)' : `translateX(-${width}px)`,
-          transition: 'transform 180ms ease-out',
         },
       }}
     >

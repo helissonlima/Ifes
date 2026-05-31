@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Button, Divider,
-  CircularProgress, Alert, Chip, LinearProgress, Table,
+  Alert, Chip, LinearProgress, Table, Skeleton,
   TableBody, TableCell, TableRow, Paper, Tabs, Tab, TableHead, Tooltip,
 } from '@mui/material';
-import { FiArrowLeft, FiClipboard, FiPrinter, FiTrendingUp, FiAlertTriangle, FiCheckCircle, FiTarget } from 'react-icons/fi';
+import { FiArrowLeft, FiClipboard, FiPrinter, FiTrendingUp, FiAlertTriangle, FiCheckCircle, FiTarget, FiEdit3 } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer,
@@ -67,7 +67,20 @@ export default function Resultado() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress /></Box>;
+  if (loading) return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Skeleton width={70} height={32} />
+        <Box sx={{ flexGrow: 1 }}><Skeleton width={220} height={28} /><Skeleton width={160} height={20} sx={{ mt: 0.5 }} /></Box>
+      </Box>
+      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2, mb: 2 }} />
+      <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 12, md: 7 }}><Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} /></Grid>
+        <Grid size={{ xs: 12, md: 5 }}><Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} /></Grid>
+      </Grid>
+    </Box>
+  );
   if (erro) return (
     <Alert
       severity="error"
@@ -234,7 +247,7 @@ export default function Resultado() {
                 );
               })}
               <Divider sx={{ my: 1.5 }} />
-              <Box sx={{ p: 1.5, bgcolor: 'primary.50', borderRadius: 2, textAlign: 'center' }}>
+              <Box sx={{ p: 1.5, bgcolor: '#F1F8E9', borderRadius: 2, textAlign: 'center' }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={600}>
                   ICSR = (Amb. × 35%) + (Econ. × 30%) + (Soc. × 20%) + (IGQG × 15%) — Médias ponderadas
                 </Typography>
@@ -319,7 +332,7 @@ export default function Resultado() {
                         <Chip
                           label={(it.nota * 100).toFixed(0) + '%'}
                           size="small"
-                          sx={{ bgcolor: COR_NOTA[it.nota] || '#9E9E9E', color: '#fff', fontWeight: 700 }}
+                          sx={{ bgcolor: COR_NOTA[it.nota] || '#9E9E9E', color: COR_NOTA_TEXTO[it.nota] || '#616161', fontWeight: 700 }}
                         />
                       </TableCell>
                       <TableCell>
@@ -346,6 +359,8 @@ export default function Resultado() {
             </Paper>
 
             {/* Diagnóstico por dimensão */}
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle2" fontWeight={700} gutterBottom>Detalhamento por Dimensão</Typography>
             <Tabs value={tabDiag} onChange={(_, v) => setTabDiag(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 1.5 }}>
               {diagnostico.diagnostico_por_dimensao.map((d) => (
                 <Tab key={d.dimensao} label={d.nome} sx={{ fontWeight: 600, minWidth: 100 }} />
@@ -434,10 +449,16 @@ export default function Resultado() {
         </Card>
       )}
 
-      {/* Detalhamento por dimensão */}
+      {/* Detalhamento por indicador */}
       <Card>
         <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>Detalhamento dos Indicadores</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            <FiClipboard size={18} color="#2E7D32" />
+            <Typography variant="h6" fontWeight={700}>Notas por Indicador</Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Selecione uma dimensão para ver as notas individuais e critérios selecionados.
+          </Typography>
           <Tabs value={tabAtiva} onChange={(_, v) => setTabAtiva(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2 }}>
             {Object.entries(DIM_INFO).map(([cod, info]) => (
               <Tab key={cod} label={info.nome} sx={{ fontWeight: 600, minWidth: 100 }} />
@@ -458,8 +479,8 @@ export default function Resultado() {
                             {r.indicador_nome}
                             {r.observacao && (
                               <Tooltip title={r.observacao} placement="top" arrow>
-                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25, fontStyle: 'italic', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  ✎ {r.observacao}
+                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25, fontStyle: 'italic', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <FiEdit3 size={10} style={{ flexShrink: 0 }} /> {r.observacao}
                                 </Typography>
                               </Tooltip>
                             )}

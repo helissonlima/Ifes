@@ -96,7 +96,7 @@ export default function Login() {
                     required
                     fullWidth
                     autoComplete="email"
-                    variant="filled"
+                    variant="outlined"
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
                   <TextField
@@ -107,7 +107,7 @@ export default function Login() {
                     required
                     fullWidth
                     autoComplete="current-password"
-                    variant="filled"
+                    variant="outlined"
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
                   <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ mt: 0.5 }}>

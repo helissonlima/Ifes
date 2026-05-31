@@ -188,7 +188,7 @@ export default function Dashboard() {
       </Grid>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 7 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
@@ -271,7 +271,7 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 5, lg: 2 }}>
+        <Grid size={{ xs: 12, md: 5, lg: 3 }}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700} gutterBottom>
