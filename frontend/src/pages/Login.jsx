@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { friendlyError } from '../utils/errorMessages';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -33,7 +34,7 @@ export default function Login() {
       notify('Login realizado com sucesso!', 'success');
       navigate('/', { replace: true });
     } catch (err) {
-      notify(err.message, 'error');
+      notify(friendlyError(err), 'error');
     } finally {
       setLoading(false);
     }

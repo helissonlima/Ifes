@@ -12,6 +12,7 @@ import {
   Cell, LineChart, Line, Legend,
 } from 'recharts';
 import { avaliacoesAPI } from '../services/api';
+import { friendlyError } from '../utils/errorMessages';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
@@ -60,12 +61,19 @@ export default function Resultado() {
         if (diag.status === 'fulfilled') setDiagnostico(diag.value.data);
         if (tl.status === 'fulfilled') setTimeline(tl.value.data.avaliacoes || []);
       })
-      .catch((e) => setErro(e.message))
+      .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress /></Box>;
-  if (erro) return <Alert severity="error">{erro}</Alert>;
+  if (erro) return (
+    <Alert
+      severity="error"
+      action={<Button color="inherit" size="small" onClick={() => window.location.reload()}>Recarregar</Button>}
+    >
+      {erro}
+    </Alert>
+  );
   if (!avaliacao) return null;
 
   const respostasPorDimensao = (avaliacao.respostas || []).reduce((acc, r) => {
@@ -112,27 +120,39 @@ export default function Resultado() {
         </Box>
       </Box>
 
-      {/* IGS Principal */}
-      <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', color: 'white' }}>
+      {/* ICSR Principal — card limpo sem gradiente escuro */}
+      <Card sx={{ mb: 2, borderTop: `4px solid ${COR_NOTA[avaliacao.classificacao === 'Alta' ? 1 : avaliacao.classificacao === 'Boa' ? 0.75 : avaliacao.classificacao === 'Moderada' ? 0.5 : avaliacao.classificacao === 'Baixa' ? 0.25 : 0] || '#9E9E9E'}` }}>
         <CardContent>
           <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-            <Grid size={{ xs: 12, sm: 4 }} sx={{ textAlign: 'center' }}>
-              <IGSGauge igs={avaliacao.igs || 0} classificacao={avaliacao.classificacao} size={180} />
+            <Grid size={{ xs: 12, sm: 3 }} sx={{ textAlign: 'center' }}>
+              <IGSGauge igs={avaliacao.igs || 0} classificacao={avaliacao.classificacao} size={160} />
             </Grid>
-            <Grid size={{ xs: 12, sm: 8 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: 'rgba(255,255,255,0.85)', mb: 1 }}>
-                ICSR — Índice Consolidado de Sustentabilidade Rural
-              </Typography>
-              <Typography variant="h3" fontWeight={900} sx={{ color: 'white', lineHeight: 1 }}>
-                {avaliacao.igs ? `ICSR ${(avaliacao.igs * 100).toFixed(1)}%` : '—'}
-              </Typography>
-              <IGSBadge classificacao={avaliacao.classificacao} size="medium" />
-              <Divider sx={{ my: 1.5, borderColor: 'rgba(255,255,255,0.2)' }} />
+            <Grid size={{ xs: 12, sm: 9 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.68rem' }}>
+                    ICSR — Índice Consolidado de Sustentabilidade Rural
+                  </Typography>
+                  <Typography variant="h3" fontWeight={900} sx={{ lineHeight: 1.1, color: 'text.primary', mt: 0.25 }}>
+                    {avaliacao.igs ? `${(avaliacao.igs * 100).toFixed(1)}%` : '—'}
+                  </Typography>
+                </Box>
+                <IGSBadge classificacao={avaliacao.classificacao} size="medium" />
+              </Box>
+              <Divider sx={{ my: 1.5 }} />
               <Grid container spacing={1}>
-                <Grid size={6}><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Propriedade</Typography><br /><Typography variant="body2" fontWeight={700} color="white">{avaliacao.propriedade_nome}</Typography></Grid>
-                <Grid size={6}><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Técnico</Typography><br /><Typography variant="body2" fontWeight={700} color="white">{avaliacao.tecnico_responsavel || '—'}</Typography></Grid>
-                <Grid size={6}><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Data</Typography><br /><Typography variant="body2" fontWeight={700} color="white">{new Date(avaliacao.data_avaliacao).toLocaleDateString('pt-BR')}</Typography></Grid>
-                <Grid size={6}><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Status</Typography><br /><Chip label={avaliacao.status === 'concluida' ? 'Concluída' : 'Rascunho'} size="small" sx={{ bgcolor: avaliacao.status === 'concluida' ? '#4CAF50' : '#FF9800', color: 'white', fontWeight: 700 }} /></Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" color="text.secondary">Propriedade</Typography>
+                  <Typography variant="body2" fontWeight={700}>{avaliacao.propriedade_nome}</Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Typography variant="caption" color="text.secondary">Técnico</Typography>
+                  <Typography variant="body2" fontWeight={600}>{avaliacao.tecnico_responsavel || '—'}</Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Typography variant="caption" color="text.secondary">Data</Typography>
+                  <Typography variant="body2" fontWeight={600}>{new Date(avaliacao.data_avaliacao).toLocaleDateString('pt-BR')}</Typography>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

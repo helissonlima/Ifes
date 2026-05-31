@@ -13,6 +13,8 @@ import { MdOutlineEco } from 'react-icons/md';
 import { maskTelefone, maskUF, maskCEP, erroEmail } from '../utils/masks';
 import { propriedadesAPI, graosAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import EmptyState from '../components/Common/EmptyState';
+import { friendlyError } from '../utils/errorMessages';
 import IGSBadge from '../components/Common/IGSBadge';
 import MapPicker from '../components/Common/MapPicker';
 
@@ -443,12 +445,14 @@ export default function Propriedades() {
         <Box sx={{ display: 'flex', justifyContent: 'center', pt: 6 }}><CircularProgress /></Box>
       ) : propriedades.length === 0 ? (
         <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <FiMap size={48} color="#aaa" />
-            <Typography variant="h6" color="text.secondary" mt={1}>Nenhuma propriedade encontrada</Typography>
-            <Button variant="contained" sx={{ mt: 2 }} onClick={abrirNovo} startIcon={<FiPlus />}>
-              Cadastrar primeira propriedade
-            </Button>
+          <CardContent>
+            <EmptyState
+              icon={<FiMap size={40} />}
+              title="Nenhuma propriedade cadastrada"
+              description="Cadastre as propriedades rurais antes de iniciar as avaliações ICSR. Cada propriedade terá seu histórico de avaliações e evolução de sustentabilidade."
+              actionLabel="Cadastrar primeira propriedade"
+              onAction={abrirNovo}
+            />
           </CardContent>
         </Card>
       ) : isMobile ? (

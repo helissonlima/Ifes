@@ -11,6 +11,7 @@ import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
+import { friendlyError } from '../utils/errorMessages';
 
 const COR_DIMS = {
   economico: '#2196F3', ambiental: '#4CAF50', social: '#FF9800', gestao: '#9C27B0',
@@ -66,14 +67,14 @@ export default function Historico() {
   const tecnicos = [...new Set(avaliacoes.map((a) => a.tecnico_responsavel).filter(Boolean))].sort();
   const localizacoes = [...new Set(avaliacoes.map((a) => `${a.municipio}/${a.estado}`).filter(Boolean))].sort();
 
-  const excluir = async (id) => {
-    if (!window.confirm('Excluir esta avaliação permanentemente?')) return;
+  const excluir = async (id, nomePropriedade) => {
+    if (!window.confirm(`Excluir a avaliação de "${nomePropriedade || 'esta propriedade'}" permanentemente? Esta ação não pode ser desfeita.`)) return;
     setExcluindo(id);
     try {
       await avaliacoesAPI.excluir(id);
-      notify('Avaliação excluída.');
+      notify(`Avaliação de "${nomePropriedade || 'propriedade'}" excluída com sucesso.`, 'success');
       carregar();
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setExcluindo(null); }
   };
 
@@ -213,7 +214,7 @@ export default function Historico() {
                       <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)}>
                         <FiEye size={16} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => excluir(av.id)} disabled={excluindo === av.id}>
+                      <IconButton size="small" color="error" onClick={() => excluir(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>
@@ -275,7 +276,7 @@ export default function Historico() {
                       <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)}>
                         <FiEye size={16} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => excluir(av.id)} disabled={excluindo === av.id}>
+                      <IconButton size="small" color="error" onClick={() => excluir(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>

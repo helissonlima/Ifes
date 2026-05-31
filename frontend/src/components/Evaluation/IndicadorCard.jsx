@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
-  Card, CardContent, Typography, Box, Collapse, TextField, Button, Chip,
+  Card, CardContent, Typography, Box, Collapse, TextField, Button, Chip, Tooltip,
 } from '@mui/material';
-import { FiCheckSquare, FiEdit3, FiChevronDown, FiChevronUp, FiCheck } from 'react-icons/fi';
+import { FiCheckSquare, FiEdit3, FiChevronDown, FiChevronUp, FiCheck, FiInfo } from 'react-icons/fi';
+import { getDefinicao } from '../../utils/glossario';
 
 const LABEL_NOTA = { 0: '0,00', 0.25: '0,25', 0.5: '0,50', 0.75: '0,75', 1: '1,00' };
 // Cores de fundo/acento para cada nota
@@ -23,6 +24,7 @@ const NIVEL = {
 
 export default function IndicadorCard({ indicador, nota, observacao, onChange, onObservacaoChange, corDimensao }) {
   const [obsExpanded, setObsExpanded] = useState(false);
+  const glossario = getDefinicao(indicador.nome) || getDefinicao(indicador.criterio);
 
   return (
     <Card
@@ -47,6 +49,18 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                 }}>
                   peso {Math.round(indicador.peso * 100)}%
                 </Box>
+              )}
+              {glossario && (
+                <Tooltip
+                  title={<span><strong>{glossario.termo}:</strong> {glossario.def}</span>}
+                  placement="top"
+                  arrow
+                  enterDelay={300}
+                >
+                  <Box component="span" sx={{ display: 'inline-flex', cursor: 'help', color: 'text.disabled', '&:hover': { color: corDimensao } }}>
+                    <FiInfo size={13} />
+                  </Box>
+                </Tooltip>
               )}
             </Box>
             <Typography variant="caption" color="text.secondary">{indicador.criterio}</Typography>

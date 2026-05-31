@@ -1,4 +1,5 @@
-import { Box, Typography, LinearProgress, Chip, Alert } from '@mui/material';
+import { Box, Typography, LinearProgress, Chip, Alert, Tooltip } from '@mui/material';
+import { FiInfo } from 'react-icons/fi';
 import IndicadorCard from './IndicadorCard';
 
 export default function DimensaoStep({ dimensao, respostas, observacoes, onChange, onObservacaoChange }) {
@@ -25,11 +26,22 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Box>
-            <Typography variant="h6" fontWeight={800} color={dimensao.cor}>
-              {dimensao.nome}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Typography variant="h6" fontWeight={800} color={dimensao.cor}>
+                {dimensao.nome}
+              </Typography>
+              <Tooltip
+                title="Atribua notas de 0,00 a 1,00 para cada indicador conforme os critérios descritivos. Valores intermediários (ex: 0,35; 0,60) são permitidos. Registre justificativa na observação para notas extremas."
+                placement="right"
+                arrow
+              >
+                <Box component="span" sx={{ color: dimensao.cor, opacity: 0.6, cursor: 'help', display: 'inline-flex' }}>
+                  <FiInfo size={14} />
+                </Box>
+              </Tooltip>
+            </Box>
             <Typography variant="caption" color="text.secondary">
-              Peso no IGS: {Math.round(dimensao.peso * 100)}% · {total} indicadores
+              Peso no ICSR: {Math.round(dimensao.peso * 100)}% · {total} indicadores · média ponderada
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>

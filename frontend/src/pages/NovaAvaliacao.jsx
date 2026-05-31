@@ -4,15 +4,16 @@ import {
   Box, Typography, Stepper, Step, StepLabel, StepButton,
   Button, Card, CardContent, Grid, TextField, Autocomplete,
   CircularProgress, Alert, LinearProgress, Paper,
-  useMediaQuery, useTheme, MobileStepper,
+  useMediaQuery, useTheme,
   Dialog, DialogTitle, DialogContent, DialogActions, Chip, Tooltip,
 } from '@mui/material';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifi, FiWifiOff, FiClock, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifi, FiWifiOff, FiClock, FiTrash2, FiHelpCircle } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import DimensaoStep from '../components/Evaluation/DimensaoStep';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import { useEvaluationKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import {
   salvarRascunhoLocal,
   carregarRascunhoLocal,
@@ -20,6 +21,7 @@ import {
   temRascunhoLocal,
   formatarDataRascunho,
 } from '../utils/avaliacaoCache';
+import { friendlyError } from '../utils/errorMessages';
 
 const DIMENSOES_ORDEM = ['economica', 'ambiental', 'social', 'gestao_qualidade'];
 
@@ -106,7 +108,7 @@ export default function NovaAvaliacao() {
         const prop = p.data.data.find((x) => x.id === propId);
         if (prop) setInfo((i) => ({ ...i, propriedade: prop }));
       }
-    }).catch((e) => setErro(e.message))
+    }).catch((e) => setErro(friendlyError(e)))
     .finally(() => setCarregando(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -133,6 +135,29 @@ export default function NovaAvaliacao() {
 
     return () => clearTimeout(autoSaveTimer.current);
   }, [step, avaliacaoId, info, respostas, respostasDetalhes, observacoes, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── beforeunload: avisa se há dados não sincronizados ────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      if (syncPendente && totalRespondidos > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [syncPendente, totalRespondidos]);
+
+  // ── Atalhos de teclado para navegação no wizard ───────────────────────────
+  useEvaluationKeyboardShortcuts({
+    onNext: () => {
+      if (step < STEP_LABELS.length - 1) setStep((s) => s + 1);
+    },
+    onPrev: () => {
+      if (step > 0) setStep((s) => s - 1);
+    },
+    onSave: () => salvarRascunho(),
+  }, !carregando);
 
   // ── Sincroniza com o servidor ao voltar online ────────────────────────────
   useEffect(() => {
@@ -294,7 +319,7 @@ export default function NovaAvaliacao() {
       limparCacheAposEnvio();
       notify('Avaliação concluída com sucesso!', 'success');
       navigate(`/avaliacao/${id}`);
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setSalvando(false); }
   };
 
@@ -395,7 +420,7 @@ export default function NovaAvaliacao() {
       <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
         <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">Nova Avaliação</Typography>
+          <Typography variant="h5" fontWeight={800} color="primary.dark">Nova Avaliação ICSR</Typography>
           <Typography variant="body2" color="text.secondary">
             {totalRespondidos}/{totalIndicadores} indicadores avaliados
           </Typography>
@@ -425,14 +450,30 @@ export default function NovaAvaliacao() {
           )}
         </Box>
 
-        <Button
-          variant="outlined" startIcon={<FiSave />}
-          onClick={salvarRascunho} disabled={salvando || !info.propriedade}
-          size="small"
-          sx={{ ml: { xs: 0, sm: 'auto' } }}
-        >
-          {salvando ? <CircularProgress size={16} /> : 'Salvar no servidor'}
-        </Button>
+        <Tooltip title="Ver critérios de pontuação e guia de aplicação">
+          <Button
+            component="a"
+            href="/guia"
+            target="_blank"
+            rel="noopener noreferrer"
+            size="small"
+            startIcon={<FiHelpCircle size={14} />}
+            sx={{ color: 'text.secondary', borderColor: 'divider' }}
+            variant="outlined"
+          >
+            Guia
+          </Button>
+        </Tooltip>
+        <Tooltip title="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
+          <Button
+            variant="outlined" startIcon={<FiSave />}
+            onClick={salvarRascunho} disabled={salvando || !info.propriedade}
+            size="small"
+            sx={{ ml: { xs: 0, sm: 'auto' } }}
+          >
+          {salvando ? <CircularProgress size={16} /> : 'Salvar'}
+          </Button>
+        </Tooltip>
       </Box>
 
       {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
@@ -578,9 +619,9 @@ export default function NovaAvaliacao() {
                   noOptionsText="Nenhuma propriedade encontrada"
                 />
                 {propriedades.length === 0 && (
-                  <Alert severity="warning" sx={{ mt: 1 }}>
-                    Nenhuma propriedade cadastrada.{' '}
-                    <Button size="small" onClick={() => navigate('/propriedades')}>Cadastrar agora</Button>
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    Nenhuma propriedade cadastrada. Cadastre pelo menos uma propriedade rural antes de iniciar uma avaliação.{' '}
+                    <Button size="small" onClick={() => navigate('/propriedades')}>Cadastrar propriedade</Button>
                   </Alert>
                 )}
               </Grid>

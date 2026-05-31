@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Grid, Card, CardContent, Typography, Box, Button,
-  Divider, CircularProgress, Alert, LinearProgress, Tooltip,
+  Divider, Alert, LinearProgress, Tooltip, Skeleton,
 } from '@mui/material';
 import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
+import { friendlyError } from '../utils/errorMessages';
 import StatCard from '../components/Dashboard/StatCard';
+import EmptyState from '../components/Common/EmptyState';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
@@ -26,7 +28,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
 
-  useEffect(() => {
+  const carregarDados = () => {
+    setLoading(true);
+    setErro('');
     Promise.all([
       avaliacoesAPI.estatisticas(),
       avaliacoesAPI.listar({ status: 'concluida', limit: 5 }),
@@ -35,13 +39,45 @@ export default function Dashboard() {
         setStats(s.data);
         setRecentes(r.data.data);
       })
-      .catch((e) => setErro(e.message))
+      .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { carregarDados(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}>
-      <CircularProgress color="primary" />
+    <Box>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box><Skeleton width={160} height={32} /><Skeleton width={280} height={20} sx={{ mt: 0.5 }} /></Box>
+        <Skeleton width={120} height={38} sx={{ borderRadius: 2 }} />
+      </Box>
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        {[0,1,2,3].map((i) => (
+          <Grid size={{ xs: 6, md: 3 }} key={i}>
+            <Card><CardContent sx={{ p: 2 }}>
+              <Skeleton width="60%" height={18} />
+              <Skeleton width="40%" height={40} sx={{ mt: 0.5 }} />
+              <Skeleton width="80%" height={16} sx={{ mt: 0.5 }} />
+            </CardContent></Card>
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={2}>
+        {[0,1,2].map((i) => (
+          <Grid size={{ xs: 12, md: i === 0 ? 5 : i === 1 ? 4 : 3 }} key={i}>
+            <Card sx={{ height: 280 }}><CardContent>
+              <Skeleton width="50%" height={24} />
+              <Skeleton variant="rectangular" height={220} sx={{ mt: 1, borderRadius: 1 }} />
+            </CardContent></Card>
+          </Grid>
+        ))}
+        <Grid size={12}>
+          <Card><CardContent>
+            <Skeleton width="30%" height={24} sx={{ mb: 1 }} />
+            {[0,1,2].map((i) => <Skeleton key={i} height={48} sx={{ mb: 0.5 }} />)}
+          </CardContent></Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 
@@ -67,7 +103,19 @@ export default function Dashboard() {
         </Button>
       </Box>
 
-      {erro && <Alert severity="warning" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && (
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={carregarDados}>
+              Tentar novamente
+            </Button>
+          }
+        >
+          {erro}
+        </Alert>
+      )}
 
       {/* Cards de estatísticas */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -184,18 +232,14 @@ export default function Dashboard() {
                   </Box>
                 ))
               ) : (
-                <Box sx={{ textAlign: 'center', py: 4, color: 'text.disabled' }}>
-                  <MdOutlineEco size={40} />
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    Nenhuma avaliação concluída
-                  </Typography>
-                  <Button
-                    size="small" sx={{ mt: 1 }}
-                    onClick={() => navigate('/avaliacao/nova')}
-                  >
-                    Iniciar avaliação
-                  </Button>
-                </Box>
+                <EmptyState
+                  icon={<MdOutlineEco size={36} />}
+                  title="Nenhuma avaliação concluída"
+                  description="Conclua a primeira avaliação para ver a distribuição por classificação de sustentabilidade."
+                  actionLabel="Nova avaliação"
+                  onAction={() => navigate('/avaliacao/nova')}
+                  small
+                />
               )}
             </CardContent>
           </Card>
@@ -212,12 +256,14 @@ export default function Dashboard() {
                 </Button>
               </Box>
               {recentes.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 3, color: 'text.disabled' }}>
-                  <Typography variant="body2">Nenhuma avaliação concluída ainda.</Typography>
-                  <Button variant="contained" sx={{ mt: 1 }} onClick={() => navigate('/avaliacao/nova')}>
-                    Criar primeira avaliação
-                  </Button>
-                </Box>
+                <EmptyState
+                  icon={<FiClipboard size={28} />}
+                  title="Nenhuma avaliação concluída"
+                  description="Cadastre uma propriedade rural e inicie a primeira avaliação ICSR para ver os resultados aqui."
+                  actionLabel="Criar primeira avaliação"
+                  onAction={() => navigate('/avaliacao/nova')}
+                  small
+                />
               ) : (
                 recentes.map((av, i) => (
                   <Box key={av.id}>
