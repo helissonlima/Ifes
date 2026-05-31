@@ -12,6 +12,7 @@ import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
 import { friendlyError } from '../utils/errorMessages';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const COR_DIMS = {
   economico: '#2196F3', ambiental: '#4CAF50', social: '#FF9800', gestao: '#9C27B0',
@@ -86,15 +87,15 @@ export default function Historico() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">Histórico de Avaliações</Typography>
-          <Typography variant="body2" color="text.secondary">{total} avaliação(ões) registrada(s)</Typography>
-        </Box>
-        <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
-          Nova Avaliação
-        </Button>
-      </Box>
+      <PageHeaderCard
+        title="Histórico de Avaliações"
+        subtitle={`${total} avaliação(ões) registrada(s)`}
+        actions={(
+          <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
+            Nova Avaliação
+          </Button>
+        )}
+      />
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
@@ -167,9 +168,6 @@ export default function Historico() {
             <Typography variant="h6" color="text.secondary" mt={1}>
               {search || filtroStatus ? 'Nenhuma avaliação encontrada para este filtro.' : 'Nenhuma avaliação registrada.'}
             </Typography>
-            <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/avaliacao/nova')} startIcon={<FiPlus />}>
-              Criar primeira avaliação
-            </Button>
           </CardContent>
         </Card>
       ) : isMobile ? (
@@ -284,9 +282,6 @@ export default function Historico() {
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)}>
-                        <FiEye size={16} />
-                      </IconButton>
                       <IconButton size="small" color="error" onClick={() => excluir(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>

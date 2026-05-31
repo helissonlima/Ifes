@@ -10,6 +10,7 @@ import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX, FiRefreshCw } from '
 import { MdGrain } from 'react-icons/md';
 import { axiosInstance } from '../services/api';
 import { useApp } from '../context/AppContext';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const FORM_INICIAL = { nome: '', codigo: '', descricao: '', ativo: true };
 
@@ -128,12 +129,10 @@ export default function Graos() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">Gestão de Grãos</Typography>
-          <Typography variant="body2" color="text.secondary">{graos.length} grão(s) cadastrado(s)</Typography>
-        </Box>
-        {!isMobile && (
+      <PageHeaderCard
+        title="Gestão de Grãos"
+        subtitle={`${graos.length} grão(s) cadastrado(s)`}
+        actions={!isMobile ? (
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               variant="outlined"
@@ -146,8 +145,8 @@ export default function Graos() {
             </Button>
             <Button variant="contained" startIcon={<FiPlus />} onClick={abrirNovo}>Novo Grão</Button>
           </Box>
-        )}
-      </Box>
+        ) : null}
+      />
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
 

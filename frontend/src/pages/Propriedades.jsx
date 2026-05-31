@@ -8,7 +8,7 @@ import {
   Autocomplete, Tooltip,
   useMediaQuery, useTheme,
 } from '@mui/material';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiEye, FiX, FiTrendingUp } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiX, FiTrendingUp } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { maskTelefone, maskUF, maskCEP, erroEmail } from '../utils/masks';
 import { propriedadesAPI, graosAPI, producaoAPI } from '../services/api';
@@ -17,6 +17,7 @@ import EmptyState from '../components/Common/EmptyState';
 import { friendlyError } from '../utils/errorMessages';
 import IGSBadge from '../components/Common/IGSBadge';
 import MapPicker from '../components/Common/MapPicker';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const FORM_INICIAL = {
   nome: '', municipio: '', estado: 'ES', proprietario: '',
@@ -428,15 +429,13 @@ export default function Propriedades() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">Propriedades</Typography>
-          <Typography variant="body2" color="text.secondary">{total} propriedade(s) cadastrada(s)</Typography>
-        </Box>
-        {!isMobile && (
+      <PageHeaderCard
+        title="Propriedades"
+        subtitle={`${total} propriedade(s) cadastrada(s)`}
+        actions={!isMobile ? (
           <Button variant="contained" startIcon={<FiPlus />} onClick={abrirNovo}>Nova Propriedade</Button>
-        )}
-      </Box>
+        ) : null}
+      />
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
@@ -487,9 +486,6 @@ export default function Propriedades() {
                   </Box>
                   <Divider sx={{ my: 1 }} />
                   <Box sx={{ display: 'flex', gap: 1 }} onClick={(e) => e.stopPropagation()}>
-                    <Button size="small" startIcon={<FiEye />} onClick={() => navigate(`/propriedades/${p.id}`)}>
-                      Detalhes
-                    </Button>
                     <Button size="small" startIcon={<FiClipboard />} onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
                       Avaliar
                     </Button>
@@ -534,10 +530,6 @@ export default function Propriedades() {
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary" title="Ver detalhe / histórico"
-                        onClick={() => navigate(`/propriedades/${p.id}`)}>
-                        <FiEye size={16} />
-                      </IconButton>
                       <IconButton size="small" color="primary" title="Nova Avaliação"
                         onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
                         <FiClipboard size={16} />

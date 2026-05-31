@@ -8,6 +8,7 @@ import {
   FiCheckCircle, FiAlertTriangle,
 } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const ETAPAS = [
   {
@@ -92,12 +93,10 @@ const DICAS = [
 export default function Guia() {
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight={800} color="primary.dark">Guia de Aplicação</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Passo a passo para aplicar o ICSR em uma propriedade rural — adaptado da metodologia ISA-EPAMIG/INCAPER.
-        </Typography>
-      </Box>
+      <PageHeaderCard
+        title="Guia de Aplicação"
+        subtitle="Passo a passo para aplicar o ICSR em uma propriedade rural — adaptado da metodologia ISA-EPAMIG/INCAPER."
+      />
 
       {/* Apresentação */}
       <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', color: 'white' }}>

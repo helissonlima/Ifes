@@ -13,6 +13,7 @@ import EmptyState from '../components/Common/EmptyState';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const DIMENSOES = [
   { key: 'media_economica', label: 'Econômica', cor: '#2196F3', peso: '30%' },
@@ -88,25 +89,20 @@ export default function Dashboard() {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">
-            Visão Geral
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            ICSR — Índice Consolidado de Sustentabilidade Rural · ISA-EPAMIG / INCAPER
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<FiPlus />}
-          onClick={() => navigate('/avaliacao/nova')}
-          sx={{ borderRadius: 2 }}
-        >
-          Nova Avaliação
-        </Button>
-      </Box>
+      <PageHeaderCard
+        title="Visão Geral"
+        subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · ISA-EPAMIG / INCAPER"
+        actions={(
+          <Button
+            variant="contained"
+            startIcon={<FiPlus />}
+            onClick={() => navigate('/avaliacao/nova')}
+            sx={{ borderRadius: 2 }}
+          >
+            Nova Avaliação
+          </Button>
+        )}
+      />
 
       {erro && (
         <Alert
@@ -211,8 +207,6 @@ export default function Dashboard() {
                   icon={<FiClipboard size={28} />}
                   title="Nenhuma avaliação concluída"
                   description="Cadastre uma propriedade rural e inicie a primeira avaliação ICSR para ver os resultados aqui."
-                  actionLabel="Iniciar avaliação"
-                  onAction={() => navigate('/avaliacao/nova')}
                   small
                 />
               ) : (
@@ -297,8 +291,6 @@ export default function Dashboard() {
                   icon={<MdOutlineEco size={36} />}
                   title="Nenhuma avaliação concluída"
                   description="Conclua a primeira avaliação para ver a distribuição por classificação de sustentabilidade."
-                  actionLabel="Iniciar avaliação"
-                  onAction={() => navigate('/avaliacao/nova')}
                   small
                 />
               )}

@@ -4,6 +4,7 @@
         "brew": true,
         "true": true,
         "docker compose": true,
-        "git rm": true
+        "git rm": true,
+        "npm run build": true
     }
 }

@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { FiChevronDown, FiInfo } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const DIMENSOES = [
   {
@@ -41,12 +42,10 @@ const ESCALA = [
 export default function Metodologia() {
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight={800} color="primary.dark">Metodologia</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Análise comparativa ISA-EPAMIG / INCAPER — Sistema Integrado de Sustentabilidade Rural
-        </Typography>
-      </Box>
+      <PageHeaderCard
+        title="Metodologia"
+        subtitle="Análise comparativa ISA-EPAMIG / INCAPER — Sistema Integrado de Sustentabilidade Rural"
+      />
 
       {/* Apresentação */}
       <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', color: 'white' }}>

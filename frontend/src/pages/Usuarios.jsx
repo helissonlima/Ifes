@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const PERMISSION_KEYS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -211,24 +212,17 @@ export default function Usuarios() {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FiShield size={22} color="#1B5E20" />
-            <Typography variant="h5" fontWeight={800} color="primary.dark">Administração</Typography>
-            <Chip label="Acesso restrito" size="small" sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 700 }} />
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Gestão de usuários, papéis e permissões do sistema.
-          </Typography>
-        </Box>
-        {!isMobile && (
+      <PageHeaderCard
+        title="Administração"
+        subtitle="Gestão de usuários, papéis e permissões do sistema."
+        icon={<FiShield size={22} />}
+        titleAdornment={<Chip label="Acesso restrito" size="small" sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 700 }} />}
+        actions={!isMobile ? (
           <Button variant="contained" startIcon={<FiUserPlus />} onClick={abrirNovo}>
             Novo Usuário
           </Button>
-        )}
-      </Box>
+        ) : null}
+      />
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
 
