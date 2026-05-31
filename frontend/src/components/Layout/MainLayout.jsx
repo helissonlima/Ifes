@@ -28,12 +28,14 @@ export default function MainLayout() {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       <Navbar onMenuClick={toggle} isMobile={isMobile} />
-      <Sidebar
-        open={sidebarOpen}
-        onClose={close}
-        width={DRAWER_WIDTH}
-        isMobile={isMobile}
-      />
+      {!isMobile && (
+        <Sidebar
+          open={sidebarOpen}
+          onClose={close}
+          width={DRAWER_WIDTH}
+          isMobile={isMobile}
+        />
+      )}
       <Box
         component="main"
         sx={{

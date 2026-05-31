@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Stepper, Step, StepLabel, StepButton,
@@ -7,7 +7,7 @@ import {
   useMediaQuery, useTheme,
   Dialog, DialogTitle, DialogContent, DialogActions, Chip, Tooltip,
 } from '@mui/material';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifi, FiWifiOff, FiClock, FiTrash2, FiHelpCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -65,6 +65,13 @@ export default function NovaAvaliacao() {
   const autoSaveTimer = useRef(null);
   const sincronizandoAutoRef = useRef(false);
 
+  const abrirDialogRascunho = useCallback((draft) => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setDialogRascunho({ open: true, draft });
+  }, []);
+
   // Dados do formulário
   const [info, setInfo] = useState({
     propriedade: null,
@@ -108,7 +115,7 @@ export default function NovaAvaliacao() {
         if (propId && draft?.info?.propriedade?.id === propId) {
           restaurarRascunho(draft, p.data.data);
         } else {
-          setDialogRascunho({ open: true, draft });
+          abrirDialogRascunho(draft);
         }
         return;
       }
@@ -449,189 +456,189 @@ export default function NovaAvaliacao() {
       </Dialog>
 
       {/* ── Cabeçalho ── */}
-      <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h4" fontWeight={800} color="primary.dark">Nova Avaliação ICSR</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {totalRespondidos}/{totalIndicadores} indicadores avaliados
-          </Typography>
-        </Box>
-
-        {/* Status de rede + último salvamento */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-          <Tooltip title={isOnline ? 'Conectado ao servidor' : 'Offline — dados salvos localmente'}>
-            <Chip
-              size="small"
-              icon={isOnline ? <FiWifi size={13} /> : <FiWifiOff size={13} />}
-              label={isOnline ? (syncPendente ? 'Pendente sync' : 'Online') : 'Offline'}
-              color={isOnline ? (syncPendente ? 'warning' : 'success') : 'error'}
-              variant="outlined"
-            />
-          </Tooltip>
-          {ultimoSalvoLocal && (
-            <Tooltip title={`Salvo localmente em ${formatarDataRascunho(ultimoSalvoLocal)}`}>
-              <Chip
+      <Card
+        sx={{
+          mb: 3,
+          border: '1px solid',
+          borderColor: 'rgba(27, 94, 32, 0.16)',
+          background: 'linear-gradient(135deg, #F6FBF6 0%, #FFFFFF 100%)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2, md: 2.5 }, '&:last-child': { pb: { xs: 2, md: 2.5 } } }}>
+          <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2, flexWrap: 'wrap' }}>
+            <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h4" fontWeight={800} color="primary.dark">Nova Avaliação ICSR</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Preencha os indicadores para acompanhar o progresso da avaliação.
+              </Typography>
+            </Box>
+            <Tooltip title="Ver critérios de pontuação e guia de aplicação">
+              <Button
+                component="a"
+                href="/guia"
+                target="_blank"
+                rel="noopener noreferrer"
                 size="small"
-                icon={<FiClock size={13} />}
-                label="Salvo localmente"
+                startIcon={<FiHelpCircle size={14} />}
+                sx={{ color: 'text.secondary', borderColor: 'divider' }}
                 variant="outlined"
-                color="default"
-              />
+              >
+                Guia
+              </Button>
             </Tooltip>
-          )}
-        </Box>
-
-        <Tooltip title="Ver critérios de pontuação e guia de aplicação">
-          <Button
-            component="a"
-            href="/guia"
-            target="_blank"
-            rel="noopener noreferrer"
-            size="small"
-            startIcon={<FiHelpCircle size={14} />}
-            sx={{ color: 'text.secondary', borderColor: 'divider' }}
-            variant="outlined"
-          >
-            Guia
-          </Button>
-        </Tooltip>
-        <Tooltip title="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
-          <Button
-            variant="outlined" startIcon={<FiSave />}
-            onClick={salvarRascunho} disabled={salvando || !info.propriedade}
-            size="small"
-            sx={{ ml: { xs: 0, sm: 'auto' } }}
-          >
-          {salvando ? <CircularProgress size={16} /> : 'Salvar'}
-          </Button>
-        </Tooltip>
-      </Box>
+            <Tooltip title="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
+              <span>
+                <Button
+                  variant="outlined" startIcon={<FiSave />}
+                  onClick={salvarRascunho} disabled={salvando || !info.propriedade}
+                  size="small"
+                  sx={{ ml: { xs: 0, sm: 'auto' } }}
+                >
+                {salvando ? <CircularProgress size={16} /> : 'Salvar'}
+                </Button>
+              </span>
+            </Tooltip>
+          </Box>
+        </CardContent>
+      </Card>
 
       {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
 
-      {/* Progresso global */}
-      <LinearProgress
-        variant="determinate"
-        value={progressoGlobal}
-        sx={{ height: 5, borderRadius: 3, mb: 1.5 }}
-        color="primary"
-      />
-
-      {/* Stepper */}
-      {!isMobile ? (
-        <Box sx={{ mb: 2, overflow: 'hidden' }}>
-          <Stepper
-            nonLinear
-            alternativeLabel
-            activeStep={step}
-            sx={{
-              width: '100%',
-              '& .MuiStepConnector-alternativeLabel': {
-                top: isLargeDesktop ? 16 : isCompactStepper ? 13 : 15,
-                left: isLargeDesktop ? 'calc(-50% + 23px)' : isCompactStepper ? 'calc(-50% + 20px)' : 'calc(-50% + 22px)',
-                right: isLargeDesktop ? 'calc(50% + 23px)' : isCompactStepper ? 'calc(50% + 20px)' : 'calc(50% + 22px)',
-              },
-              '& .MuiStepConnector-root': { zIndex: 0 },
-              '& .MuiStepLabel-label': {
-                fontSize: isLargeDesktop ? '0.94rem' : isCompactStepper ? '0.82rem' : '0.9rem',
-                mt: 0.75,
-                whiteSpace: 'nowrap',
-              },
-              '& .MuiStepButton-root': { px: isLargeDesktop ? 1.05 : isCompactStepper ? 0.5 : 0.8 },
-              '& .MuiStepConnector-line': { borderTopWidth: 2 },
-              '& .MuiStepLabel-iconContainer': {
-                zIndex: 1,
-                px: 0.5,
-              },
-              '& .MuiStepIcon-root': {
-                fontSize: isLargeDesktop ? '1.95rem' : isCompactStepper ? '1.55rem' : '1.75rem',
-                position: 'relative',
-                zIndex: 1,
-                borderRadius: '50%',
-              },
-            }}
-          >
-          {STEP_LABELS_STEPPER.map((label, idx) => (
-            <Step key={label} completed={idx < step}>
-              <StepButton onClick={() => setStep(idx)}>
-                <Typography
-                  variant="caption"
-                  fontWeight={700}
-                  noWrap
-                  sx={{ fontSize: isLargeDesktop ? '0.92rem' : isCompactStepper ? '0.78rem' : '0.86rem' }}
-                >
-                  {label}
-                </Typography>
-              </StepButton>
-            </Step>
-          ))}
-          </Stepper>
-        </Box>
-      ) : (
-        /* Mobile: indicador de dimensão proeminente */
-        <Box sx={{ mb: 1.5 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {step >= 1 && step <= dimensoesLista.length && (
-                <Box sx={{
-                  width: 10, height: 10, borderRadius: '50%',
-                  bgcolor: dimensoesLista[step - 1]?.cor,
-                  flexShrink: 0,
-                }} />
-              )}
-              <Typography variant="body2" fontWeight={800} color={
-                step >= 1 && step <= dimensoesLista.length
-                  ? dimensoesLista[step - 1]?.cor
-                  : 'primary.dark'
-              }>
-                {stepAtualLabel}
-              </Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>
-              {Math.min(step + 1, STEP_LABELS.length)}/{STEP_LABELS.length}
+      <Card sx={{ mb: 1.5 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+          {/* Progresso global */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75, gap: 1 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={700}>
+              Progresso global da avaliação
+            </Typography>
+            <Typography variant="caption" color="text.secondary" fontWeight={700}>
+              {totalRespondidos}/{totalIndicadores} ({Math.round(progressoGlobal)}%)
             </Typography>
           </Box>
-          {/* Trilho de dots compacto */}
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {STEP_LABELS.map((_, idx) => {
-              const dimCor = idx >= 1 && idx <= dimensoesLista.length
-                ? dimensoesLista[idx - 1]?.cor
-                : '#2E7D32';
-              return (
-                <Box
-                  key={idx}
-                  sx={{
-                    height: 4,
-                    borderRadius: 2,
-                    flexGrow: 1,
-                    bgcolor: idx < step ? dimCor : idx === step ? dimCor : '#e0e0e0',
-                    opacity: idx < step ? 0.45 : 1,
-                    transition: 'background-color 0.2s',
-                  }}
-                />
-              );
-            })}
-          </Box>
-        </Box>
-      )}
+          <LinearProgress
+            variant="determinate"
+            value={progressoGlobal}
+            sx={{ height: 6, borderRadius: 3, mb: 2 }}
+            color="primary"
+          />
 
-      {/* Progresso do step atual */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-        <Typography variant="caption" color="text.secondary" fontWeight={600}>
-          {step >= 1 && step <= dimensoesLista.length
-            ? `${dimensoesLista[step - 1]?.indicadores?.length || 0} indicadores · peso ${Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%`
-            : `Etapa ${Math.min(step + 1, STEP_LABELS.length)} de ${STEP_LABELS.length}`}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" fontWeight={700}>
-          {Math.round(progressoEtapa)}%
-        </Typography>
-      </Box>
-      <LinearProgress
-        variant="determinate"
-        value={progressoEtapa}
-        sx={{ height: 4, borderRadius: 2, mb: 1.5, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: step === 0 ? 'primary.main' : dimensoesLista[step - 1]?.cor } }}
-      />
+          {/* Stepper */}
+          {!isMobile ? (
+            <Box sx={{ mb: 2, overflow: 'hidden' }}>
+              <Stepper
+                nonLinear
+                alternativeLabel
+                activeStep={step}
+                sx={{
+                  width: '100%',
+                  '& .MuiStepConnector-alternativeLabel': {
+                    top: isLargeDesktop ? 16 : isCompactStepper ? 13 : 15,
+                    left: isLargeDesktop ? 'calc(-50% + 23px)' : isCompactStepper ? 'calc(-50% + 20px)' : 'calc(-50% + 22px)',
+                    right: isLargeDesktop ? 'calc(50% + 23px)' : isCompactStepper ? 'calc(50% + 20px)' : 'calc(50% + 22px)',
+                  },
+                  '& .MuiStepConnector-root': { zIndex: 0 },
+                  '& .MuiStepLabel-label': {
+                    fontSize: isLargeDesktop ? '0.94rem' : isCompactStepper ? '0.82rem' : '0.9rem',
+                    mt: 0.75,
+                    whiteSpace: 'nowrap',
+                  },
+                  '& .MuiStepButton-root': { px: isLargeDesktop ? 1.05 : isCompactStepper ? 0.5 : 0.8 },
+                  '& .MuiStepConnector-line': { borderTopWidth: 2 },
+                  '& .MuiStepLabel-iconContainer': {
+                    zIndex: 1,
+                    px: 0.5,
+                  },
+                  '& .MuiStepIcon-root': {
+                    fontSize: isLargeDesktop ? '1.95rem' : isCompactStepper ? '1.55rem' : '1.75rem',
+                    position: 'relative',
+                    zIndex: 1,
+                    borderRadius: '50%',
+                  },
+                }}
+              >
+              {STEP_LABELS_STEPPER.map((label, idx) => (
+                <Step key={label} completed={idx < step}>
+                  <StepButton onClick={() => setStep(idx)}>
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      noWrap
+                      sx={{ fontSize: isLargeDesktop ? '0.92rem' : isCompactStepper ? '0.78rem' : '0.86rem' }}
+                    >
+                      {label}
+                    </Typography>
+                  </StepButton>
+                </Step>
+              ))}
+              </Stepper>
+            </Box>
+          ) : (
+            /* Mobile: indicador de dimensão proeminente */
+            <Box sx={{ mb: 1.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {step >= 1 && step <= dimensoesLista.length && (
+                    <Box sx={{
+                      width: 10, height: 10, borderRadius: '50%',
+                      bgcolor: dimensoesLista[step - 1]?.cor,
+                      flexShrink: 0,
+                    }} />
+                  )}
+                  <Typography variant="body2" fontWeight={800} color={
+                    step >= 1 && step <= dimensoesLista.length
+                      ? dimensoesLista[step - 1]?.cor
+                      : 'primary.dark'
+                  }>
+                    {stepAtualLabel}
+                  </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  {Math.min(step + 1, STEP_LABELS.length)}/{STEP_LABELS.length}
+                </Typography>
+              </Box>
+              {/* Trilho de dots compacto */}
+              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                {STEP_LABELS.map((_, idx) => {
+                  const dimCor = idx >= 1 && idx <= dimensoesLista.length
+                    ? dimensoesLista[idx - 1]?.cor
+                    : '#2E7D32';
+                  return (
+                    <Box
+                      key={idx}
+                      sx={{
+                        height: 4,
+                        borderRadius: 2,
+                        flexGrow: 1,
+                        bgcolor: idx < step ? dimCor : idx === step ? dimCor : '#e0e0e0',
+                        opacity: idx < step ? 0.45 : 1,
+                        transition: 'background-color 0.2s',
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+            </Box>
+          )}
+
+          {/* Progresso do step atual */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              {step >= 1 && step <= dimensoesLista.length
+                ? `${dimensoesLista[step - 1]?.indicadores?.length || 0} indicadores · peso ${Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%`
+                : `Etapa ${Math.min(step + 1, STEP_LABELS.length)} de ${STEP_LABELS.length}`}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" fontWeight={700}>
+              {Math.round(progressoEtapa)}%
+            </Typography>
+          </Box>
+          <LinearProgress
+            variant="determinate"
+            value={progressoEtapa}
+            sx={{ height: 4, borderRadius: 2, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: step === 0 ? 'primary.main' : dimensoesLista[step - 1]?.cor } }}
+          />
+        </CardContent>
+      </Card>
 
       {/* Conteúdo dos steps */}
       {step === 0 && (
@@ -721,54 +728,58 @@ export default function NovaAvaliacao() {
       )}
 
       {/* Botões de navegação */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3.5, gap: 2 }}>
-        <Button
-          startIcon={<FiArrowLeft />}
-          onClick={() => setStep((s) => s - 1)}
-          disabled={step === 0}
-          variant="outlined"
-          fullWidth={isMobile}
-          size="large"
-          sx={{ minWidth: isMobile ? 'auto' : 140 }}
-        >
-          Anterior
-        </Button>
+      <Card sx={{ mt: 3.5 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+            <Button
+              startIcon={<FiArrowLeft />}
+              onClick={() => setStep((s) => s - 1)}
+              disabled={step === 0}
+              variant="outlined"
+              fullWidth={isMobile}
+              size="large"
+              sx={{ minWidth: isMobile ? 'auto' : 140 }}
+            >
+              Anterior
+            </Button>
 
-        {step < STEP_LABELS.length - 1 ? (
-          <Button
-            endIcon={<FiArrowRight />}
-            onClick={() => {
-              if (step === 0 && !info.propriedade) {
-                notify('Selecione uma propriedade', 'warning'); return;
-              }
-              setStep((s) => s + 1);
-            }}
-            variant="contained"
-            fullWidth={isMobile}
-            size="large"
-            sx={{ minWidth: isMobile ? 'auto' : 140 }}
-          >
-            Próximo
-          </Button>
-        ) : (
-          <Tooltip title={!isOnline ? 'Conecte-se à internet para concluir. Os dados estão salvos localmente.' : ''}>
-            <span style={{ flex: 1 }}>
+            {step < STEP_LABELS.length - 1 ? (
               <Button
-                startIcon={<FiCheck />}
-                onClick={concluir}
+                endIcon={<FiArrowRight />}
+                onClick={() => {
+                  if (step === 0 && !info.propriedade) {
+                    notify('Selecione uma propriedade', 'warning'); return;
+                  }
+                  setStep((s) => s + 1);
+                }}
                 variant="contained"
-                color="success"
-                disabled={salvando || !isOnline}
-                size="large"
                 fullWidth={isMobile}
-                sx={{ minWidth: isMobile ? 'auto' : 180 }}
+                size="large"
+                sx={{ minWidth: isMobile ? 'auto' : 140 }}
               >
-                {salvando ? <CircularProgress size={20} /> : !isOnline ? 'Aguardando conexão…' : 'Concluir Avaliação'}
+                Próximo
               </Button>
-            </span>
-          </Tooltip>
-        )}
-      </Box>
+            ) : (
+              <Tooltip title={!isOnline ? 'Conecte-se à internet para concluir. Os dados estão salvos localmente.' : ''}>
+                <span style={{ flex: 1 }}>
+                  <Button
+                    startIcon={<FiCheck />}
+                    onClick={concluir}
+                    variant="contained"
+                    color="success"
+                    disabled={salvando || !isOnline}
+                    size="large"
+                    fullWidth={isMobile}
+                    sx={{ minWidth: isMobile ? 'auto' : 180 }}
+                  >
+                    {salvando ? <CircularProgress size={20} /> : !isOnline ? 'Aguardando conexão…' : 'Concluir Avaliação'}
+                  </Button>
+                </span>
+              </Tooltip>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 }

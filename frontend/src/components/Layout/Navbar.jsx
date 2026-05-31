@@ -3,7 +3,7 @@ import { FiMenu, FiLogOut } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
 
-export default function Navbar({ onMenuClick }) {
+export default function Navbar({ onMenuClick, isMobile }) {
   const { user, logout, isOnline } = useApp();
 
   return (
@@ -15,15 +15,17 @@ export default function Navbar({ onMenuClick }) {
       }}
     >
       <Toolbar sx={{ gap: 1, minHeight: { xs: 64, sm: 64 } }}>
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={onMenuClick}
-          size="large"
-          sx={{ display: 'inline-flex' }}
-        >
-          <FiMenu />
-        </IconButton>
+        {!isMobile && (
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={onMenuClick}
+            size="large"
+            sx={{ display: 'inline-flex' }}
+          >
+            <FiMenu />
+          </IconButton>
+        )}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
           <MdOutlineEco size={24} />
