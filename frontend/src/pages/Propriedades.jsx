@@ -310,6 +310,7 @@ export default function Propriedades() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
+  const [dadosEmCache, setDadosEmCache] = useState(false);
   const [dialog, setDialog] = useState({ open: false, editando: null });
   const [form, setForm] = useState(FORM_INICIAL);
   const [salvando, setSalvando] = useState(false);
@@ -320,8 +321,13 @@ export default function Propriedades() {
 
   const carregar = useCallback(() => {
     setLoading(true);
+    setErro('');
     propriedadesAPI.listar({ search, limit: 50 })
-      .then((r) => { setPropriedades(r.data.data); setTotal(r.data.total); })
+      .then((r) => {
+        setPropriedades(r.data.data);
+        setTotal(r.data.total);
+        setDadosEmCache(Boolean(r.fromCache));
+      })
       .catch((e) => setErro(e.message))
       .finally(() => setLoading(false));
   }, [search]);
@@ -433,6 +439,11 @@ export default function Propriedades() {
       </Box>
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {dadosEmCache && !erro && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Lista carregada do cache local. Novas propriedades ou edições recentes podem aparecer somente após reconexão.
+        </Alert>
+      )}
 
       <TextField
         fullWidth placeholder="Buscar por nome, município ou proprietário..."

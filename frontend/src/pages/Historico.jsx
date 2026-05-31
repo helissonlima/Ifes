@@ -27,6 +27,7 @@ export default function Historico() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
+  const [dadosEmCache, setDadosEmCache] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroTecnico, setFiltroTecnico] = useState('');
   const [filtroLocalizacao, setFiltroLocalizacao] = useState('');
@@ -35,8 +36,13 @@ export default function Historico() {
 
   const carregar = useCallback(() => {
     setLoading(true);
+    setErro('');
     avaliacoesAPI.listar({ status: filtroStatus || undefined, limit: 100 })
-      .then((r) => { setAvaliacoes(r.data.data); setTotal(r.data.total); })
+      .then((r) => {
+        setAvaliacoes(r.data.data);
+        setTotal(r.data.total);
+        setDadosEmCache(Boolean(r.fromCache));
+      })
       .catch((e) => setErro(e.message))
       .finally(() => setLoading(false));
   }, [filtroStatus]);
@@ -91,6 +97,11 @@ export default function Historico() {
       </Box>
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {dadosEmCache && !erro && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Histórico exibido a partir do cache local. Os registros podem não refletir alterações mais recentes do servidor.
+        </Alert>
+      )}
 
       {/* Filtros */}
       <Card sx={{ mb: 2 }}>

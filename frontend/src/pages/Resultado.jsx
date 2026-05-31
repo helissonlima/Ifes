@@ -48,6 +48,7 @@ export default function Resultado() {
   const [erro, setErro] = useState('');
   const [tabAtiva, setTabAtiva] = useState(0);
   const [tabDiag, setTabDiag] = useState(0);
+  const [dadosEmCache, setDadosEmCache] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -60,6 +61,7 @@ export default function Resultado() {
         ]);
         if (diag.status === 'fulfilled') setDiagnostico(diag.value.data);
         if (tl.status === 'fulfilled') setTimeline(tl.value.data.avaliacoes || []);
+        setDadosEmCache(Boolean(r.fromCache || (diag.status === 'fulfilled' && diag.value.fromCache) || (tl.status === 'fulfilled' && tl.value.fromCache)));
       })
       .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
@@ -97,6 +99,8 @@ export default function Resultado() {
     Social: Math.round((Number(t.indice_social) || 0) * 100),
     'IGQG': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
   }));
+  const dimensaoCritica = getDimensaoCritica(avaliacao);
+  const prioridadePrincipal = diagnostico?.plano_acao_top5?.[0] || null;
 
   return (
     <Box className="print-resultado">
@@ -119,6 +123,12 @@ export default function Resultado() {
           </Button>
         </Box>
       </Box>
+
+      {dadosEmCache && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Este resultado está sendo exibido com apoio do cache local. Confirme os dados novamente quando a conexão estabilizar.
+        </Alert>
+      )}
 
       {/* ICSR Principal — card limpo sem gradiente escuro */}
       <Card sx={{ mb: 2, borderTop: `4px solid ${COR_NOTA[avaliacao.classificacao === 'Alta' ? 1 : avaliacao.classificacao === 'Boa' ? 0.75 : avaliacao.classificacao === 'Moderada' ? 0.5 : avaliacao.classificacao === 'Baixa' ? 0.25 : 0] || '#9E9E9E'}` }}>
@@ -154,6 +164,39 @@ export default function Resultado() {
                   <Typography variant="body2" fontWeight={600}>{new Date(avaliacao.data_avaliacao).toLocaleDateString('pt-BR')}</Typography>
                 </Grid>
               </Grid>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ mb: 2, border: '1px solid', borderColor: 'rgba(46,125,50,0.12)' }}>
+        <CardContent>
+          <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>
+                Leitura para a próxima conversa
+              </Typography>
+              <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5, mb: 1 }}>
+                {prioridadePrincipal
+                  ? `Comece por ${prioridadePrincipal.indicador_nome}`
+                  : 'Use os índices por dimensão para orientar a próxima conversa em campo'}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+                {prioridadePrincipal
+                  ? `Este indicador está na dimensão ${prioridadePrincipal.dimensao_nome} e oferece o maior ganho potencial imediato no ICSR. Foque evidências concretas, alinhamento de prazo e ação verificável para a próxima visita.`
+                  : 'O resultado já mostra a situação geral da propriedade. Selecione a dimensão mais baixa e conduza a conversa a partir dela, não a partir do número final isolado.'}
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {dimensaoCritica && (
+                  <Chip label={`Dimensão mais frágil: ${dimensaoCritica.nome}`} variant="outlined" sx={{ fontWeight: 700 }} />
+                )}
+                {prioridadePrincipal && (
+                  <Chip label={`Prazo sugerido: ${prioridadePrincipal.prazo_sugerido}`} color="warning" variant="outlined" sx={{ fontWeight: 700 }} />
+                )}
+                <Chip label={`Classificação: ${avaliacao.classificacao}`} color="success" variant="outlined" sx={{ fontWeight: 700 }} />
+              </Box>
             </Grid>
           </Grid>
         </CardContent>
@@ -460,4 +503,11 @@ export default function Resultado() {
       )}
     </Box>
   );
+}
+
+function getDimensaoCritica(avaliacao) {
+  if (!avaliacao) return null;
+  return Object.values(DIM_INFO)
+    .map((info) => ({ ...info, valor: Number(avaliacao[info.campo] || 0) }))
+    .sort((a, b) => a.valor - b.valor)[0] || null;
 }

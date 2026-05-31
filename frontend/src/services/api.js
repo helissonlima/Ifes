@@ -1,16 +1,48 @@
 import axios from 'axios';
+import { isSafeToCache, readCachedGet, saveCachedGet } from '../utils/requestCache';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
-  timeout: 10000,
+  timeout: 6000,
   headers: { 'Content-Type': 'application/json' },
 });
 
 export const axiosInstance = api;
 
+api.interceptors.request.use((config) => {
+  const nextConfig = { ...config };
+  nextConfig.metadata = {
+    startedAt: Date.now(),
+    cacheable: isSafeToCache(config.method),
+  };
+  return nextConfig;
+});
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const { config } = response;
+    if (config?.metadata?.cacheable) {
+      saveCachedGet(config.url, config.params, response.data);
+    }
+    return response;
+  },
   (error) => {
+    const config = error.config || {};
+    const cached = config.metadata?.cacheable ? readCachedGet(config.url, config.params) : null;
+
+    if (cached) {
+      return Promise.resolve({
+        data: cached.data,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+        request: error.request,
+        fromCache: true,
+        cachedAt: cached.cachedAt,
+      });
+    }
+
     const msg = error.response?.data?.erro || error.message || 'Erro de conexão com o servidor';
     return Promise.reject(new Error(msg));
   }

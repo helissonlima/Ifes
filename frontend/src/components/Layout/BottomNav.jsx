@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { FiHome, FiMap, FiClipboard, FiList, FiBook, FiShield } from 'react-icons/fi';
+import { FiHome, FiMap, FiClipboard, FiList } from 'react-icons/fi';
 import { useApp } from '../../context/AppContext';
 
 const NAV_ITEMS = [
@@ -8,8 +8,6 @@ const NAV_ITEMS = [
   { label: 'Propriedades', icon: <FiMap size={20} />,       path: '/propriedades', permission: 'propriedades' },
   { label: 'Avaliar',      icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
   { label: 'Histórico',    icon: <FiList size={20} />,      path: '/historico', permission: 'historico' },
-  { label: 'Metodologia',  icon: <FiBook size={20} />,      path: '/metodologia', permission: 'metodologia' },
-  { label: 'Admin',        icon: <FiShield size={20} />,    path: '/usuarios', adminOnly: true },
 ];
 
 export default function BottomNav() {
@@ -38,14 +36,15 @@ export default function BottomNav() {
           bgcolor: 'white',
           borderTop: '1px solid',
           borderColor: 'divider',
-          height: 64,
+          height: 68,
           '& .MuiBottomNavigationAction-root': {
             minWidth: 0,
+            px: 0.5,
             color: 'text.secondary',
             '&.Mui-selected': { color: 'primary.main' },
           },
           '& .MuiBottomNavigationAction-label': {
-            fontSize: '0.65rem',
+            fontSize: '0.72rem',
             fontWeight: 600,
           },
         }}

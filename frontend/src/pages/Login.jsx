@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../context/AppContext';
-import loginBg from '../assets/login-bg.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -47,32 +46,20 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         py: { xs: 2, sm: 3 },
-        backgroundImage: `url(${loginBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.25)',
-          backdropFilter: 'blur(2px)',
-          zIndex: 0,
-        },
-        '& > *': {
-          position: 'relative',
-          zIndex: 1,
-        }
+        background: 'radial-gradient(circle at top, rgba(76,175,80,0.18), transparent 34%), linear-gradient(180deg, #f6fbf2 0%, #edf5e8 100%)',
       }}
     >
       <Container maxWidth="sm">
         <Paper
-          elevation={10}
+          elevation={0}
           sx={{
             maxWidth: 430,
             mx: 'auto',
-            borderRadius: 4,
+            borderRadius: 3,
             overflow: 'hidden',
+            border: '1px solid',
+            borderColor: 'rgba(27,94,32,0.12)',
+            boxShadow: '0 18px 36px rgba(27, 94, 32, 0.08)',
           }}
         >
           <Card elevation={0}>
@@ -92,7 +79,7 @@ export default function Login() {
                   SustentaCafé
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                  Acesse a plataforma com suas credenciais.
+                  Instrumento digital do ICSR para avaliação técnica em campo.
                 </Typography>
               </Stack>
 
@@ -123,6 +110,9 @@ export default function Login() {
                   <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ mt: 0.5 }}>
                     {loading ? 'Entrando...' : 'Entrar'}
                   </Button>
+                  <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+                    Em caso de falha de acesso, confirme sua conexão e as permissões do seu perfil.
+                  </Typography>
                 </Stack>
               </Box>
             </CardContent>

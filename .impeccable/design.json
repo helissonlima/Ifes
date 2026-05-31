@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-31T00:00:00Z",
+  "title": "Design System: SustentaCafé ICSR",
+  "extensions": {
+    "colorMeta": {
+      "verde-caparao": {
+        "role": "primary",
+        "displayName": "Verde Caparaó",
+        "canonical": "oklch(46% 0.14 145)",
+        "tonalRamp": ["#0A1F0B", "#153A17", "#1B5E20", "#2E7D32", "#388E3C", "#4CAF50", "#81C784", "#C8E6C9"]
+      },
+      "verde-caparao-claro": {
+        "role": "primary-light",
+        "displayName": "Verde Caparaó Claro",
+        "canonical": "oklch(64% 0.16 145)",
+        "tonalRamp": ["#1B5E20", "#2E7D32", "#388E3C", "#4CAF50", "#66BB6A", "#81C784", "#A5D6A7", "#E8F5E9"]
+      },
+      "verde-caparao-escuro": {
+        "role": "primary-dark",
+        "displayName": "Verde Caparaó Escuro",
+        "canonical": "oklch(32% 0.10 145)",
+        "tonalRamp": ["#071A08", "#0A2E0B", "#0D4211", "#1B5E20", "#2E7D32", "#388E3C", "#4CAF50", "#C8E6C9"]
+      },
+      "terracota": {
+        "role": "secondary",
+        "displayName": "Terracota Seco",
+        "canonical": "oklch(43% 0.07 50)",
+        "tonalRamp": ["#1C0E0A", "#3E2723", "#4E342E", "#6D4C41", "#795548", "#A1887F", "#BCAAA4", "#EFEBE9"]
+      },
+      "azul-economico": {
+        "role": "dimension-economica",
+        "displayName": "Azul Econômico",
+        "canonical": "oklch(60% 0.19 231)",
+        "tonalRamp": ["#0D2B6B", "#1565C0", "#1976D2", "#2196F3", "#42A5F5", "#64B5F6", "#90CAF9", "#E3F2FD"]
+      },
+      "ambar-social": {
+        "role": "dimension-social",
+        "displayName": "Âmbar Social",
+        "canonical": "oklch(72% 0.17 65)",
+        "tonalRamp": ["#3E2000", "#E65100", "#EF6C00", "#F57C00", "#FF9800", "#FFA726", "#FFB74D", "#FFF3E0"]
+      },
+      "violeta-governanca": {
+        "role": "dimension-igqg",
+        "displayName": "Violeta Governança",
+        "canonical": "oklch(42% 0.20 305)",
+        "tonalRamp": ["#1A0028", "#4A148C", "#6A1B9A", "#7B1FA2", "#9C27B0", "#AB47BC", "#CE93D8", "#F3E5F5"]
+      },
+      "ambar-moderado": {
+        "role": "classification-moderada",
+        "displayName": "Âmbar Moderado",
+        "canonical": "oklch(83% 0.15 83)",
+        "tonalRamp": ["#3D2B00", "#7A5800", "#8B6000", "#B07D00", "#FFC107", "#FFD54F", "#FFE082", "#FFF8E1"]
+      },
+      "verde-emergente": {
+        "role": "classification-boa",
+        "displayName": "Verde Emergente",
+        "canonical": "oklch(71% 0.15 137)",
+        "tonalRamp": ["#1B3A00", "#33691E", "#558B2F", "#689F38", "#8BC34A", "#9CCC65", "#AED581", "#DCEDC8"]
+      },
+      "fundo-campo": {
+        "role": "neutral-bg",
+        "displayName": "Fundo de Campo",
+        "canonical": "oklch(97% 0.015 145)",
+        "tonalRamp": ["#C8E6C9", "#A5D6A7", "#81C784", "#66BB6A", "#C8E6C9", "#DCEDC8", "#E8F5E9", "#F1F8E9"]
+      }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Títulos de página — uma ocorrência por tela. variant='h5' no MUI." },
+      "title":    { "displayName": "Title",    "purpose": "Cabeçalhos de card e seção. variant='h6' no MUI." },
+      "body":     { "displayName": "Body",     "purpose": "Texto de critérios, observações, copy. Máximo 65–75ch." },
+      "label":    { "displayName": "Label",    "purpose": "Labels de botões, chips, cabeçalhos de tabela. fontWeight 600." },
+      "caption":  { "displayName": "Caption",  "purpose": "Metadados, evidências, notas de rodapé. fontSize 0.72rem." }
+    },
+    "shadows": [
+      { "name": "card",   "value": "0 2px 12px rgba(0,0,0,0.08)", "purpose": "Elevação padrão de todos os Cards." },
+      { "name": "appbar", "value": "0 2px 8px rgba(0,0,0,0.12)",  "purpose": "AppBar superior, permanentemente acima do conteúdo." }
+    ],
+    "motion": [
+      { "name": "transition-standard", "value": "0.15s ease-out",           "purpose": "Transições de estado em IndicadorCard (seleção, hover)." },
+      { "name": "transition-color",    "value": "background-color 0.2s",    "purpose": "Transição de cor nas barras de progresso de dimensão." }
+    ],
+    "breakpoints": [
+      { "name": "mobile",  "value": "0–899px",   "treatment": "BottomNav fixa, wizard com stepper customizado, sidebar ausente." },
+      { "name": "desktop", "value": "900px+",    "treatment": "Sidebar persistent 260px, stepper horizontal no wizard." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação primária do sistema. Verde Caparaó com texto branco, bordas levemente arredondadas.",
+      "html": "<button class=\"ds-btn-primary\">Nova Avaliação</button>",
+      "css": ".ds-btn-primary { background: #2E7D32; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.875rem; font-weight: 600; padding: 6px 16px; border: none; border-radius: 8px; cursor: pointer; transition: background 0.15s ease-out; letter-spacing: 0.01em; } .ds-btn-primary:hover { background: #1B5E20; } .ds-btn-primary:focus-visible { outline: 2px solid #2E7D32; outline-offset: 2px; } .ds-btn-primary:active { background: #1B5E20; transform: scale(0.99); }"
+    },
+    {
+      "name": "Outlined Button",
+      "kind": "button",
+      "refersTo": "button-outlined",
+      "description": "Ação secundária. Borda Verde Caparaó, fundo transparente.",
+      "html": "<button class=\"ds-btn-outlined\">Salvar</button>",
+      "css": ".ds-btn-outlined { background: transparent; color: #2E7D32; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.875rem; font-weight: 600; padding: 5px 15px; border: 1px solid #2E7D32; border-radius: 8px; cursor: pointer; transition: background 0.15s ease-out, border-color 0.15s; letter-spacing: 0.01em; } .ds-btn-outlined:hover { background: rgba(46,125,50,0.06); } .ds-btn-outlined:focus-visible { outline: 2px solid #2E7D32; outline-offset: 2px; }"
+    },
+    {
+      "name": "IGS Badge — Boa",
+      "kind": "chip",
+      "refersTo": "chip-classification-boa",
+      "description": "Badge de classificação ICSR para a banda 'Boa' (0,61–0,80). Texto escuro sobre verde para contraste ≥4.5:1.",
+      "html": "<span class=\"ds-chip-boa\">Boa (72,3%)</span>",
+      "css": ".ds-chip-boa { display: inline-flex; align-items: center; background: #8BC34A; color: #1B3A00; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }"
+    },
+    {
+      "name": "IGS Badge — Moderada",
+      "kind": "chip",
+      "refersTo": "chip-classification-moderada",
+      "description": "Badge para a banda 'Moderada' (0,41–0,60). NUNCA texto branco aqui: contraste 1,07:1.",
+      "html": "<span class=\"ds-chip-moderada\">Moderada (54,2%)</span>",
+      "css": ".ds-chip-moderada { display: inline-flex; align-items: center; background: #FFC107; color: #5D4000; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }"
+    },
+    {
+      "name": "IndicadorCard — Default",
+      "kind": "card",
+      "refersTo": "indicador-card",
+      "description": "Card de avaliação de um indicador ICSR. Mostra nome, peso, critério e 5 opções de nota clicáveis.",
+      "html": "<div class=\"ds-indicador-card\"><div class=\"ds-ind-header\"><span class=\"ds-ind-dot\"></span><div class=\"ds-ind-meta\"><span class=\"ds-ind-nome\">APP e Reserva Legal</span><span class=\"ds-ind-peso\">peso 15%</span></div></div><div class=\"ds-ind-criterio\">Percentual regularizado e conservado</div><div class=\"ds-ind-options\"><div class=\"ds-ind-opt ds-ind-opt--selected\"><span class=\"ds-opt-score\">0,50</span><span><strong class=\"ds-opt-nivel\">Regular:</strong> CAR ativo com pendências em RL ou APP</span></div><div class=\"ds-ind-opt\"><span class=\"ds-opt-score ds-opt-score--75\">0,75</span><span><strong class=\"ds-opt-nivel ds-opt-nivel--75\">Bom:</strong> CAR ativo, APPs e RL demarcadas</span></div></div></div>",
+      "css": ".ds-indicador-card { background: #fff; border-radius: 12px; border: 2px solid #FFC10755; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 12px 16px; font-family: 'IBM Plex Sans', sans-serif; } .ds-ind-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; } .ds-ind-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CAF50; margin-top: 6px; flex-shrink: 0; } .ds-ind-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .ds-ind-nome { font-size: 0.875rem; font-weight: 700; color: #212121; } .ds-ind-peso { font-size: 0.65rem; font-weight: 700; color: #4CAF50; background: rgba(76,175,80,0.1); padding: 1px 6px; border-radius: 4px; } .ds-ind-criterio { font-size: 0.75rem; color: #757575; margin-bottom: 10px; } .ds-ind-options { display: flex; flex-direction: column; gap: 6px; } .ds-ind-opt { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1.5px solid #e0e0e0; cursor: pointer; font-size: 0.74rem; color: #424242; } .ds-ind-opt--selected { border-color: #FFC107; background: rgba(255,193,7,0.08); } .ds-opt-score { min-width: 36px; text-align: center; padding: 2px 4px; border-radius: 4px; font-size: 0.68rem; font-weight: 800; background: #FFC107; color: #5D4000; flex-shrink: 0; } .ds-opt-score--75 { background: rgba(139,195,74,0.16); color: #33691E; } .ds-opt-nivel { color: #8B6000; margin-right: 4px; } .ds-opt-nivel--75 { color: #33691E; }"
+    },
+    {
+      "name": "Card Surface",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Card padrão do sistema. Fundo branco, 12px radius, sombra suave.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Índices por Dimensão</div><div class=\"ds-card-body\">Conteúdo</div></div>",
+      "css": ".ds-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 16px; font-family: 'IBM Plex Sans', sans-serif; } .ds-card-title { font-size: 1.1rem; font-weight: 700; color: #212121; margin-bottom: 12px; letter-spacing: -0.01em; } .ds-card-body { font-size: 1rem; color: #424242; }"
+    },
+    {
+      "name": "Empty State",
+      "kind": "custom",
+      "refersTo": "empty-state",
+      "description": "Estado vazio padronizado: ícone + título + descrição + CTA. Usado em todas as listas vazias do sistema.",
+      "html": "<div class=\"ds-empty-state\"><div class=\"ds-empty-icon\"><svg width=\"40\" height=\"40\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#BDBDBD\" stroke-width=\"1.5\"><path d=\"M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2\"/><rect x=\"9\" y=\"3\" width=\"6\" height=\"4\" rx=\"1\"/></svg></div><p class=\"ds-empty-title\">Nenhuma avaliação concluída</p><p class=\"ds-empty-desc\">Cadastre uma propriedade e inicie a primeira avaliação ICSR para ver os resultados aqui.</p><button class=\"ds-btn-primary\">Criar primeira avaliação</button></div>",
+      "css": ".ds-empty-state { text-align: center; padding: 48px 16px; font-family: 'IBM Plex Sans', sans-serif; } .ds-empty-icon { margin-bottom: 12px; opacity: 0.5; } .ds-empty-title { font-size: 1rem; font-weight: 700; color: #757575; margin-bottom: 8px; } .ds-empty-desc { font-size: 0.875rem; color: #BDBDBD; max-width: 380px; margin: 0 auto 16px; line-height: 1.5; }"
+    },
+    {
+      "name": "Navigation Sidebar Item — Active",
+      "kind": "nav",
+      "refersTo": "nav-sidebar-active",
+      "description": "Item de sidebar ativo. Verde Caparaó sólido, texto e ícone brancos.",
+      "html": "<div class=\"ds-nav-item ds-nav-item--active\"><svg class=\"ds-nav-icon\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg><span>Dashboard</span></div>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9rem; font-weight: 500; color: #757575; cursor: pointer; transition: background 0.15s; margin-bottom: 4px; } .ds-nav-item:hover { background: rgba(0,0,0,0.04); } .ds-nav-item--active { background: #2E7D32; color: #FFFFFF; font-weight: 700; } .ds-nav-item--active:hover { background: #1B5E20; } .ds-nav-icon { flex-shrink: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Caderno de Campo Digital",
+    "overview": "Este sistema visual traduz o rigor metodológico do ICSR — instrumento científico nascido em planilhas e fichas de campo da EPAMIG e do INCAPER — em uma interface digital que preserva a seriedade técnica sem criar distância. O ponto de referência não é o dashboard de BI corporativo nem o SaaS minimalista: é a ficha de avaliação impressa com hierarquia de dados clara, tabelas que se leem de cima para baixo, e indicadores que têm nome, peso e evidência visíveis ao mesmo tempo.\n\nA paleta parte do verde da vegetação do Parque Nacional do Caparaó (o território original do instrumento), não de um verde-marca genérico. As quatro cores de dimensão são funcionais, não decorativas: cada cor identifica exatamente uma dimensão em todos os contextos do sistema. A escala de classificação de cinco bandas usa cores acessíveis com tokens de texto de alta legibilidade.\n\nA densidade tipográfica segue a IBM Plex Sans: técnica e humanista. Os pesos 400/600/700 criam hierarquia sólida em telas pequenas. Cantos arredondados em 12px nos cards e 8px nos botões transmitem acessibilidade sem infantilismo. A elevação é mínima: uma sombra suave nos cards é o único elemento de profundidade.",
+    "keyCharacteristics": [
+      "Verde Caparaó como cor primária fixa em toda navegação e ações primárias",
+      "Quatro cores de dimensão semanticamente imutáveis (azul/laranja/roxo/verde-ambiental)",
+      "Escala de cinco classificações com texto de alto contraste em cada banda",
+      "IBM Plex Sans como única família tipográfica em todos os pesos",
+      "Cantos arredondados generosos (12px cards, 8px botões) com elevação mínima",
+      "Fundo levemente tintado de verde (#F1F8E9) como superfície de trabalho"
+    ],
+    "rules": [
+      { "name": "A Regra do Texto Escuro em Fundo Claro", "body": "Nunca texto branco sobre #FFC107 (Moderada) ou #8BC34A (Boa). Contraste 1,07:1 e 2,6:1 respectivamente. Sempre use COR_NOTA_TEXTO.", "section": "colors" },
+      { "name": "A Regra das Quatro Dimensões", "body": "As quatro cores de dimensão são fixas e imutáveis. Nunca reordene, recolorie ou introduza uma quinta cor de dimensão.", "section": "colors" },
+      { "name": "A Regra Plano por Padrão", "body": "Somente dois níveis de sombra: card e appbar. Qualquer componente que não seja card ou barra de topo deve ser plano.", "section": "elevation" },
+      { "name": "A Regra do Peso Duplo", "body": "A hierarquia visual depende exclusivamente de peso (400 vs 600 vs 700) e tamanho. Nunca itálico para hierarquia. Nunca all-caps em corpo.", "section": "typography" },
+      { "name": "A Regra da Família Única", "body": "Uma família tipográfica em todos os contextos. IBM Plex Sans em múltiplos pesos é suficiente.", "section": "typography" }
+    ],
+    "dos": [
+      "Do usar Verde Caparaó (#2E7D32) exclusivamente para ações primárias, navegação ativa e elementos de marca",
+      "Do usar os tokens COR_NOTA_TEXTO para qualquer texto sobre fundo branco representando nota ICSR",
+      "Do usar borderTop: 3px solid {cor} em vez de borderLeft para acentuar cards semanticamente",
+      "Do incluir sempre nome, peso e evidência visíveis em cada indicador durante a avaliação",
+      "Do respeitar a ordem das quatro dimensões: Ambiental (verde, 35%) → Econômica (azul, 30%) → Social (laranja, 20%) → IGQG (roxo, 15%)",
+      "Do aplicar EmptyState com título, descrição e ação primária em toda lista vazia",
+      "Do manter text-transform: none em todos os botões",
+      "Do usar friendlyError() para toda mensagem de erro exibida ao usuário"
+    ],
+    "donts": [
+      "Don't usar border-left maior que 1px como acento colorido — side-stripe é o tell #1 de UI AI-generated",
+      "Don't usar texto branco sobre #FFC107 (Moderada) ou #8BC34A (Boa) — contraste catastrófico",
+      "Don't criar hero card com gradiente escuro — hero-metric template abolido",
+      "Don't parecer com SaaS genérico (Notion, Linear): cards brancos sem hierarquia de dados",
+      "Don't parecer com dashboard de BI corporativo (Power BI, Tableau): múltiplos gráficos empilhados",
+      "Don't parecer com app governamental antiquado: formulários sem hierarquia, ausência de feedback",
+      "Don't parecer com app agro estereotípico: ícones de trator, verde saturado decorativo",
+      "Don't introduzir uma quinta cor de dimensão",
+      "Don't usar gradient-text — ênfase é via peso tipográfico e tamanho",
+      "Don't usar spinner centralizado como loading de página — use Skeleton com layout real",
+      "Don't nomear a dimensão IGQG como 'Gestão e Qualidade' ou 'IGQ' em nenhum texto visível"
+    ]
+  }
+}

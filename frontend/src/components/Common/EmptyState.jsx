@@ -10,10 +10,10 @@ export default function EmptyState({ icon, title, description, actionLabel, onAc
       textAlign: 'center',
       py: small ? 3 : 6,
       px: 2,
-      color: 'text.disabled',
+      color: 'text.secondary',
     }}>
       {icon && (
-        <Box sx={{ mb: 1.5, opacity: 0.5, fontSize: small ? '2rem' : '3rem' }}>
+        <Box sx={{ mb: 1.5, opacity: 0.8, color: 'primary.main', fontSize: small ? '2rem' : '3rem' }}>
           {icon}
         </Box>
       )}
@@ -26,7 +26,7 @@ export default function EmptyState({ icon, title, description, actionLabel, onAc
         {title}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 380, mx: 'auto', mb: actionLabel ? 2 : 0 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 380, mx: 'auto', mb: actionLabel ? 2 : 0, lineHeight: 1.6 }}>
           {description}
         </Typography>
       )}

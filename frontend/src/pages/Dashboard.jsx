@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Grid, Card, CardContent, Typography, Box, Button,
-  Divider, Alert, LinearProgress, Tooltip, Skeleton,
+  Divider, Alert, LinearProgress, Tooltip, Skeleton, Chip,
 } from '@mui/material';
-import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight } from 'react-icons/fi';
+import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiTrendingUp } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { friendlyError } from '../utils/errorMessages';
@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [recentes, setRecentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
+  const [dadosEmCache, setDadosEmCache] = useState(false);
 
   const carregarDados = () => {
     setLoading(true);
@@ -38,6 +39,7 @@ export default function Dashboard() {
       .then(([s, r]) => {
         setStats(s.data);
         setRecentes(r.data.data);
+        setDadosEmCache(Boolean(s.fromCache || r.fromCache));
       })
       .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
@@ -81,6 +83,9 @@ export default function Dashboard() {
     </Box>
   );
 
+  const classificacaoMedia = getClassificacao(stats?.media_igs);
+  const dimensaoPrioritaria = getDimensaoPrioritaria(stats);
+
   return (
     <Box>
       {/* Header */}
@@ -116,6 +121,49 @@ export default function Dashboard() {
           {erro}
         </Alert>
       )}
+
+      {dadosEmCache && !erro && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Painel carregado do cache local. Use este resumo como referência rápida e atualize novamente quando a conexão estabilizar.
+        </Alert>
+      )}
+
+      <Card sx={{ mb: 3, border: '1px solid', borderColor: 'rgba(46,125,50,0.12)' }}>
+        <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
+          <Grid container spacing={2.5} sx={{ alignItems: 'center' }}>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>
+                Prioridade operacional
+              </Typography>
+              <Typography variant="h5" fontWeight={800} sx={{ mt: 0.5, mb: 1 }}>
+                {classificacaoMedia ? `ICSR médio em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 700, lineHeight: 1.65, mb: 2 }}>
+                {dimensaoPrioritaria
+                  ? `A dimensão com menor desempenho atual é ${dimensaoPrioritaria.label}. Use este painel para preparar a próxima visita e concentrar a conversa nos indicadores com maior potencial de melhoria.`
+                  : 'Cadastre e conclua avaliações para transformar este painel em uma leitura operacional do território.'}
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {classificacaoMedia && <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />}
+                {dimensaoPrioritaria && (
+                  <Chip icon={<FiTarget size={13} />} label={`Foco imediato: ${dimensaoPrioritaria.label}`} variant="outlined" />
+                )}
+                <Chip icon={<FiTrendingUp size={13} />} label={`${stats?.avaliacoes_concluidas ?? 0} avaliações concluídas`} variant="outlined" color="success" />
+              </Box>
+            </Grid>
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Box sx={{ display: 'grid', gap: 1.5, justifyItems: { xs: 'stretch', md: 'end' } }}>
+                <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
+                  Iniciar nova avaliação
+                </Button>
+                <Button variant="outlined" endIcon={<FiArrowRight />} onClick={() => navigate('/historico')}>
+                  Revisar avaliações concluídas
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Cards de estatísticas */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -158,8 +206,53 @@ export default function Dashboard() {
       </Grid>
 
       <Grid container spacing={2}>
-        {/* Gauge + Radar */}
-        <Grid size={{ xs: 12, md: 5 }}>
+        <Grid size={{ xs: 12, lg: 7 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>Avaliações Recentes</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Use este bloco para retomar rapidamente a última conversa registrada em campo.
+                  </Typography>
+                </Box>
+                <Button size="small" endIcon={<FiArrowRight />} onClick={() => navigate('/historico')}>
+                  Ver todas
+                </Button>
+              </Box>
+              {recentes.length === 0 ? (
+                <EmptyState
+                  icon={<FiClipboard size={28} />}
+                  title="Nenhuma avaliação concluída"
+                  description="Cadastre uma propriedade rural e inicie a primeira avaliação ICSR para ver os resultados aqui."
+                  actionLabel="Criar primeira avaliação"
+                  onAction={() => navigate('/avaliacao/nova')}
+                  small
+                />
+              ) : (
+                recentes.map((av, i) => (
+                  <Box key={av.id}>
+                    {i > 0 && <Divider sx={{ my: 1 }} />}
+                    <Box
+                      sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer', py: 1.25, borderRadius: 1, px: 1, '&:hover': { bgcolor: 'action.hover' } }}
+                      onClick={() => navigate(`/avaliacao/${av.id}`)}
+                    >
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {av.municipio} · {new Date(av.data_avaliacao).toLocaleDateString('pt-BR')} · {av.tecnico_responsavel || 'Técnico'}
+                        </Typography>
+                      </Box>
+                      <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
+                    </Box>
+                  </Box>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 7, lg: 3 }}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700} gutterBottom>
@@ -198,25 +291,7 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Radar */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>
-                Perfil de Sustentabilidade
-              </Typography>
-              <DimensaoChart
-                economica={stats?.media_economica}
-                ambiental={stats?.media_ambiental}
-                social={stats?.media_social}
-                gestao={stats?.media_gestao}
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Distribuição por classificação */}
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 5, lg: 2 }}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" fontWeight={700} gutterBottom>
@@ -225,7 +300,7 @@ export default function Dashboard() {
               {stats?.distribuicao_classificacao?.length > 0 ? (
                 stats.distribuicao_classificacao.map((item) => (
                   <Box key={item.classificacao} sx={{ mb: 1.5 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5, gap: 1 }}>
                       <IGSBadge classificacao={item.classificacao} size="small" />
                       <Typography variant="body2" fontWeight={700}>{item.quantidade}</Typography>
                     </Box>
@@ -245,50 +320,32 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Avaliações recentes */}
-        <Grid size={12}>
-          <Card>
+        <Grid size={{ xs: 12 }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" fontWeight={700}>Avaliações Recentes</Typography>
-                <Button size="small" endIcon={<FiArrowRight />} onClick={() => navigate('/historico')}>
-                  Ver todas
-                </Button>
-              </Box>
-              {recentes.length === 0 ? (
-                <EmptyState
-                  icon={<FiClipboard size={28} />}
-                  title="Nenhuma avaliação concluída"
-                  description="Cadastre uma propriedade rural e inicie a primeira avaliação ICSR para ver os resultados aqui."
-                  actionLabel="Criar primeira avaliação"
-                  onAction={() => navigate('/avaliacao/nova')}
-                  small
-                />
-              ) : (
-                recentes.map((av, i) => (
-                  <Box key={av.id}>
-                    {i > 0 && <Divider sx={{ my: 1 }} />}
-                    <Box
-                      sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer', py: 1, borderRadius: 1, px: 1, '&:hover': { bgcolor: 'action.hover' } }}
-                      onClick={() => navigate(`/avaliacao/${av.id}`)}
-                    >
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {av.municipio} · {new Date(av.data_avaliacao).toLocaleDateString('pt-BR')} · {av.tecnico_responsavel || 'Técnico'}
-                        </Typography>
-                      </Box>
-                      <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
-                    </Box>
-                  </Box>
-                ))
-              )}
+              <Typography variant="h6" fontWeight={700} gutterBottom>
+                Perfil de Sustentabilidade
+              </Typography>
+              <DimensaoChart
+                economica={stats?.media_economica}
+                ambiental={stats?.media_ambiental}
+                social={stats?.media_social}
+                gestao={stats?.media_gestao}
+              />
             </CardContent>
           </Card>
         </Grid>
       </Grid>
     </Box>
   );
+}
+
+function getDimensaoPrioritaria(stats) {
+  if (!stats) return null;
+  return DIMENSOES
+    .map((d) => ({ ...d, valor: stats[d.key] }))
+    .filter((d) => typeof d.valor === 'number')
+    .sort((a, b) => a.valor - b.valor)[0] || null;
 }
 
 function getClassificacao(igs) {

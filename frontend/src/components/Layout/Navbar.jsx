@@ -4,7 +4,7 @@ import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
 
 export default function Navbar({ onMenuClick }) {
-  const { user, logout } = useApp();
+  const { user, logout, isOnline } = useApp();
 
   return (
     <AppBar
@@ -20,7 +20,7 @@ export default function Navbar({ onMenuClick }) {
           edge="start"
           onClick={onMenuClick}
           size="large"
-          sx={{ display: { xs: 'none', md: 'inline-flex' } }}
+          sx={{ display: 'inline-flex' }}
         >
           <FiMenu />
         </IconButton>
@@ -41,6 +41,23 @@ export default function Navbar({ onMenuClick }) {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.2 } }}>
+          <Box
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              alignItems: 'center',
+              gap: 0.75,
+              px: 1.1,
+              py: 0.5,
+              borderRadius: 999,
+              bgcolor: isOnline ? 'rgba(255,255,255,0.14)' : 'rgba(255,243,224,0.2)',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: isOnline ? '#B9F6CA' : '#FFE082' }} />
+            <Typography variant="caption" sx={{ fontWeight: 700, color: 'white' }}>
+              {isOnline ? 'Online' : 'Sem rede'}
+            </Typography>
+          </Box>
           <Avatar
             src={user?.foto_url || ''}
             alt={user?.nome || 'Usuario'}

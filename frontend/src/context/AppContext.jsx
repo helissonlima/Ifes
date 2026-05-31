@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Snackbar, Alert } from '@mui/material';
 import { authAPI, setAuthToken } from '../services/api';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
 
 const defaultContextValue = {
   notify: () => {},
@@ -11,6 +12,8 @@ const defaultContextValue = {
   login: async () => {},
   logout: () => {},
   hasPermission: () => false,
+  isOnline: true,
+  networkRecoveredAt: null,
 };
 
 const AppContext = createContext(defaultContextValue);
@@ -20,6 +23,8 @@ export function AppProvider({ children }) {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const [networkRecoveredAt, setNetworkRecoveredAt] = useState(null);
+  const { isOnline } = useNetworkStatus();
 
   const loadSession = useCallback(async () => {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -44,6 +49,14 @@ export function AppProvider({ children }) {
   const notify = useCallback((message, severity = 'success') => {
     setNotification({ open: true, message, severity });
   }, []);
+
+  useEffect(() => {
+    if (isOnline) {
+      setNetworkRecoveredAt(new Date().toISOString());
+      return;
+    }
+    setNetworkRecoveredAt(null);
+  }, [isOnline]);
 
   const closeNotification = () => setNotification((n) => ({ ...n, open: false }));
 
@@ -78,6 +91,8 @@ export function AppProvider({ children }) {
       login,
       logout,
       hasPermission,
+      isOnline,
+      networkRecoveredAt,
     }}>
       {children}
       <Snackbar

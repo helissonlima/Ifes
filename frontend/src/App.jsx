@@ -4,6 +4,7 @@ import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material
 import theme from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import MainLayout from './components/Layout/MainLayout';
+import AcessoNegado from './pages/AcessoNegado';
 import Dashboard from './pages/Dashboard';
 import Propriedades from './pages/Propriedades';
 import PropriedadeDetalhe from './pages/PropriedadeDetalhe';
@@ -16,10 +17,20 @@ import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
 import Graos from './pages/Graos';
 
-function CenterLoading() {
+function CenterLoading({ title = 'Carregando sistema', description = 'Preparando sessão, permissões e dados iniciais.' }) {
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
-      <CircularProgress />
+    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', px: 3 }}>
+      <Box sx={{ display: 'grid', justifyItems: 'center', gap: 2, textAlign: 'center', maxWidth: 420 }}>
+        <CircularProgress />
+        <Box>
+          <Box component="h1" sx={{ fontSize: '1.2rem', fontWeight: 800, color: 'text.primary', mb: 0.75 }}>
+            {title}
+          </Box>
+          <Box component="p" sx={{ color: 'text.secondary', lineHeight: 1.5 }}>
+            {description}
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 }
@@ -33,13 +44,13 @@ function RequireAuth({ children }) {
 
 function RequirePermission({ permission, children }) {
   const { hasPermission } = useApp();
-  if (!hasPermission(permission)) return <Navigate to="/" replace />;
+  if (!hasPermission(permission)) return <Navigate to="/acesso-negado" replace state={{ reason: 'permission' }} />;
   return children;
 }
 
 function RequireAdmin({ children }) {
   const { user } = useApp();
-  if (user?.role !== 'admin') return <Navigate to="/" replace />;
+  if (user?.role !== 'admin') return <Navigate to="/acesso-negado" replace state={{ reason: 'admin' }} />;
   return children;
 }
 
@@ -50,12 +61,13 @@ function AppRoutes() {
     loadSession();
   }, [loadSession]);
 
-  if (loadingAuth) return <CenterLoading />;
+  if (loadingAuth) return <CenterLoading title="Restaurando sessão" description="Verificando autenticação e permissões disponíveis para este perfil." />;
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/acesso-negado" element={<AcessoNegado />} />
         <Route
           element={(
             <RequireAuth>
