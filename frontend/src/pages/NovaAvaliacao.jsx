@@ -7,7 +7,7 @@ import {
   useMediaQuery, useTheme,
   Dialog, DialogTitle, DialogContent, DialogActions, Chip, Tooltip,
 } from '@mui/material';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle, FiX } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -65,6 +65,14 @@ export default function NovaAvaliacao() {
   const [dialogRascunho, setDialogRascunho] = useState({ open: false, draft: null });
   const autoSaveTimer = useRef(null);
   const sincronizandoAutoRef = useRef(false);
+
+  // ── Tutorial campo a campo ────────────────────────────────────────────────
+  const [tutorialAtivo, setTutorialAtivo] = useState(false);
+  const [passoTutorial, setPassoTutorial] = useState(0);
+  const refCabecalho = useRef(null);
+  const refProgressoCard = useRef(null);
+  const refConteudoStep = useRef(null);
+  const refNavegacao = useRef(null);
 
   const abrirDialogRascunho = useCallback((draft) => {
     if (document.activeElement instanceof HTMLElement) {
@@ -385,6 +393,102 @@ export default function NovaAvaliacao() {
       })()
     : 100;
 
+  // ── Passos do tutorial (contextuais ao wizard step) ───────────────────────
+  // ATENÇÃO: este useCallback DEVE ficar antes de qualquer early return para
+  // não violar as Rules of Hooks.
+  const getTutorialSteps = useCallback(() => {
+    const base = [
+      {
+        ref: refCabecalho,
+        titulo: '📋 Cabeçalho da avaliação',
+        descricao: 'Aqui fica o título e os controles principais. Use o botão Voltar para sair sem perder dados (o rascunho fica salvo). O botão Salvar guarda o progresso no servidor a qualquer momento.',
+      },
+      {
+        ref: refProgressoCard,
+        titulo: '📊 Progresso e etapas',
+        descricao: 'Acompanhe o progresso geral (todos os indicadores) e o da etapa atual. Clique em qualquer etapa no stepper para navegar diretamente entre elas sem precisar usar os botões.',
+      },
+    ];
+    if (step === 0) {
+      return [
+        ...base,
+        {
+          ref: refConteudoStep,
+          titulo: '📝 Informações da avaliação',
+          descricao: 'Preencha os dados básicos:\n• Propriedade Rural (obrigatório) — busque digitando o nome.\n• Técnico Responsável — preenchido automaticamente com seu cadastro.\n• Data da Avaliação — data em que a visita está ocorrendo.\n• Observações — campo livre para anotações sobre a visita.',
+        },
+        {
+          ref: refNavegacao,
+          titulo: '➡️ Navegação entre etapas',
+          descricao: 'Use o botão Próximo para avançar para a primeira dimensão de avaliação. Você pode voltar a qualquer etapa anterior sem perder as respostas já preenchidas.',
+        },
+      ];
+    }
+    if (step >= 1 && step <= dimensoesLista.length) {
+      const dim = dimensoesLista[step - 1];
+      return [
+        ...base,
+        {
+          ref: refConteudoStep,
+          titulo: `🌱 Dimensão: ${dim?.nome}`,
+          descricao: `Esta dimensão possui ${dim?.indicadores?.length || 0} indicadores e representa ${Math.round((dim?.peso || 0) * 100)}% do Índice Geral de Sustentabilidade.\n\nPara cada indicador, leia o enunciado e selecione o critério que melhor descreve a realidade da propriedade. Uma nota de 0 a 1 é atribuída automaticamente. Você pode adicionar observações individuais em cada indicador.`,
+        },
+        {
+          ref: refNavegacao,
+          titulo: '➡️ Navegação entre etapas',
+          descricao: 'Avance para a próxima dimensão ao concluir. Não é obrigatório responder todos os indicadores para continuar, mas o cálculo do IGS será parcial se houver indicadores sem resposta.',
+        },
+      ];
+    }
+    return [
+      ...base,
+      {
+        ref: refConteudoStep,
+        titulo: '🔍 Revisão e resultado',
+        descricao: 'Confira o resumo com os índices calculados por dimensão e o ICSR (Índice de Sustentabilidade) preliminar. Se precisar corrigir algo, use o Stepper acima para voltar a qualquer etapa.',
+      },
+      {
+        ref: refNavegacao,
+        titulo: '✅ Concluir avaliação',
+        descricao: 'Clique em Concluir Avaliação para finalizar e enviar os dados ao servidor. Você precisa estar conectado à internet para concluir. Os dados ficam salvos localmente até você se conectar.',
+      },
+    ];
+  }, [step, dimensoesLista]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll + highlight quando muda o passo do tutorial
+  useEffect(() => {
+    if (!tutorialAtivo) return;
+    const steps = getTutorialSteps();
+    const el = steps[Math.min(passoTutorial, steps.length - 1)]?.ref?.current;
+    if (!el) return;
+    document.querySelectorAll('[data-tutorial-hl]').forEach((e) => {
+      e.style.outline = '';
+      e.style.outlineOffset = '';
+      e.removeAttribute('data-tutorial-hl');
+    });
+    el.setAttribute('data-tutorial-hl', '1');
+    el.style.outline = '3px solid #2E7D32';
+    el.style.outlineOffset = '4px';
+    el.style.borderRadius = '12px';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return () => {
+      el.style.outline = '';
+      el.style.outlineOffset = '';
+      el.removeAttribute('data-tutorial-hl');
+    };
+  }, [tutorialAtivo, passoTutorial, getTutorialSteps]);
+
+  // Fecha e limpa highlights ao desativar tutorial
+  useEffect(() => {
+    if (!tutorialAtivo) {
+      document.querySelectorAll('[data-tutorial-hl]').forEach((e) => {
+        e.style.outline = '';
+        e.style.outlineOffset = '';
+        e.removeAttribute('data-tutorial-hl');
+      });
+    }
+  }, [tutorialAtivo]);
+
   if (carregando) return (
     <Box>
       <Skeleton variant="rectangular" height={88} sx={{ borderRadius: 2, mb: 1.5 }} />
@@ -394,6 +498,7 @@ export default function NovaAvaliacao() {
   );
 
   const STEP_LABELS = ['Informações', ...dimensoesLista.map((d) => d.nome), 'Revisão'];
+
   const STEP_LABELS_STEPPER = STEP_LABELS.map((label) => {
     if (label === 'Informações') return 'Info';
     if (label === 'Gestão, Qualidade e Governança') return 'IGQG';
@@ -463,6 +568,7 @@ export default function NovaAvaliacao() {
       </Dialog>
 
       {/* ── Cabeçalho ── */}
+      <Box ref={refCabecalho}>
       <PageHeaderCard
         title="Nova Avaliação ICSR"
         subtitle="Preencha os indicadores de cada dimensão. Seus dados são salvos automaticamente."
@@ -471,18 +577,16 @@ export default function NovaAvaliacao() {
             <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">
               Voltar
             </Button>
-            <Tooltip title="Ver critérios de pontuação e guia de aplicação">
+            <Tooltip title={tutorialAtivo ? 'Fechar o tutorial' : 'Tutorial interativo: explicação campo a campo desta página'}>
               <Button
-                component="a"
-                href="/guia"
-                target="_blank"
-                rel="noopener noreferrer"
                 size="small"
-                startIcon={<FiHelpCircle size={14} />}
-                variant="outlined"
-                sx={{ color: 'text.secondary', borderColor: 'divider' }}
+                startIcon={tutorialAtivo ? <FiX size={14} /> : <FiHelpCircle size={14} />}
+                variant={tutorialAtivo ? 'contained' : 'outlined'}
+                color={tutorialAtivo ? 'primary' : 'inherit'}
+                onClick={() => { setTutorialAtivo((a) => !a); setPassoTutorial(0); }}
+                sx={tutorialAtivo ? {} : { color: 'text.secondary', borderColor: 'divider' }}
               >
-                Guia
+                {tutorialAtivo ? 'Fechar guia' : 'Guia'}
               </Button>
             </Tooltip>
             <Tooltip title="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
@@ -501,10 +605,11 @@ export default function NovaAvaliacao() {
           </Box>
         )}
       />
+      </Box>
 
       {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
 
-      <Card sx={{ mb: 1.5 }}>
+      <Card ref={refProgressoCard} sx={{ mb: 1.5 }}>
         <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
           {/* Progresso global */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75, gap: 1 }}>
@@ -640,6 +745,7 @@ export default function NovaAvaliacao() {
       </Card>
 
       {/* Conteúdo dos steps */}
+      <Box ref={refConteudoStep}>
       {step === 0 && (
         <Card sx={{ mb: 2.5 }}>
           <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
@@ -725,9 +831,10 @@ export default function NovaAvaliacao() {
           totalIndicadores={totalIndicadores}
         />
       )}
+      </Box>
 
       {/* Botões de navegação */}
-      <Card sx={{ mt: 3.5 }}>
+      <Card ref={refNavegacao} sx={{ mt: 3.5 }}>
         <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
             <Button
@@ -779,6 +886,113 @@ export default function NovaAvaliacao() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* ── Painel de Tutorial ── */}
+      {tutorialAtivo && (() => {
+        const tutorialSteps = getTutorialSteps();
+        const passo = Math.min(passoTutorial, tutorialSteps.length - 1);
+        const atual = tutorialSteps[passo];
+        return (
+          <Paper
+            elevation={12}
+            sx={{
+              position: 'fixed',
+              bottom: isMobile ? 64 : 20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: { xs: 'calc(100% - 32px)', sm: 480 },
+              zIndex: 1400,
+              borderRadius: 3,
+              p: 2.5,
+              border: '2px solid',
+              borderColor: 'primary.main',
+              bgcolor: 'background.paper',
+            }}
+          >
+            {/* Header */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  Tutorial · Passo {passo + 1} de {tutorialSteps.length}
+                </Typography>
+                <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ mt: 0.25 }}>
+                  {atual.titulo}
+                </Typography>
+              </Box>
+              <Tooltip title="Fechar tutorial">
+                <span>
+                  <Button
+                    size="small"
+                    onClick={() => setTutorialAtivo(false)}
+                    sx={{ minWidth: 0, p: 0.5, color: 'text.secondary' }}
+                  >
+                    <FiX size={16} />
+                  </Button>
+                </span>
+              </Tooltip>
+            </Box>
+
+            {/* Conteúdo */}
+            <Typography
+              variant="body2"
+              sx={{ mb: 2, lineHeight: 1.7, whiteSpace: 'pre-line', color: 'text.primary' }}
+            >
+              {atual.descricao}
+            </Typography>
+
+            {/* Dots */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, mb: 1.5 }}>
+              {tutorialSteps.map((_, idx) => (
+                <Box
+                  key={idx}
+                  onClick={() => setPassoTutorial(idx)}
+                  sx={{
+                    width: idx === passo ? 20 : 8,
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: idx === passo ? 'primary.main' : '#ddd',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                />
+              ))}
+            </Box>
+
+            {/* Navegação */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+              <Button
+                size="small"
+                startIcon={<FiArrowLeft />}
+                onClick={() => setPassoTutorial((p) => p - 1)}
+                disabled={passo === 0}
+                variant="outlined"
+              >
+                Anterior
+              </Button>
+              {passo < tutorialSteps.length - 1 ? (
+                <Button
+                  size="small"
+                  variant="contained"
+                  endIcon={<FiArrowRight />}
+                  onClick={() => setPassoTutorial((p) => p + 1)}
+                >
+                  Próximo
+                </Button>
+              ) : (
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="success"
+                  startIcon={<FiCheck />}
+                  onClick={() => setTutorialAtivo(false)}
+                >
+                  Entendi!
+                </Button>
+              )}
+            </Box>
+          </Paper>
+        );
+      })()}
     </Box>
   );
 }
