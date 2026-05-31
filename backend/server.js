@@ -15,13 +15,28 @@ const graosRoutes = require('./src/routes/graos');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const allowedOrigins = new Set([
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:4173',
-  'http://127.0.0.1:4173',
-  process.env.FRONTEND_URL,
-].filter(Boolean));
+// Normaliza a FRONTEND_URL: adiciona tanto a versão com porta quanto sem,
+// cobrindo cenários onde um proxy reverso remove a porta (ex: :4300 → :443).
+const buildAllowedOrigins = () => {
+  const origins = new Set([
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+  ]);
+  const raw = process.env.FRONTEND_URL;
+  if (raw) {
+    origins.add(raw.trim());
+    try {
+      // Adiciona também a versão sem porta (para proxy reverso com SSL)
+      const u = new URL(raw.trim());
+      u.port = '';
+      origins.add(u.origin);
+    } catch { /* URL inválida — ignora */ }
+  }
+  return origins;
+};
+const allowedOrigins = buildAllowedOrigins();
 
 app.use(cors({
   origin(origin, callback) {
@@ -29,7 +44,8 @@ app.use(cors({
       callback(null, true);
       return;
     }
-    callback(new Error(`Origem não permitida por CORS: ${origin}`));
+    // callback(null, false) retorna 403 — NÃO throw Error, que causaria 500
+    callback(null, false);
   },
 }));
 app.use(express.json());

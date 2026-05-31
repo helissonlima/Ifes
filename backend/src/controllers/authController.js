@@ -61,6 +61,7 @@ const login = async (req, res) => {
     const token = signToken(user);
     return res.json({ token, user });
   } catch (err) {
+      console.error('[auth/login] Erro interno:', err.message);
     return res.status(500).json({ erro: err.message });
   }
 };
