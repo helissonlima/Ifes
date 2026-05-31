@@ -1,0 +1,16 @@
+{
+  "name": "ifes-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix frontend run dev --",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "dev:frontend": "npm --prefix frontend run dev --",
+    "build:frontend": "npm --prefix frontend run build",
+    "dev:backend": "npm --prefix backend run dev",
+    "start:backend": "npm --prefix backend run start",
+    "check:forbidden": "bash ./scripts/check-forbidden-terms.sh",
+    "verify": "npm run check:forbidden && npm run build",
+    "verify:strict": "npm run check:forbidden && npm run lint && npm run build"
+  }
+}

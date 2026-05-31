@@ -20,6 +20,24 @@ baseada na análise comparativa **metodologia de referência** (MG) × **institu
 - Node.js ≥ 18
 - PostgreSQL ≥ 14
 
+## Comandos Rápidos (na raiz do projeto)
+
+```bash
+# Desenvolvimento frontend
+npm run dev -- --host 0.0.0.0
+
+# Build frontend
+npm run build
+
+# Validação padrão (termos proibidos + build)
+npm run verify
+
+# Validação estrita (termos proibidos + lint + build)
+npm run verify:strict
+```
+
+Esses comandos podem ser executados da pasta raiz (`Ifes/`) e evitam erros de contexto como `ENOENT` por falta de `package.json` no diretório atual.
+
 ## Docker Compose
 
 Se preferir subir tudo com Docker, `docker compose up` agora cria automaticamente
@@ -70,6 +88,12 @@ API disponível em: `http://localhost:3001`
 cd frontend
 npm install
 npm run dev
+```
+
+Alternativa equivalente pela raiz:
+
+```bash
+npm run dev -- --host 0.0.0.0
 ```
 
 Interface disponível em: `http://localhost:5173`
