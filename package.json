@@ -2,6 +2,8 @@
   "name": "ifes-workspace",
   "private": true,
   "scripts": {
+    "env": "node scripts/init-env.js",
+    "up": "node scripts/init-env.js && docker compose up -d --build",
     "dev": "npm --prefix frontend run dev --",
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",

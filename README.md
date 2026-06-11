@@ -38,17 +38,43 @@ npm run verify:strict
 
 Esses comandos podem ser executados da pasta raiz (`Ifes/`) e evitam erros de contexto como `ENOENT` por falta de `package.json` no diretório atual.
 
-## Docker Compose
+## Docker (deploy)
 
-Se preferir subir tudo com Docker, `docker compose up` agora cria automaticamente
-um volume de segredos na primeira execução e gera chaves de 32 caracteres para
-o banco e para o JWT. Depois disso, os segredos ficam persistidos no volume
-`secrets` e são reutilizados nas próximas execuções.
+Subir tudo (banco + API + frontend) com um único comando:
 
-Para acesso externo, a URL pública do frontend deve ficar em
-`https://cafe.h3info.com:4300`. O `.env` e o backend usam esse valor para CORS.
-Se a terminação TLS acontecer em outro proxy, mantenha o mesmo host/porta no
-ambiente e ajuste apenas a infraestrutura de rede.
+```bash
+make up
+```
+
+O `make up` faz duas coisas:
+
+1. **Gera o `.env` automaticamente na primeira execução**, preenchendo
+   `DB_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET` com senhas aleatórias de
+   **32 caracteres**. Se o `.env` já existir, os segredos são preservados.
+2. Roda `docker compose up -d --build`.
+
+A aplicação fica disponível em **http://localhost:5173** (frontend Nginx, que
+também faz proxy de `/api` para o backend).
+
+Outros atalhos: `make logs`, `make ps`, `make down`, `make restart`,
+`make rebuild` (build sem cache) e `make clean` (remove o volume do banco).
+
+### Sem `make` (ex.: Windows)
+
+```bash
+docker compose up -d --build      # exige um .env existente
+```
+
+Para gerar o `.env` antes (equivalente ao passo 1 do `make up`):
+
+```bash
+npm run env        # gera .env com segredos de 32 caracteres (se ainda não existir)
+# ou direto:
+npm run up         # gera .env + docker compose up -d --build
+```
+
+> **Acesso externo / proxy reverso:** ajuste `FRONTEND_URL` e `APP_PORT` no
+> `.env` conforme o domínio público. O backend usa `FRONTEND_URL` para o CORS.
 
 ---
 

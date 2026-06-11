@@ -1,33 +1,15 @@
 services:
 
-  # ─── Bootstrap de Segredos ───────────────────────────────────────────────────
-  setup:
-    image: node:20-alpine
-    restart: "no"
-    command: ["node", "/scripts/init-secrets.js"]
-    volumes:
-      - secrets:/run/secrets
-      - ./scripts:/scripts:ro
-
   # ─── Banco de Dados ───────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    entrypoint:
-      - sh
-      - -ec
-      - |
-        export POSTGRES_PASSWORD="$(cat /run/secrets/db_password)"
-        exec docker-entrypoint.sh postgres
     environment:
       POSTGRES_DB:       ${DB_NAME:-sustentabilidade_rural}
       POSTGRES_USER:     ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env (rode "make up" para gerar)}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - secrets:/run/secrets:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-sustentabilidade_rural}"]
       interval: 10s
@@ -39,23 +21,19 @@ services:
     build: ./backend
     restart: unless-stopped
     depends_on:
-      setup:
-        condition: service_completed_successfully
       db:
         condition: service_healthy
     environment:
-      NODE_ENV:          ${NODE_ENV:-production}
-      PORT:              3001
-      DB_HOST:           db
-      DB_PORT:           ${DB_PORT:-5432}
-      DB_NAME:           ${DB_NAME:-sustentabilidade_rural}
-      DB_USER:           ${DB_USER:-postgres}
-      DB_PASSWORD_FILE:       /run/secrets/db_password
-      JWT_SECRET_FILE:        /run/secrets/jwt_secret
-      JWT_REFRESH_SECRET_FILE: /run/secrets/jwt_refresh_secret
-      FRONTEND_URL:      ${FRONTEND_URL:-https://cafe.h3info.com}
-    volumes:
-      - secrets:/run/secrets:ro
+      NODE_ENV:           ${NODE_ENV:-production}
+      PORT:               3001
+      DB_HOST:            db
+      DB_PORT:            5432
+      DB_NAME:            ${DB_NAME:-sustentabilidade_rural}
+      DB_USER:            ${DB_USER:-postgres}
+      DB_PASSWORD:        ${DB_PASSWORD:?defina DB_PASSWORD no .env (rode "make up" para gerar)}
+      JWT_SECRET:         ${JWT_SECRET:?defina JWT_SECRET no .env (rode "make up" para gerar)}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?defina JWT_REFRESH_SECRET no .env (rode "make up" para gerar)}
+      FRONTEND_URL:       ${FRONTEND_URL:-http://localhost:5173}
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""]
       interval: 15s
@@ -71,7 +49,7 @@ services:
         VITE_API_URL: /api
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-4300}:80"
+      - "${APP_PORT:-5173}:80"
     depends_on:
       backend:
         condition: service_healthy
@@ -79,4 +57,3 @@ services:
 # ─── Volumes ─────────────────────────────────────────────────────────────────
 volumes:
   pgdata:
-  secrets:
