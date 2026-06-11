@@ -18,6 +18,9 @@ if (fs.existsSync(envPath)) {
 // 16 bytes em hex = 32 caracteres
 const secret = () => crypto.randomBytes(16).toString('hex');
 
+const adminEmail = 'admin@example.com';
+const adminPassword = secret();
+
 const env = `# Gerado automaticamente em ${new Date().toISOString()}
 # Segredos aleatórios de 32 caracteres. NÃO commitar este arquivo.
 
@@ -34,7 +37,16 @@ DB_PASSWORD=${secret()}
 # --- Segredos JWT (32 caracteres cada) ---
 JWT_SECRET=${secret()}
 JWT_REFRESH_SECRET=${secret()}
+
+# --- Usuário Admin inicial ---
+ADMIN_EMAIL=${adminEmail}
+ADMIN_PASSWORD=${adminPassword}
 `;
 
 fs.writeFileSync(envPath, env, { mode: 0o600 });
 console.log('✅ .env criado com segredos aleatórios de 32 caracteres.');
+console.log('');
+console.log('🔑 Login admin inicial (anote — não será exibido novamente):');
+console.log(`   E-mail: ${adminEmail}`);
+console.log(`   Senha:  ${adminPassword}`);
+console.log('');

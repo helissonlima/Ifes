@@ -22,6 +22,8 @@ env:
 		echo "ℹ️  .env já existe — mantendo segredos atuais."; \
 	elif command -v openssl >/dev/null 2>&1; then \
 		echo "🔐 Gerando .env com segredos aleatórios de 32 caracteres..."; \
+		ADMIN_EMAIL="admin@example.com"; \
+		ADMIN_PASSWORD="$$(openssl rand -hex 16)"; \
 		{ \
 			echo "# Gerado automaticamente. NÃO commitar este arquivo."; \
 			echo ""; \
@@ -38,9 +40,18 @@ env:
 			echo "# --- Segredos JWT (32 caracteres cada) ---"; \
 			echo "JWT_SECRET=$$(openssl rand -hex 16)"; \
 			echo "JWT_REFRESH_SECRET=$$(openssl rand -hex 16)"; \
+			echo ""; \
+			echo "# --- Usuário Admin inicial ---"; \
+			echo "ADMIN_EMAIL=$$ADMIN_EMAIL"; \
+			echo "ADMIN_PASSWORD=$$ADMIN_PASSWORD"; \
 		} > .env; \
 		chmod 600 .env; \
 		echo "✅ .env criado com segredos aleatórios de 32 caracteres."; \
+		echo ""; \
+		echo "🔑 Login admin inicial (anote — não será exibido novamente):"; \
+		echo "   E-mail: $$ADMIN_EMAIL"; \
+		echo "   Senha:  $$ADMIN_PASSWORD"; \
+		echo ""; \
 	else \
 		echo "openssl não encontrado — usando Node para gerar o .env..."; \
 		node scripts/init-env.js; \
