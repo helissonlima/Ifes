@@ -34,6 +34,8 @@ services:
       JWT_SECRET:         ${JWT_SECRET:?defina JWT_SECRET no .env (rode "make up" para gerar)}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?defina JWT_REFRESH_SECRET no .env (rode "make up" para gerar)}
       FRONTEND_URL:       ${FRONTEND_URL:-http://localhost:5173}
+      ADMIN_EMAIL:        ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD:     ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env (rode "make up" para gerar)}
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""]
       interval: 15s
