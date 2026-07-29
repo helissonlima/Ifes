@@ -1,7 +1,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
-const { readSecret } = require('../config/secrets');
+const { requireSecret } = require('../config/secrets');
+
+const JWT_SECRET = requireSecret('JWT_SECRET', 'dev-secret-change-me');
+
+// Hash bcrypt válido sem senha correspondente conhecida — usado para manter o
+// tempo de resposta do login constante quando o e-mail não existe, evitando
+// que a ausência da chamada a bcrypt.compare revele a existência da conta.
+const DUMMY_HASH = '$2a$10$CwTycUXWue0Thq9StjUM0uJ8Zo6dR8kqsBw1S/Q.gQjHRnDS.6f0e';
 
 const DEFAULT_PERMISSIONS = {
   dashboard: true,
@@ -27,7 +34,6 @@ function sanitizeUser(row) {
 }
 
 function signToken(user) {
-  const secret = readSecret('JWT_SECRET', 'dev-secret-change-me');
   return jwt.sign(
     {
       sub: user.id,
@@ -38,45 +44,45 @@ function signToken(user) {
       foto_url: user.foto_url,
       permissions: user.permissions,
     },
-    secret,
+    JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '12h' }
   );
 }
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, senha } = req.body;
     if (!email || !senha) return res.status(400).json({ erro: 'E-mail e senha são obrigatórios' });
 
     const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email.toLowerCase()]);
-    if (!result.rows.length) return res.status(401).json({ erro: 'Credenciais inválidas' });
-
     const row = result.rows[0];
-    if (!row.ativo) return res.status(403).json({ erro: 'Usuário inativo' });
 
-    const ok = await bcrypt.compare(senha, row.senha_hash);
-    if (!ok) return res.status(401).json({ erro: 'Credenciais inválidas' });
+    // bcrypt.compare sempre roda, mesmo sem usuário, para não vazar a
+    // existência da conta por diferença no tempo de resposta.
+    const ok = await bcrypt.compare(senha, row?.senha_hash || DUMMY_HASH);
+    if (!row || !ok || !row.ativo) {
+      return res.status(401).json({ erro: 'Credenciais inválidas' });
+    }
 
     const user = sanitizeUser(row);
     const token = signToken(user);
     return res.json({ token, user });
   } catch (err) {
-      console.error('[auth/login] Erro interno:', err.message);
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const me = async (req, res) => {
+const me = async (req, res, next) => {
   try {
     const result = await pool.query('SELECT * FROM usuarios WHERE id = $1', [req.user.id]);
     if (!result.rows.length) return res.status(404).json({ erro: 'Usuário não encontrado' });
     return res.json(sanitizeUser(result.rows[0]));
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const listarUsuarios = async (req, res) => {
+const listarUsuarios = async (req, res, next) => {
   try {
     const result = await pool.query(
       `SELECT id, nome, email, role, foto_url, ativo, permissoes, criado_em, atualizado_em
@@ -84,11 +90,11 @@ const listarUsuarios = async (req, res) => {
     );
     return res.json(result.rows.map(sanitizeUser));
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const criarUsuario = async (req, res) => {
+const criarUsuario = async (req, res, next) => {
   try {
     const { nome, email, senha, role = 'tecnico', foto_url = '', permissions = {} } = req.body;
     if (!nome || !email || !senha) {
@@ -118,11 +124,11 @@ const criarUsuario = async (req, res) => {
     if (err.code === '23505') {
       return res.status(409).json({ erro: 'Já existe um usuário com este e-mail' });
     }
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const atualizarUsuario = async (req, res) => {
+const atualizarUsuario = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { nome, email, foto_url, role } = req.body;
@@ -175,11 +181,11 @@ const atualizarUsuario = async (req, res) => {
     if (err.code === '23505') {
       return res.status(409).json({ erro: 'Já existe um usuário com este e-mail' });
     }
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const atualizarPermissoes = async (req, res) => {
+const atualizarPermissoes = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { permissions = {}, ativo } = req.body;
@@ -212,11 +218,11 @@ const atualizarPermissoes = async (req, res) => {
 
     return res.json(sanitizeUser(result.rows[0]));
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const redefinirSenha = async (req, res) => {
+const redefinirSenha = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { senha } = req.body;
@@ -231,11 +237,11 @@ const redefinirSenha = async (req, res) => {
     if (!result.rows.length) return res.status(404).json({ erro: 'Usuário não encontrado' });
     return res.json({ mensagem: 'Senha redefinida com sucesso' });
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 
-const excluirUsuario = async (req, res) => {
+const excluirUsuario = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -256,7 +262,7 @@ const excluirUsuario = async (req, res) => {
     await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
     return res.json({ mensagem: 'Usuário excluído com sucesso' });
   } catch (err) {
-    return res.status(500).json({ erro: err.message });
+    return next(err);
   }
 };
 

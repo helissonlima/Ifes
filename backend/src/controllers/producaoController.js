@@ -60,7 +60,8 @@ async function getMediaProducao(req, res) {
       ibgeCategoria = grao.ibge_categoria;
       culturaNome = grao.nome;
     } catch (e) {
-      return res.status(500).json({ erro: 'Erro ao consultar grão: ' + e.message });
+      console.error('[producao/media] Erro ao consultar grão:', e);
+      return res.status(500).json({ erro: 'Erro ao consultar grão' });
     }
   }
 
@@ -127,7 +128,8 @@ async function getMediaProducao(req, res) {
     CACHE.set(key, { data, ts: Date.now() });
     return res.json(data);
   } catch (err) {
-    return res.status(502).json({ erro: 'Falha ao consultar IBGE', detalhes: err.message });
+    console.error('[producao/media] Falha ao consultar IBGE:', err);
+    return res.status(502).json({ erro: 'Falha ao consultar dados do IBGE. Tente novamente mais tarde.' });
   }
 }
 

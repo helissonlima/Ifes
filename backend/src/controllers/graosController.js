@@ -268,7 +268,7 @@ class GraosController {
       });
     } catch (error) {
       console.error('Erro ao sincronizar com IBGE:', error);
-      res.status(500).json({ erro: 'Falha ao buscar dados do IBGE: ' + error.message });
+      res.status(502).json({ erro: 'Falha ao buscar dados do IBGE. Tente novamente mais tarde.' });
     }
   }
 }

@@ -3,7 +3,7 @@ const pool = require('../config/database');
 // Converte string vazia / undefined em null para colunas numéricas do Postgres
 const numOrNull = (v) => (v === '' || v === undefined || v === null ? null : v);
 
-const listar = async (req, res) => {
+const listar = async (req, res, next) => {
   try {
     const { search, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
@@ -40,11 +40,11 @@ const listar = async (req, res) => {
       limit: parseInt(limit),
     });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
-const buscarPorId = async (req, res) => {
+const buscarPorId = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM propriedades WHERE id = $1', [id]);
@@ -64,7 +64,7 @@ const buscarPorId = async (req, res) => {
 
     res.json(propriedade);
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
@@ -82,7 +82,7 @@ async function sincronizarGraos(client, propriedadeId, graos) {
   }
 }
 
-const criar = async (req, res) => {
+const criar = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -110,13 +110,13 @@ const criar = async (req, res) => {
     res.status(201).json(propriedade);
   } catch (err) {
     await client.query('ROLLBACK');
-    res.status(500).json({ erro: err.message });
+    next(err);
   } finally {
     client.release();
   }
 };
 
-const atualizar = async (req, res) => {
+const atualizar = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -147,20 +147,20 @@ const atualizar = async (req, res) => {
     res.json(propriedade);
   } catch (err) {
     await client.query('ROLLBACK');
-    res.status(500).json({ erro: err.message });
+    next(err);
   } finally {
     client.release();
   }
 };
 
-const excluir = async (req, res) => {
+const excluir = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM propriedades WHERE id = $1 RETURNING id', [id]);
     if (result.rows.length === 0) return res.status(404).json({ erro: 'Propriedade não encontrada' });
     res.json({ mensagem: 'Propriedade excluída com sucesso' });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 

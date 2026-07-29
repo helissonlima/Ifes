@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Gera o arquivo .env (na raiz do projeto) na PRIMEIRA execução, com todas
-// as senhas/segredos aleatórios de 32 caracteres. Se o .env já existir, nada
-// é alterado — os segredos atuais são preservados.
+// as senhas/segredos aleatórios no primeiro deploy. Se o .env já existir,
+// nada é alterado — os segredos atuais são preservados.
 
 const fs = require('fs');
 const path = require('path');
@@ -15,14 +15,16 @@ if (fs.existsSync(envPath)) {
   process.exit(0);
 }
 
-// 16 bytes em hex = 32 caracteres
+// 16 bytes em hex = 32 caracteres (senhas)
 const secret = () => crypto.randomBytes(16).toString('hex');
+// 32 bytes em hex = 64 caracteres (recomendado para HMAC-SHA256 usado no JWT)
+const jwtSecret = () => crypto.randomBytes(32).toString('hex');
 
 const adminEmail = 'admin@example.com';
 const adminPassword = secret();
 
 const env = `# Gerado automaticamente em ${new Date().toISOString()}
-# Segredos aleatórios de 32 caracteres. NÃO commitar este arquivo.
+# Segredos aleatórios gerados automaticamente. NÃO commitar este arquivo.
 
 # --- Aplicação ---
 APP_PORT=5173
@@ -34,9 +36,9 @@ DB_NAME=sustentabilidade_rural
 DB_USER=postgres
 DB_PASSWORD=${secret()}
 
-# --- Segredos JWT (32 caracteres cada) ---
-JWT_SECRET=${secret()}
-JWT_REFRESH_SECRET=${secret()}
+# --- Segredos JWT (32 bytes / 64 caracteres cada) ---
+JWT_SECRET=${jwtSecret()}
+JWT_REFRESH_SECRET=${jwtSecret()}
 
 # --- Usuário Admin inicial ---
 ADMIN_EMAIL=${adminEmail}

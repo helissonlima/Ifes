@@ -8,7 +8,7 @@ const {
   calcularImpactoIGS,
 } = require('../models/indicadores');
 
-const listar = async (req, res) => {
+const listar = async (req, res, next) => {
   try {
     const { propriedade_id, status, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
@@ -44,11 +44,11 @@ const listar = async (req, res) => {
       limit: parseInt(limit),
     });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
-const buscarPorId = async (req, res) => {
+const buscarPorId = async (req, res, next) => {
   try {
     const { id } = req.params;
     const avalResult = await pool.query(
@@ -65,17 +65,20 @@ const buscarPorId = async (req, res) => {
 
     res.json({ ...avalResult.rows[0], respostas: respostasResult.rows });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
-const criar = async (req, res) => {
+const criar = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     const { propriedade_id, tecnico_responsavel, data_avaliacao, observacoes, respostas } = req.body;
-    if (!propriedade_id) return res.status(400).json({ erro: 'propriedade_id é obrigatório' });
+    if (!propriedade_id) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ erro: 'propriedade_id é obrigatório' });
+    }
 
     // Criar avaliação inicial como rascunho
     const avalResult = await client.query(
@@ -102,13 +105,13 @@ const criar = async (req, res) => {
     res.status(201).json(avaliacao);
   } catch (err) {
     await client.query('ROLLBACK');
-    res.status(500).json({ erro: err.message });
+    next(err);
   } finally {
     client.release();
   }
 };
 
-const salvarRespostas = async (req, res) => {
+const salvarRespostas = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -117,7 +120,10 @@ const salvarRespostas = async (req, res) => {
 
     // Verificar que a avaliação existe
     const avalCheck = await client.query('SELECT id FROM avaliacoes WHERE id = $1', [id]);
-    if (avalCheck.rows.length === 0) return res.status(404).json({ erro: 'Avaliação não encontrada' });
+    if (avalCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ erro: 'Avaliação não encontrada' });
+    }
 
     // Limpar respostas existentes e reinserir
     await client.query('DELETE FROM respostas_indicadores WHERE avaliacao_id = $1', [id]);
@@ -141,7 +147,7 @@ const salvarRespostas = async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     await client.query('ROLLBACK');
-    res.status(500).json({ erro: err.message });
+    next(err);
   } finally {
     client.release();
   }
@@ -167,18 +173,18 @@ async function calcularEPersistirIndices(client, avaliacaoId, respostas) {
   );
 }
 
-const excluir = async (req, res) => {
+const excluir = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM avaliacoes WHERE id=$1 RETURNING id', [id]);
     if (result.rows.length === 0) return res.status(404).json({ erro: 'Avaliação não encontrada' });
     res.json({ mensagem: 'Avaliação excluída com sucesso' });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
-const estatisticas = async (req, res) => {
+const estatisticas = async (req, res, next) => {
   try {
     const stats = await pool.query(`
       SELECT
@@ -205,12 +211,12 @@ const estatisticas = async (req, res) => {
       distribuicao_classificacao: distribuicao.rows,
     });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
 // Diagnóstico automático: status, recomendações e plano de ação top-5 por impacto no IGS
-const diagnostico = async (req, res) => {
+const diagnostico = async (req, res, next) => {
   try {
     const { id } = req.params;
     const avalResult = await pool.query(
@@ -290,12 +296,12 @@ const diagnostico = async (req, res) => {
       plano_acao_top5: topAcoes,
     });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
 // Comparativo entre duas avaliações (mesma propriedade ou não)
-const comparar = async (req, res) => {
+const comparar = async (req, res, next) => {
   try {
     const { a, b } = req.query;
     if (!a || !b) return res.status(400).json({ erro: 'Parâmetros a e b (IDs das avaliações) são obrigatórios' });
@@ -387,12 +393,12 @@ const comparar = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 
 // Evolução temporal de uma propriedade
-const timelinePropriedade = async (req, res) => {
+const timelinePropriedade = async (req, res, next) => {
   try {
     const { propriedade_id } = req.params;
     const result = await pool.query(
@@ -406,7 +412,7 @@ const timelinePropriedade = async (req, res) => {
     );
     res.json({ propriedade_id, total: result.rows.length, avaliacoes: result.rows });
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    next(err);
   }
 };
 

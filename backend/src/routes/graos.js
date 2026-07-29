@@ -1,15 +1,15 @@
 const express = require('express');
 const GraosController = require('../controllers/graosController');
-const { authRequired } = require('../middleware/auth');
+const { authRequired, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Rotas admin (mais específicas, colocadas antes de rotas genéricas)
-router.get('/admin/todos', authRequired, (req, res, next) => GraosController.listarTodos(req, res));
-router.post('/admin/criar', authRequired, (req, res, next) => GraosController.criar(req, res));
-router.post('/admin/sincronizar-ibge', authRequired, (req, res, next) => GraosController.sincronizarIBGE(req, res));
-router.put('/admin/:id/atualizar', authRequired, (req, res, next) => GraosController.atualizar(req, res));
-router.delete('/admin/:id/deletar', authRequired, (req, res, next) => GraosController.deletar(req, res));
+router.get('/admin/todos', authRequired, requireAdmin, (req, res, next) => GraosController.listarTodos(req, res));
+router.post('/admin/criar', authRequired, requireAdmin, (req, res, next) => GraosController.criar(req, res));
+router.post('/admin/sincronizar-ibge', authRequired, requireAdmin, (req, res, next) => GraosController.sincronizarIBGE(req, res));
+router.put('/admin/:id/atualizar', authRequired, requireAdmin, (req, res, next) => GraosController.atualizar(req, res));
+router.delete('/admin/:id/deletar', authRequired, requireAdmin, (req, res, next) => GraosController.deletar(req, res));
 
 // Rotas públicas
 router.get('/', (req, res, next) => GraosController.listar(req, res));

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const { runMigrations } = require('./src/config/migrations');
 const { bootstrapAuth } = require('./src/config/authBootstrap');
 const { authRequired } = require('./src/middleware/auth');
@@ -38,6 +39,7 @@ const buildAllowedOrigins = () => {
 };
 const allowedOrigins = buildAllowedOrigins();
 
+app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
     if (!origin || allowedOrigins.has(origin)) {
@@ -48,7 +50,7 @@ app.use(cors({
     callback(null, false);
   },
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/graos', graosRoutes); // Rotas de grãos (parcialmente públicas, parcialmente autenticadas)
