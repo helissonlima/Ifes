@@ -1,9 +1,11 @@
-import { Box, Typography, LinearProgress, Chip, Alert, Tooltip } from '@mui/material';
+import { useState } from 'react';
+import { Box, Typography, LinearProgress, Chip, Alert, Tooltip, IconButton } from '@mui/material';
 import { FiInfo } from 'react-icons/fi';
 import IndicadorCard from './IndicadorCard';
 import { calcularIndiceDimensao } from '../../utils/metodologia';
 
 export default function DimensaoStep({ dimensao, respostas, observacoes, onChange, onObservacaoChange }) {
+  const [ajudaAberta, setAjudaAberta] = useState(false);
   const total = dimensao.indicadores.length;
   const respondidos = dimensao.indicadores.filter((ind) => respostas[ind.codigo] !== undefined).length;
   const progresso = (respondidos / total) * 100;
@@ -29,10 +31,18 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
                 title="Atribua notas de 0,00 a 1,00 para cada indicador conforme os critérios descritivos. Valores intermediários (ex: 0,35; 0,60) são permitidos. Registre justificativa na observação para notas extremas."
                 placement="right"
                 arrow
+                open={ajudaAberta}
+                onOpen={() => setAjudaAberta(true)}
+                onClose={() => setAjudaAberta(false)}
               >
-                <Box component="span" sx={{ color: dimensao.cor, opacity: 0.6, cursor: 'help', display: 'inline-flex' }}>
+                <IconButton
+                  size="small"
+                  aria-label="Como avaliar os indicadores desta dimensão"
+                  onClick={() => setAjudaAberta((v) => !v)}
+                  sx={{ p: 0.25, color: dimensao.cor, opacity: 0.7, '&:hover': { opacity: 1, bgcolor: 'transparent' } }}
+                >
                   <FiInfo size={14} />
-                </Box>
+                </IconButton>
               </Tooltip>
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>

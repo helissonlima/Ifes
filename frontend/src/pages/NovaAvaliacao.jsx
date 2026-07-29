@@ -75,6 +75,7 @@ export default function NovaAvaliacao() {
   // ── Tutorial campo a campo ────────────────────────────────────────────────
   const [tutorialAtivo, setTutorialAtivo] = useState(false);
   const [passoTutorial, setPassoTutorial] = useState(0);
+  const refAnuncioTutorial = useRef(null);
   const refCabecalho = useRef(null);
   const refProgressoCard = useRef(null);
   const refConteudoStep = useRef(null);
@@ -459,11 +460,16 @@ export default function NovaAvaliacao() {
     ];
   }, [step, dimensoesLista]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll + highlight quando muda o passo do tutorial
+  // Scroll + highlight + foco quando muda o passo do tutorial. Mover o foco
+  // de verdade (não só o destaque visual) é o que permite quem navega por
+  // teclado/leitor de tela acompanhar o tutorial; o aria-live abaixo anuncia
+  // o conteúdo do passo sem depender de enxergar o card flutuante.
   useEffect(() => {
     if (!tutorialAtivo) return;
     const steps = getTutorialSteps();
-    const el = steps[Math.min(passoTutorial, steps.length - 1)]?.ref?.current;
+    const idx = Math.min(passoTutorial, steps.length - 1);
+    const passoAtual = steps[idx];
+    const el = passoAtual?.ref?.current;
     if (!el) return;
     document.querySelectorAll('[data-tutorial-hl]').forEach((e) => {
       e.style.outline = '';
@@ -475,6 +481,10 @@ export default function NovaAvaliacao() {
     el.style.outlineOffset = '4px';
     el.style.borderRadius = '12px';
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    el.focus({ preventScroll: true });
+    if (refAnuncioTutorial.current) {
+      refAnuncioTutorial.current.textContent = `Passo ${idx + 1} de ${steps.length}: ${passoAtual.titulo}. ${passoAtual.descricao}`;
+    }
     return () => {
       el.style.outline = '';
       el.style.outlineOffset = '';
@@ -490,6 +500,7 @@ export default function NovaAvaliacao() {
         e.style.outlineOffset = '';
         e.removeAttribute('data-tutorial-hl');
       });
+      if (refAnuncioTutorial.current) refAnuncioTutorial.current.textContent = '';
     }
   }, [tutorialAtivo]);
 
@@ -572,7 +583,7 @@ export default function NovaAvaliacao() {
       </Dialog>
 
       {/* ── Cabeçalho ── */}
-      <Box ref={refCabecalho}>
+      <Box ref={refCabecalho} tabIndex={-1} sx={{ outline: 'none' }}>
       <PageHeaderCard
         title="Nova Avaliação ICSR"
         subtitle="Preencha os indicadores de cada dimensão. Seus dados são salvos automaticamente."
@@ -613,7 +624,7 @@ export default function NovaAvaliacao() {
 
       {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
 
-      <Card ref={refProgressoCard} sx={{ mb: 1.5 }}>
+      <Card ref={refProgressoCard} tabIndex={-1} sx={{ mb: 1.5, outline: 'none' }}>
         <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
           {/* Progresso global */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75, gap: 1 }}>
@@ -749,7 +760,7 @@ export default function NovaAvaliacao() {
       </Card>
 
       {/* Conteúdo dos steps */}
-      <Box ref={refConteudoStep}>
+      <Box ref={refConteudoStep} tabIndex={-1} sx={{ outline: 'none' }}>
       {step === 0 && (
         <Card sx={{ mb: 2.5 }}>
           <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
@@ -838,7 +849,7 @@ export default function NovaAvaliacao() {
       </Box>
 
       {/* Botões de navegação */}
-      <Card ref={refNavegacao} sx={{ mt: 3.5 }}>
+      <Card ref={refNavegacao} tabIndex={-1} sx={{ mt: 3.5, outline: 'none' }}>
         <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
             <Button
@@ -997,6 +1008,18 @@ export default function NovaAvaliacao() {
           </Paper>
         );
       })()}
+
+      {/* Anuncia o passo atual do tutorial para leitores de tela (o card flutuante é só
+          visual) — texto setado via ref (não state) para não disparar re-render a cada passo */}
+      <Box
+        ref={refAnuncioTutorial}
+        aria-live="polite"
+        role="status"
+        sx={{
+          position: 'absolute', width: '1px', height: '1px', margin: '-1px',
+          padding: 0, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0,
+        }}
+      />
 
       <ConfirmDialog
         open={confirmConcluirPendente}

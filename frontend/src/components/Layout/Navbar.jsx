@@ -21,6 +21,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
             edge="start"
             onClick={onMenuClick}
             size="large"
+            aria-label="Abrir menu"
             sx={{ display: 'inline-flex' }}
           >
             <FiMenu />

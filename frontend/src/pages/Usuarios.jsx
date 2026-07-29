@@ -358,18 +358,18 @@ export default function Usuarios() {
                     <TableCell>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Tooltip title="Editar">
-                          <IconButton size="small" onClick={() => abrirEditar(u)}>
+                          <IconButton size="small" onClick={() => abrirEditar(u)} aria-label={`Editar ${u.nome}`}>
                             <FiEdit2 size={16} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Redefinir senha">
-                          <IconButton size="small" color="warning" onClick={() => abrirResetSenha(u)}>
+                          <IconButton size="small" color="warning" onClick={() => abrirResetSenha(u)} aria-label={`Redefinir senha de ${u.nome}`}>
                             <FiKey size={16} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={isSelf ? 'Você não pode se excluir' : 'Excluir'}>
                           <span>
-                            <IconButton size="small" color="error" disabled={isSelf} onClick={() => abrirExcluir(u)}>
+                            <IconButton size="small" color="error" disabled={isSelf} onClick={() => abrirExcluir(u)} aria-label={`Excluir ${u.nome}`}>
                               <FiTrash2 size={16} />
                             </IconButton>
                           </span>
@@ -430,7 +430,7 @@ export default function Usuarios() {
                   slotProps={{
                     input: {
                       endAdornment: (
-                        <IconButton size="small" onClick={() => setShowSenha((v) => !v)}>
+                        <IconButton size="small" onClick={() => setShowSenha((v) => !v)} aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}>
                           {showSenha ? <FiEyeOff /> : <FiEye />}
                         </IconButton>
                       ),
@@ -559,7 +559,7 @@ export default function Usuarios() {
             slotProps={{
               input: {
                 endAdornment: (
-                  <IconButton size="small" onClick={() => setShowSenha((v) => !v)}>
+                  <IconButton size="small" onClick={() => setShowSenha((v) => !v)} aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}>
                     {showSenha ? <FiEyeOff /> : <FiEye />}
                   </IconButton>
                 ),

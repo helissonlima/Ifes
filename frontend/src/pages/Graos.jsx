@@ -240,10 +240,10 @@ export default function Graos() {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" onClick={() => abrirEditar(g)} title="Editar">
+                      <IconButton size="small" onClick={() => abrirEditar(g)} title="Editar" aria-label={`Editar ${g.nome}`}>
                         <FiEdit2 size={18} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => setConfirmExcluir(g)} disabled={excluindo === g.id} title="Deletar">
+                      <IconButton size="small" color="error" onClick={() => setConfirmExcluir(g)} disabled={excluindo === g.id} title="Deletar" aria-label={`Excluir ${g.nome}`}>
                         {excluindo === g.id ? <CircularProgress size={18} /> : <FiTrash2 size={18} />}
                       </IconButton>
                     </Box>

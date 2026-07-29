@@ -231,10 +231,10 @@ export default function Historico() {
                       variant="outlined"
                     />
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)}>
+                      <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)} aria-label={`Ver avaliação de ${av.propriedade_nome}`}>
                         <FiEye size={16} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
+                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id} aria-label={`Excluir avaliação de ${av.propriedade_nome}`}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>
@@ -293,7 +293,7 @@ export default function Historico() {
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
+                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id} aria-label={`Excluir avaliação de ${av.propriedade_nome}`}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>

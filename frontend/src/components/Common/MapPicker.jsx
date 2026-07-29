@@ -225,6 +225,7 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
                 href={`https://www.google.com/maps?q=${parsedLat},${parsedLng}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Abrir localização no Google Maps"
                 sx={{
                   bgcolor: 'white',
                   boxShadow: 2,

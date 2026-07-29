@@ -245,7 +245,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
                       slotProps={{ htmlInput: { min: 0, step: '0.01', style: { width: 110 } } }}
                       sx={{ width: 150 }}
                     />
-                    <IconButton size="small" onClick={() => removerGrao(g.id)} title="Remover">
+                    <IconButton size="small" onClick={() => removerGrao(g.id)} title="Remover" aria-label={`Remover ${g.nome}`}>
                       <FiX size={16} />
                     </IconButton>
                   </Box>
@@ -495,8 +495,8 @@ export default function Propriedades() {
                     <Button size="small" startIcon={<FiClipboard />} onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
                       Avaliar
                     </Button>
-                    <IconButton size="small" onClick={() => abrirEditar(p)}><FiEdit2 size={16} /></IconButton>
-                    <IconButton size="small" color="error" onClick={() => setConfirmExcluir(p)} disabled={excluindo === p.id}>
+                    <IconButton size="small" onClick={() => abrirEditar(p)} aria-label={`Editar ${p.nome}`}><FiEdit2 size={16} /></IconButton>
+                    <IconButton size="small" color="error" onClick={() => setConfirmExcluir(p)} disabled={excluindo === p.id} aria-label={`Excluir ${p.nome}`}>
                       <FiTrash2 size={16} />
                     </IconButton>
                   </Box>
@@ -536,15 +536,15 @@ export default function Propriedades() {
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary" title="Nova Avaliação"
+                      <IconButton size="small" color="primary" title="Nova Avaliação" aria-label={`Nova avaliação para ${p.nome}`}
                         onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
                         <FiClipboard size={16} />
                       </IconButton>
-                      <IconButton size="small" onClick={() => abrirEditar(p)} title="Editar">
+                      <IconButton size="small" onClick={() => abrirEditar(p)} title="Editar" aria-label={`Editar ${p.nome}`}>
                         <FiEdit2 size={16} />
                       </IconButton>
                       <IconButton size="small" color="error" onClick={() => setConfirmExcluir(p)}
-                        disabled={excluindo === p.id} title="Excluir">
+                        disabled={excluindo === p.id} title="Excluir" aria-label={`Excluir ${p.nome}`}>
                         {excluindo === p.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>
