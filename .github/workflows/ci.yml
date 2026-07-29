@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    # Mesma versão do node:20-alpine usado nos Dockerfiles (backend/frontend)
+    # — mantém o CI alinhado com a imagem que efetivamente vai pra produção.
+    env:
+      NODE_VERSION: '20'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: sustenta_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Instalar dependências (backend)
+        run: npm ci
+        working-directory: backend
+
+      - name: Instalar dependências (frontend)
+        run: npm ci
+        working-directory: frontend
+
+      - name: Termos proibidos
+        run: npm run check:forbidden
+
+      # Lint tem ~30 problemas pré-existentes (react-hooks/set-state-in-effect
+      # no padrão fetch-on-mount usado em quase toda página) documentados como
+      # débito técnico fora do escopo desde o M3 do PLANO_MELHORIAS.md — não
+      # bloqueia o CI, só fica visível no resumo do job.
+      - name: Lint (informativo — não bloqueia)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Migrar banco de teste
+        working-directory: backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_NAME: sustenta_test
+          DB_USER: postgres
+          DB_PASSWORD: test
+        run: node scripts/migrate.js
+
+      - name: Testes do backend
+        working-directory: backend
+        env:
+          TEST_DB_HOST: localhost
+          TEST_DB_PORT: 5433
+          TEST_DB_NAME: sustenta_test
+          TEST_DB_USER: postgres
+          TEST_DB_PASSWORD: test
+        run: npx vitest run
+
+      - name: Testes do frontend
+        working-directory: frontend
+        run: npm test
+
+      - name: Build do frontend
+        working-directory: frontend
+        run: npm run build

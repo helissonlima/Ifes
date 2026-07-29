@@ -84,19 +84,29 @@ const criar = async (req, res, next) => {
        VALUES ($1, $2, $3, $4, 'rascunho') RETURNING *`,
       [propriedade_id, tecnico_responsavel, data_avaliacao || new Date(), observacoes]
     );
-    const avaliacao = avalResult.rows[0];
+    let avaliacao = avalResult.rows[0];
 
     // Inserir respostas se fornecidas
     if (respostas && respostas.length > 0) {
       for (const r of respostas) {
+        // indicador_nome é NOT NULL no banco mas opcional no schema de
+        // validação (o cliente normalmente já envia, mas nada obriga) — cai
+        // pro nome real do indicador em vez de deixar o INSERT falhar com
+        // erro de constraint.
+        const nome = r.indicador_nome || localizarIndicador(r.indicador_codigo)?.nome;
         await client.query(
           `INSERT INTO respostas_indicadores (avaliacao_id, dimensao, indicador_codigo, indicador_nome, nota, criterio_selecionado, observacao)
            VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-          [avaliacao.id, r.dimensao, r.indicador_codigo, r.indicador_nome, r.nota, r.criterio_selecionado, r.observacao]
+          [avaliacao.id, r.dimensao, r.indicador_codigo, nome, r.nota, r.criterio_selecionado, r.observacao]
         );
       }
       // Calcular e persistir índices
       await calcularEPersistirIndices(client, avaliacao.id, respostas);
+      // `avaliacao` foi capturado ANTES do UPDATE acima (igs/índices ainda
+      // nulos) — busca de novo pra a resposta refletir o que foi salvo, em
+      // vez de devolver os valores em branco de antes do cálculo.
+      const atualizada = await client.query('SELECT * FROM avaliacoes WHERE id = $1', [avaliacao.id]);
+      avaliacao = atualizada.rows[0];
     }
 
     await client.query('COMMIT');
@@ -128,10 +138,13 @@ const salvarRespostas = async (req, res, next) => {
     // Limpar respostas existentes e reinserir
     await client.query('DELETE FROM respostas_indicadores WHERE avaliacao_id = $1', [id]);
     for (const r of respostas) {
+      // Ver comentário equivalente em criar(): indicador_nome é NOT NULL no
+      // banco mas opcional no schema de validação.
+      const nome = r.indicador_nome || localizarIndicador(r.indicador_codigo)?.nome;
       await client.query(
         `INSERT INTO respostas_indicadores (avaliacao_id, dimensao, indicador_codigo, indicador_nome, nota, criterio_selecionado, observacao)
          VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-        [id, r.dimensao, r.indicador_codigo, r.indicador_nome, r.nota, r.criterio_selecionado, r.observacao]
+        [id, r.dimensao, r.indicador_codigo, nome, r.nota, r.criterio_selecionado, r.observacao]
       );
     }
 

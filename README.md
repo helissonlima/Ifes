@@ -32,11 +32,29 @@ npm run build
 # Validação padrão (termos proibidos + build)
 npm run verify
 
-# Validação estrita (termos proibidos + lint + build)
+# Validação estrita (termos proibidos + lint + build + testes)
 npm run verify:strict
+
+# Testes (backend + frontend)
+npm test
 ```
 
 Esses comandos podem ser executados da pasta raiz (`Ifes/`) e evitam erros de contexto como `ENOENT` por falta de `package.json` no diretório atual.
+
+### Testes
+
+`npm test` roda a suíte de backend (Vitest + Supertest, integração de verdade
+contra um Postgres em container — auth, CRUD de propriedades, cálculo do IGS
+com valores conhecidos, validações de payload) e depois a de frontend (Vitest
++ Testing Library — utils puros e componentes como `IndicadorCard`/guardas de
+rota do `App.jsx`).
+
+Só o backend precisa de infraestrutura extra: **Docker rodando** — o
+`pretest` do backend sobe (ou reaproveita) um container Postgres descartável
+na porta 5433 e aplica as migrations nele automaticamente. Pra derrubar esse
+container quando terminar: `npm --prefix backend run test:db:down`.
+
+Rodar só um dos dois: `npm run test:backend` ou `npm run test:frontend`.
 
 ## Docker (deploy)
 

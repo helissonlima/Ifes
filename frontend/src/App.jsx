@@ -38,20 +38,20 @@ function CenterLoading({ title = 'Carregando sistema', description = 'Preparando
   );
 }
 
-function RequireAuth({ children }) {
+export function RequireAuth({ children }) {
   const { isAuthenticated, loadingAuth } = useApp();
   if (loadingAuth) return <CenterLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 }
 
-function RequirePermission({ permission, children }) {
+export function RequirePermission({ permission, children }) {
   const { hasPermission } = useApp();
   if (!hasPermission(permission)) return <Navigate to="/acesso-negado" replace state={{ reason: 'permission' }} />;
   return children;
 }
 
-function RequireAdmin({ children }) {
+export function RequireAdmin({ children }) {
   const { user } = useApp();
   if (user?.role !== 'admin') return <Navigate to="/acesso-negado" replace state={{ reason: 'admin' }} />;
   return children;
