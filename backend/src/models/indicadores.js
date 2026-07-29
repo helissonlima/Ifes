@@ -490,12 +490,16 @@ const DIMENSOES = {
   },
 };
 
+// Faixas contínuas (sem gap decimal): o limite superior de uma faixa é o
+// limite inferior da próxima. Um valor exatamente no limite (ex.: 0.20)
+// pertence à faixa mais baixa — ver calcularIGS, que usa `igs <= max` e para
+// no primeiro match.
 const ESCALA_IGS = [
   { min: 0.00, max: 0.20, classificacao: 'Muito Baixa', cor: '#f44336', descricao: 'Situação crítica; intervenção urgente em múltiplas dimensões' },
-  { min: 0.21, max: 0.40, classificacao: 'Baixa', cor: '#FF9800', descricao: 'Fragilidades significativas; programa de assistência intensiva' },
-  { min: 0.41, max: 0.60, classificacao: 'Moderada', cor: '#FFEB3B', descricao: 'Propriedade em transição; fortalecer dimensões específicas' },
-  { min: 0.61, max: 0.80, classificacao: 'Boa', cor: '#8BC34A', descricao: 'Boa performance; manter e potencial para certificações' },
-  { min: 0.81, max: 1.00, classificacao: 'Alta', cor: '#4CAF50', descricao: 'Excelência; referência regional, mercados premium' },
+  { min: 0.20, max: 0.40, classificacao: 'Baixa', cor: '#FF9800', descricao: 'Fragilidades significativas; programa de assistência intensiva' },
+  { min: 0.40, max: 0.60, classificacao: 'Moderada', cor: '#FFEB3B', descricao: 'Propriedade em transição; fortalecer dimensões específicas' },
+  { min: 0.60, max: 0.80, classificacao: 'Boa', cor: '#8BC34A', descricao: 'Boa performance; manter e potencial para certificações' },
+  { min: 0.80, max: 1.00, classificacao: 'Alta', cor: '#4CAF50', descricao: 'Excelência; referência regional, mercados premium' },
 ];
 
 const STATUS_INDICADOR = [

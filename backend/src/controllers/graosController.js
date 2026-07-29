@@ -118,7 +118,7 @@ class GraosController {
   static async adicionarAPropriedade(req, res) {
     try {
       const { propriedadeId } = req.params;
-      const { graoId, areaplantada } = req.body;
+      const { graoId, area_plantada } = req.body;
 
       if (!graoId) {
         return res.status(400).json({ erro: 'ID do grão é obrigatório' });
@@ -143,7 +143,7 @@ class GraosController {
         DO UPDATE SET area_plantada = EXCLUDED.area_plantada
         RETURNING propriedade_id, grao_id, area_plantada
       `;
-      const result = await db.query(query, [propriedadeId, graoId, areaplantada || null]);
+      const result = await db.query(query, [propriedadeId, graoId, area_plantada || null]);
       res.status(201).json(result.rows[0]);
     } catch (error) {
       console.error('Erro ao adicionar grão à propriedade:', error);
@@ -248,7 +248,7 @@ class GraosController {
           const r = await db.query(
             `INSERT INTO graos (nome, codigo, descricao, ibge_categoria, ibge_tabela, ativo)
              VALUES ($1, $2, $3, $4, $5, TRUE)
-             ON CONFLICT DO NOTHING
+             ON CONFLICT (codigo) DO NOTHING
              RETURNING id`,
             [c.nome, c.codigo, c.descricao, c.ibge_categoria, c.ibge_tabela],
           );

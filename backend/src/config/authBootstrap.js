@@ -2,44 +2,10 @@ const bcrypt = require('bcryptjs');
 const pool = require('./database');
 const { requireEnv } = require('./secrets');
 
+// A tabela usuarios é criada pela migration 005_usuarios.sql (aplicada por
+// runMigrations() antes desta função rodar). Aqui só cuidamos da semente do
+// usuário admin inicial.
 async function bootstrapAuth() {
-  await pool.query(`
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-    CREATE TABLE IF NOT EXISTS usuarios (
-      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-      nome VARCHAR(200) NOT NULL,
-      email VARCHAR(150) UNIQUE NOT NULL,
-      senha_hash VARCHAR(255) NOT NULL,
-      role VARCHAR(20) NOT NULL DEFAULT 'tecnico',
-      foto_url TEXT,
-      ativo BOOLEAN NOT NULL DEFAULT TRUE,
-      permissoes JSONB NOT NULL DEFAULT '{
-        "dashboard": true,
-        "propriedades": true,
-        "avaliacoes": true,
-        "historico": true,
-        "metodologia": true,
-        "usuarios": false
-      }'::jsonb,
-      criado_em TIMESTAMP DEFAULT NOW(),
-      atualizado_em TIMESTAMP DEFAULT NOW()
-    );
-
-    CREATE OR REPLACE FUNCTION atualizar_timestamp_usuarios()
-    RETURNS TRIGGER AS $$
-    BEGIN
-      NEW.atualizado_em = NOW();
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql;
-
-    DROP TRIGGER IF EXISTS trg_usuarios_updated ON usuarios;
-    CREATE TRIGGER trg_usuarios_updated
-      BEFORE UPDATE ON usuarios
-      FOR EACH ROW EXECUTE FUNCTION atualizar_timestamp_usuarios();
-  `);
-
   const adminEmail = requireEnv('ADMIN_EMAIL', 'admin@example.com');
   const adminPassword = requireEnv('ADMIN_PASSWORD', 'change-me-now');
   const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [adminEmail]);

@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { rollback } = require('../utils/db');
 const {
   DIMENSOES,
   calcularIGS,
@@ -69,16 +70,13 @@ const buscarPorId = async (req, res, next) => {
   }
 };
 
+// propriedade_id já vem validado (UUID obrigatório) pelo middleware da rota.
 const criar = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     const { propriedade_id, tecnico_responsavel, data_avaliacao, observacoes, respostas } = req.body;
-    if (!propriedade_id) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ erro: 'propriedade_id é obrigatório' });
-    }
 
     // Criar avaliação inicial como rascunho
     const avalResult = await client.query(
@@ -104,13 +102,15 @@ const criar = async (req, res, next) => {
     await client.query('COMMIT');
     res.status(201).json(avaliacao);
   } catch (err) {
-    await client.query('ROLLBACK');
+    await rollback(client);
     next(err);
   } finally {
     client.release();
   }
 };
 
+// respostas já vem validado (array, cada item com dimensao/indicador_codigo/nota
+// válidos) pelo middleware da rota.
 const salvarRespostas = async (req, res, next) => {
   const client = await pool.connect();
   try {
@@ -121,7 +121,7 @@ const salvarRespostas = async (req, res, next) => {
     // Verificar que a avaliação existe
     const avalCheck = await client.query('SELECT id FROM avaliacoes WHERE id = $1', [id]);
     if (avalCheck.rows.length === 0) {
-      await client.query('ROLLBACK');
+      await rollback(client);
       return res.status(404).json({ erro: 'Avaliação não encontrada' });
     }
 
@@ -146,7 +146,7 @@ const salvarRespostas = async (req, res, next) => {
     const result = await pool.query('SELECT * FROM avaliacoes WHERE id = $1', [id]);
     res.json(result.rows[0]);
   } catch (err) {
-    await client.query('ROLLBACK');
+    await rollback(client);
     next(err);
   } finally {
     client.release();

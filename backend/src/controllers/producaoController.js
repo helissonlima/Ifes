@@ -1,7 +1,30 @@
 const pool = require('../config/database');
 
-const CACHE = new Map();
 const TTL_MS = 12 * 60 * 60 * 1000; // 12 horas
+const CACHE_MAX = 500;
+const CACHE = new Map();
+
+// Cache LRU simples baseado na ordem de inserção do Map: toda leitura/escrita
+// move a chave para o fim; ao estourar CACHE_MAX, a mais antiga (primeira) é removida.
+function cacheGet(key) {
+  const entry = CACHE.get(key);
+  if (!entry) return undefined;
+  if (Date.now() - entry.ts >= TTL_MS) {
+    CACHE.delete(key);
+    return undefined;
+  }
+  CACHE.delete(key);
+  CACHE.set(key, entry);
+  return entry.data;
+}
+
+function cacheSet(key, data) {
+  CACHE.delete(key);
+  CACHE.set(key, { data, ts: Date.now() });
+  if (CACHE.size > CACHE_MAX) {
+    CACHE.delete(CACHE.keys().next().value);
+  }
+}
 
 const normalizar = (s) =>
   (s || '')
@@ -31,11 +54,9 @@ function parseSerie(variavel) {
     .sort((a, b) => a.ano - b.ano);
 }
 
+// municipio/estado já vêm validados (estado com 2 letras) pelo middleware da rota.
 async function getMediaProducao(req, res) {
   const { municipio, estado, grao_id } = req.query;
-  if (!municipio || !estado) {
-    return res.status(400).json({ erro: 'municipio e estado são obrigatórios' });
-  }
 
   // Resolve qual tabela e categoria IBGE usar.
   // Tabela 5457 (lavouras temporárias e permanentes), classificação 782.
@@ -66,8 +87,8 @@ async function getMediaProducao(req, res) {
   }
 
   const key = `${municipio.toLowerCase()}|${estado.toUpperCase()}|${ibgeCategoria}`;
-  const cached = CACHE.get(key);
-  if (cached && Date.now() - cached.ts < TTL_MS) return res.json(cached.data);
+  const cachedData = cacheGet(key);
+  if (cachedData) return res.json(cachedData);
 
   try {
     // 1. Localiza o município dentro da UF informada e casa pelo nome normalizado.
@@ -125,7 +146,7 @@ async function getMediaProducao(req, res) {
       fonte: 'IBGE — Produção Agrícola Municipal (PAM)',
     };
 
-    CACHE.set(key, { data, ts: Date.now() });
+    cacheSet(key, data);
     return res.json(data);
   } catch (err) {
     console.error('[producao/media] Falha ao consultar IBGE:', err);

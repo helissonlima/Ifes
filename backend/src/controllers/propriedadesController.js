@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { rollback } = require('../utils/db');
 
 // Converte string vazia / undefined em null para colunas numéricas do Postgres
 const numOrNull = (v) => (v === '' || v === undefined || v === null ? null : v);
@@ -77,20 +78,18 @@ async function sincronizarGraos(client, propriedadeId, graos) {
       `INSERT INTO propriedades_graos (propriedade_id, grao_id, area_plantada)
        VALUES ($1, $2, $3)
        ON CONFLICT (propriedade_id, grao_id) DO UPDATE SET area_plantada = EXCLUDED.area_plantada`,
-      [propriedadeId, g.id, g.area_plantada || null],
+      [propriedadeId, g.id, numOrNull(g.area_plantada)],
     );
   }
 }
 
+// nome/municipio/proprietario já vêm validados como obrigatórios pelo
+// middleware de validação da rota (validate(criarPropriedadeSchema)).
 const criar = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const { nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep, graos } = req.body;
-    if (!nome || !municipio || !proprietario) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ erro: 'Nome, município e proprietário são obrigatórios' });
-    }
     const result = await client.query(
       `INSERT INTO propriedades (nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
@@ -109,30 +108,61 @@ const criar = async (req, res, next) => {
     propriedade.graos = graosResult.rows;
     res.status(201).json(propriedade);
   } catch (err) {
-    await client.query('ROLLBACK');
+    await rollback(client);
     next(err);
   } finally {
     client.release();
   }
 };
 
+// Atualização parcial: campos ausentes no corpo (undefined) mantêm o valor
+// atual em vez de serem sobrescritos com NULL. nome/municipio/proprietario
+// continuam obrigatórios (não podem ser explicitamente esvaziados).
 const atualizar = async (req, res, next) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const { id } = req.params;
+
+    const current = await client.query('SELECT * FROM propriedades WHERE id = $1', [id]);
+    if (current.rows.length === 0) {
+      await rollback(client);
+      return res.status(404).json({ erro: 'Propriedade não encontrada' });
+    }
+    const atual = current.rows[0];
+
     const { nome, municipio, estado, proprietario, area_total, area_cafe, latitude, longitude, telefone, email, rua, numero, complemento, bairro, cep, graos } = req.body;
+
+    const merged = {
+      nome: nome ?? atual.nome,
+      municipio: municipio ?? atual.municipio,
+      estado: estado ?? atual.estado,
+      proprietario: proprietario ?? atual.proprietario,
+      area_total: area_total !== undefined ? numOrNull(area_total) : atual.area_total,
+      area_cafe: area_cafe !== undefined ? numOrNull(area_cafe) : atual.area_cafe,
+      latitude: latitude !== undefined ? numOrNull(latitude) : atual.latitude,
+      longitude: longitude !== undefined ? numOrNull(longitude) : atual.longitude,
+      telefone: telefone ?? atual.telefone,
+      email: email ?? atual.email,
+      rua: rua ?? atual.rua,
+      numero: numero ?? atual.numero,
+      complemento: complemento ?? atual.complemento,
+      bairro: bairro ?? atual.bairro,
+      cep: cep ?? atual.cep,
+    };
+
+    if (!merged.nome || !merged.municipio || !merged.proprietario) {
+      await rollback(client);
+      return res.status(400).json({ erro: 'Nome, município e proprietário são obrigatórios' });
+    }
+
     const result = await client.query(
       `UPDATE propriedades SET nome=$1, municipio=$2, estado=$3, proprietario=$4,
        area_total=$5, area_cafe=$6, latitude=$7, longitude=$8, telefone=$9, email=$10,
        rua=$11, numero=$12, complemento=$13, bairro=$14, cep=$15
        WHERE id=$16 RETURNING *`,
-      [nome, municipio, estado, proprietario, numOrNull(area_total), numOrNull(area_cafe), numOrNull(latitude), numOrNull(longitude), telefone, email, rua, numero, complemento, bairro, cep, id]
+      [merged.nome, merged.municipio, merged.estado, merged.proprietario, merged.area_total, merged.area_cafe, merged.latitude, merged.longitude, merged.telefone, merged.email, merged.rua, merged.numero, merged.complemento, merged.bairro, merged.cep, id]
     );
-    if (result.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ erro: 'Propriedade não encontrada' });
-    }
     const propriedade = result.rows[0];
     await sincronizarGraos(client, id, graos);
     await client.query('COMMIT');
@@ -146,7 +176,7 @@ const atualizar = async (req, res, next) => {
     propriedade.graos = graosResult.rows;
     res.json(propriedade);
   } catch (err) {
-    await client.query('ROLLBACK');
+    await rollback(client);
     next(err);
   } finally {
     client.release();

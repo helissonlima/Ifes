@@ -14,7 +14,7 @@ class Graos {
 
   static async listarTodos() {
     const query = `
-      SELECT id, nome, codigo, descricao, ativo, criado_em, atualizado_em
+      SELECT id, nome, codigo, descricao, ativo, ibge_categoria, ibge_tabela, criado_em, atualizado_em
       FROM graos
       ORDER BY nome
     `;
@@ -24,7 +24,7 @@ class Graos {
 
   static async obterPorId(id) {
     const query = `
-      SELECT id, nome, codigo, descricao, ativo, criado_em, atualizado_em
+      SELECT id, nome, codigo, descricao, ativo, ibge_categoria, ibge_tabela, criado_em, atualizado_em
       FROM graos
       WHERE id = $1
     `;
