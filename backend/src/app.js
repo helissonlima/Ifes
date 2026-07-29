@@ -10,6 +10,7 @@ const indicadoresRoutes = require('./routes/indicadores');
 const authRoutes = require('./routes/auth');
 const producaoRoutes = require('./routes/producao');
 const graosRoutes = require('./routes/graos');
+const backupRoutes = require('./routes/backup');
 
 const app = express();
 
@@ -53,7 +54,14 @@ app.use(cors({
     callback(null, false);
   },
 }));
-app.use(express.json({ limit: '1mb' }));
+// Parser global com limite apertado; a restauração de backup é a única rota
+// que legitimamente recebe um payload grande e traz o próprio parser (ver
+// routes/backup.js), então fica de fora daqui.
+const jsonPadrao = express.json({ limit: '1mb' });
+app.use((req, res, next) => {
+  if (req.path === '/api/admin/backup/restaurar') return next();
+  return jsonPadrao(req, res, next);
+});
 
 app.use('/api/auth', authRoutes);
 
@@ -69,6 +77,7 @@ app.use('/api/propriedades', propriedadesRoutes);
 app.use('/api/avaliacoes', avaliacoesRoutes);
 app.use('/api/indicadores', indicadoresRoutes);
 app.use('/api/producao', producaoRoutes);
+app.use('/api/admin', backupRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -17,6 +17,7 @@ import { friendlyError } from '../utils/errorMessages';
 import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 import EmptyState from '../components/Common/EmptyState';
+import BackupCard from '../components/Admin/BackupCard';
 
 const PERMISSION_KEYS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -395,6 +396,9 @@ export default function Usuarios() {
           </Table>
         </TableContainer>
       )}
+
+      {/* ========= Backup e restauração ========= */}
+      <BackupCard onRestaurado={carregar} />
 
       {/* FAB mobile */}
       {isMobile && (

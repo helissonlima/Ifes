@@ -68,4 +68,10 @@ function requireAdmin(req, res, next) {
   return next();
 }
 
-module.exports = { authRequired, requirePermission, requireAdmin };
+// Descarta o cache de permissões — usado quando a tabela `usuarios` muda
+// inteira de baixo do middleware (ex.: restauração de backup).
+function limparCachePermissoes() {
+  permCache.clear();
+}
+
+module.exports = { authRequired, requirePermission, requireAdmin, limparCachePermissoes };

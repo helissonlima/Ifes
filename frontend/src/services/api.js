@@ -32,7 +32,10 @@ api.interceptors.request.use((config) => {
   const nextConfig = { ...config };
   nextConfig.metadata = {
     startedAt: Date.now(),
-    cacheable: isSafeToCache(config.method),
+    // `noCache` permite a uma chamada específica ficar fora do cache local
+    // (ex.: o dump de backup, que é enorme e contém hashes de senha —
+    // nada disso tem por que ficar no localStorage).
+    cacheable: !config.noCache && isSafeToCache(config.method),
   };
   return nextConfig;
 });
@@ -112,6 +115,13 @@ export const authAPI = {
   atualizarPermissoes: (id, data) => api.put(`/auth/usuarios/${id}/permissoes`, data),
   redefinirSenha: (id, senha) => api.put(`/auth/usuarios/${id}/senha`, { senha }),
   excluirUsuario: (id) => api.delete(`/auth/usuarios/${id}`),
+};
+
+// Backup e restauração (somente admin) — timeout maior: dump/restauração
+// completos do banco não cabem nos 6s padrão.
+export const backupAPI = {
+  exportar: () => api.get('/admin/backup', { timeout: 120000, noCache: true }),
+  restaurar: (conteudo) => api.post('/admin/backup/restaurar', conteudo, { timeout: 300000 }),
 };
 
 // Propriedades
