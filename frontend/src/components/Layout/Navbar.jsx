@@ -1,10 +1,14 @@
-import { AppBar, Toolbar, IconButton, Typography, Box, Avatar, Button } from '@mui/material';
-import { FiMenu, FiLogOut } from 'react-icons/fi';
+import { AppBar, Toolbar, IconButton, Typography, Box, Avatar, Button, Tooltip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { FiMenu, FiLogOut, FiUploadCloud } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
+import { useRascunhoPendente } from '../../hooks/useRascunhoPendente';
 
 export default function Navbar({ onMenuClick, isMobile }) {
   const { user, logout, isOnline } = useApp();
+  const navigate = useNavigate();
+  const rascunhoPendente = useRascunhoPendente();
 
   return (
     <AppBar
@@ -44,6 +48,30 @@ export default function Navbar({ onMenuClick, isMobile }) {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.2 } }}>
+          {rascunhoPendente && (
+            <Tooltip title="Você tem uma avaliação com respostas ainda não sincronizadas. Toque para retomar.">
+              <Button
+                onClick={() => navigate('/avaliacao/nova')}
+                aria-label="1 avaliação pendente de sincronização — toque para retomar"
+                size="small"
+                startIcon={<FiUploadCloud size={14} />}
+                variant="outlined"
+                sx={{
+                  minWidth: 0,
+                  color: '#FFE082',
+                  borderColor: 'rgba(255,224,130,0.5)',
+                  bgcolor: 'rgba(255,224,130,0.12)',
+                  px: { xs: 1, sm: 1.2 },
+                  '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.8 } },
+                  '&:hover': { bgcolor: 'rgba(255,224,130,0.24)', borderColor: 'rgba(255,224,130,0.7)' },
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, fontWeight: 700 }}>
+                  1 pendente
+                </Box>
+              </Button>
+            </Tooltip>
+          )}
           <Box
             sx={{
               display: { xs: 'none', sm: 'flex' },

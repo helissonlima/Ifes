@@ -72,6 +72,11 @@ describe('Autenticação', () => {
       expect(res.status).toBe(401);
     });
 
+    it('exige autenticação em /api/graos (M10.6 — antes era público)', async () => {
+      const res = await request(app).get('/api/graos');
+      expect(res.status).toBe(401);
+    });
+
     it('recusa token de usuário que foi desativado depois de emitido (permissão "viva")', async () => {
       const user = await criarUsuario({ email: 'vai-desativar@teste.com', permissions: { propriedades: true } });
       const token = gerarToken(user.id);

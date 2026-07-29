@@ -56,11 +56,15 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/auth', authRoutes);
-app.use('/api/graos', graosRoutes); // Rotas de grãos (parcialmente públicas, parcialmente autenticadas)
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
+// Tudo abaixo exige autenticação (M10.6): /graos não tem mais rotas GET
+// públicas — só é consumido por telas já autenticadas do app, e deixar
+// essas 3 rotas sem authRequired era a única inconsistência real na
+// exposição da API (as demais já exigiam auth, com ou sem permissão extra).
 app.use(authRequired);
+app.use('/api/graos', graosRoutes);
 app.use('/api/propriedades', propriedadesRoutes);
 app.use('/api/avaliacoes', avaliacoesRoutes);
 app.use('/api/indicadores', indicadoresRoutes);

@@ -4,9 +4,10 @@ import {
   Box, Typography, Card, CardContent, Grid, TextField, InputAdornment,
   Select, MenuItem, FormControl, InputLabel, Button, CircularProgress,
   Alert, Chip, IconButton, Divider, useMediaQuery, useTheme, LinearProgress, Skeleton,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination,
+  Checkbox, Tooltip,
 } from '@mui/material';
-import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus, FiWifiOff } from 'react-icons/fi';
+import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus, FiWifiOff, FiGitPullRequest, FiX } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -17,10 +18,17 @@ import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 import ConfirmDialog from '../components/Common/ConfirmDialog';
 import CachedDataBanner from '../components/Common/CachedDataBanner';
+import ComparativoAvaliacoesDialog from '../components/Evaluation/ComparativoAvaliacoesDialog';
 
 const COR_DIMS = {
   economico: '#2196F3', ambiental: '#4CAF50', social: '#FF9800', gestao: '#9C27B0',
 };
+
+// Paginado no servidor (M10.5) — antes buscava sempre limit:100 e truncava
+// silenciosamente qualquer avaliação além da centésima, sem forma de ver o
+// resto. Os filtros de técnico/localização/busca continuam client-side,
+// dentro da página carregada (ver PLANO_MELHORIAS.md M10.5).
+const ITENS_POR_PAGINA = 20;
 
 export default function Historico() {
   const navigate = useNavigate();
@@ -30,6 +38,7 @@ export default function Historico() {
 
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [total, setTotal] = useState(0);
+  const [pagina, setPagina] = useState(1);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [dadosEmCache, setDadosEmCache] = useState(false);
@@ -40,10 +49,35 @@ export default function Historico() {
   const [excluindo, setExcluindo] = useState(null);
   const [confirmExcluir, setConfirmExcluir] = useState(null); // { id, nome } | null
 
+  // Comparativo entre 2 avaliações (M10.1)
+  const [modoComparar, setModoComparar] = useState(false);
+  const [selecionadas, setSelecionadas] = useState([]); // até 2: [{ id, nome }]
+  const [comparativoAberto, setComparativoAberto] = useState(false);
+
+  const alternarSelecao = (av) => {
+    setSelecionadas((atual) => {
+      if (atual.some((s) => s.id === av.id)) return atual.filter((s) => s.id !== av.id);
+      if (atual.length >= 2) return atual; // já tem 2 — ignora até desmarcar uma
+      return [...atual, { id: av.id, nome: av.propriedade_nome }];
+    });
+  };
+
+  const sairDoModoComparar = () => {
+    setModoComparar(false);
+    setSelecionadas([]);
+  };
+
+  // Muda o filtro de status (server-side): volta pra 1ª página, senão a
+  // página atual pode simplesmente não existir mais no resultado filtrado.
+  const mudarFiltroStatus = (valor) => {
+    setFiltroStatus(valor);
+    setPagina(1);
+  };
+
   const carregar = useCallback(() => {
     setLoading(true);
     setErro('');
-    avaliacoesAPI.listar({ status: filtroStatus || undefined, limit: 100 })
+    avaliacoesAPI.listar({ status: filtroStatus || undefined, page: pagina, limit: ITENS_POR_PAGINA })
       .then((r) => {
         setAvaliacoes(r.data.data);
         setTotal(r.data.total);
@@ -51,7 +85,7 @@ export default function Historico() {
       })
       .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
-  }, [filtroStatus]);
+  }, [filtroStatus, pagina]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -99,15 +133,42 @@ export default function Historico() {
         title="Histórico de Avaliações"
         subtitle={`${total} avaliação(ões) registrada(s)`}
         actions={(
-          <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
-            Nova Avaliação
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant={modoComparar ? 'contained' : 'outlined'}
+              color={modoComparar ? 'secondary' : 'primary'}
+              startIcon={modoComparar ? <FiX /> : <FiGitPullRequest />}
+              onClick={() => (modoComparar ? sairDoModoComparar() : setModoComparar(true))}
+            >
+              {modoComparar ? 'Cancelar comparação' : 'Comparar'}
+            </Button>
+            <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
+              Nova Avaliação
+            </Button>
+          </Box>
         )}
       />
 
       {erro && avaliacoes.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
         <CachedDataBanner mensagem="Histórico exibido a partir do cache local. Os registros podem não refletir alterações mais recentes do servidor." />
+      )}
+
+      {modoComparar && (
+        <Alert
+          severity="info"
+          variant="outlined"
+          sx={{ mb: 2 }}
+          action={selecionadas.length === 2 && (
+            <Button color="inherit" size="small" variant="outlined" onClick={() => setComparativoAberto(true)}>
+              Comparar selecionadas
+            </Button>
+          )}
+        >
+          {selecionadas.length === 0 && 'Selecione 2 avaliações concluídas para comparar.'}
+          {selecionadas.length === 1 && `"${selecionadas[0].nome}" selecionada — escolha mais uma.`}
+          {selecionadas.length === 2 && `Pronto: "${selecionadas[0].nome}" e "${selecionadas[1].nome}".`}
+        </Alert>
       )}
 
       {/* Filtros */}
@@ -132,7 +193,7 @@ export default function Historico() {
             <Grid size={{ xs: 12, sm: 4 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
-                <Select value={filtroStatus} label="Status" onChange={(e) => setFiltroStatus(e.target.value)}>
+                <Select value={filtroStatus} label="Status" onChange={(e) => mudarFiltroStatus(e.target.value)}>
                   <MenuItem value="">Todos</MenuItem>
                   <MenuItem value="concluida">Concluídas</MenuItem>
                   <MenuItem value="rascunho">Rascunhos</MenuItem>
@@ -196,16 +257,35 @@ export default function Historico() {
       ) : isMobile ? (
         // Cards para mobile
         <Grid container spacing={2}>
-          {filtradas.map((av) => (
+          {filtradas.map((av) => {
+            const podeComparar = av.status === 'concluida';
+            const selecionada = selecionadas.some((s) => s.id === av.id);
+            return (
             <Grid size={12} key={av.id}>
-              <Card>
+              <Card sx={modoComparar && selecionada ? { border: '2px solid', borderColor: 'primary.main' } : undefined}>
                 <CardContent sx={{ pb: '12px !important' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box>
-                      <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {av.municipio} · {formatarData(av.data_avaliacao)}
-                      </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+                      {modoComparar && (
+                        <Tooltip title={podeComparar ? 'Selecionar para comparar' : 'Só avaliações concluídas podem ser comparadas'}>
+                          <span>
+                            <Checkbox
+                              size="small"
+                              checked={selecionada}
+                              disabled={!podeComparar || (!selecionada && selecionadas.length >= 2)}
+                              onChange={() => alternarSelecao(av)}
+                              slotProps={{ input: { 'aria-label': `Selecionar avaliação de ${av.propriedade_nome} para comparar` } }}
+                              sx={{ mt: -0.5, ml: -1 }}
+                            />
+                          </span>
+                        </Tooltip>
+                      )}
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {av.municipio} · {formatarData(av.data_avaliacao)}
+                        </Typography>
+                      </Box>
                     </Box>
                     <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
                   </Box>
@@ -254,7 +334,8 @@ export default function Historico() {
                 </CardContent>
               </Card>
             </Grid>
-          ))}
+            );
+          })}
         </Grid>
       ) : (
         // Tabela desktop
@@ -262,18 +343,40 @@ export default function Historico() {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: 'primary.main' }}>
+                {modoComparar && <TableCell sx={{ color: 'white', width: 48 }} />}
                 {['Propriedade', 'Município', 'Data', 'Técnico', 'Econômica', 'Ambiental', 'Social', 'IGQG', 'ICSR', 'Status', 'Ações'].map((h) => (
                   <TableCell key={h} sx={{ color: 'white', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filtradas.map((av, i) => (
+              {filtradas.map((av, i) => {
+                const podeComparar = av.status === 'concluida';
+                const selecionada = selecionadas.some((s) => s.id === av.id);
+                return (
                 <TableRow
                   key={av.id}
-                  sx={{ bgcolor: i % 2 === 0 ? 'inherit' : 'action.hover', '&:hover': { bgcolor: 'primary.50', cursor: 'pointer' } }}
+                  sx={{
+                    bgcolor: modoComparar && selecionada ? 'primary.50' : i % 2 === 0 ? 'inherit' : 'action.hover',
+                    '&:hover': { bgcolor: 'primary.50', cursor: 'pointer' },
+                  }}
                   onClick={() => navigate(`/avaliacao/${av.id}`)}
                 >
+                  {modoComparar && (
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Tooltip title={podeComparar ? 'Selecionar para comparar' : 'Só avaliações concluídas podem ser comparadas'}>
+                        <span>
+                          <Checkbox
+                            size="small"
+                            checked={selecionada}
+                            disabled={!podeComparar || (!selecionada && selecionadas.length >= 2)}
+                            onChange={() => alternarSelecao(av)}
+                            slotProps={{ input: { 'aria-label': `Selecionar avaliação de ${av.propriedade_nome} para comparar` } }}
+                          />
+                        </span>
+                      </Tooltip>
+                    </TableCell>
+                  )}
                   <TableCell><Typography variant="body2" fontWeight={600}>{av.propriedade_nome}</Typography></TableCell>
                   <TableCell><Typography variant="body2">{av.municipio}</Typography></TableCell>
                   <TableCell><Typography variant="body2">{formatarData(av.data_avaliacao)}</Typography></TableCell>
@@ -311,10 +414,24 @@ export default function Historico() {
                     </Box>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
+      )}
+
+      {!loading && !erro && total > ITENS_POR_PAGINA && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2.5 }}>
+          <Pagination
+            count={Math.ceil(total / ITENS_POR_PAGINA)}
+            page={pagina}
+            onChange={(_, p) => setPagina(p)}
+            color="primary"
+            shape="rounded"
+            siblingCount={isMobile ? 0 : 1}
+          />
+        </Box>
       )}
 
       <ConfirmDialog
@@ -325,6 +442,13 @@ export default function Historico() {
         onConfirm={confirmarExclusao}
         onCancel={() => setConfirmExcluir(null)}
         loading={excluindo === confirmExcluir?.id}
+      />
+
+      <ComparativoAvaliacoesDialog
+        open={comparativoAberto}
+        onClose={() => setComparativoAberto(false)}
+        idA={selecionadas[0]?.id}
+        idB={selecionadas[1]?.id}
       />
     </Box>
   );
