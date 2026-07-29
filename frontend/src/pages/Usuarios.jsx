@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { friendlyError } from '../utils/errorMessages';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const PERMISSION_KEYS = [
@@ -78,7 +79,7 @@ export default function Usuarios() {
       setUsuarios(r.data);
       setErro('');
     } catch (e) {
-      setErro(e.message);
+      setErro(friendlyError(e));
     } finally {
       setLoading(false);
     }
@@ -167,7 +168,7 @@ export default function Usuarios() {
       fecharForm();
       carregar();
     } catch (e) {
-      notify(e.message, 'error');
+      notify(friendlyError(e), 'error');
     } finally {
       setSalvando(false);
     }
@@ -179,7 +180,7 @@ export default function Usuarios() {
       await authAPI.atualizarPermissoes(u.id, { ativo: !u.ativo });
       notify(u.ativo ? 'Usuário desativado' : 'Usuário ativado');
       carregar();
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
   };
 
   // ====== Reset senha ======
@@ -192,7 +193,7 @@ export default function Usuarios() {
       await authAPI.redefinirSenha(dialogSenha.usuario.id, novaSenha);
       notify('Senha redefinida com sucesso!');
       fecharResetSenha();
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setResetando(false); }
   };
 
@@ -206,7 +207,7 @@ export default function Usuarios() {
       notify('Usuário excluído com sucesso!');
       fecharExcluir();
       carregar();
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setExcluindo(false); }
   };
 

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Box, Typography, Stepper, Step, StepLabel, StepButton,
+  Box, Typography, Stepper, Step, StepButton,
   Button, Card, CardContent, Grid, TextField, Autocomplete,
   CircularProgress, Alert, LinearProgress, Paper, Skeleton,
   useMediaQuery, useTheme,
-  Dialog, DialogTitle, DialogContent, DialogActions, Chip, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip,
 } from '@mui/material';
 import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle, FiX } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
@@ -137,7 +137,12 @@ export default function NovaAvaliacao() {
       }
     }).catch((e) => setErro(friendlyError(e)))
     .finally(() => setCarregando(false));
-  }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Roda só uma vez, na montagem: propositalmente NÃO depende de isOnline
+  // (nem de user/searchParams) para não re-buscar dados nem reabrir o diálogo
+  // de rascunho a cada oscilação de rede — a checagem de "está online" usa o
+  // valor do momento em que a página abriu, e é só isso que importa aqui.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Auto-save no localStorage (debounce 1,5s) ────────────────────────────
   useEffect(() => {

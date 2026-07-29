@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Snackbar, Alert } from '@mui/material';
-import { authAPI, setAuthToken } from '../services/api';
+import { authAPI, setAuthToken, onUnauthorized, TOKEN_KEY } from '../services/api';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 
 const defaultContextValue = {
@@ -17,7 +17,6 @@ const defaultContextValue = {
 };
 
 const AppContext = createContext(defaultContextValue);
-const TOKEN_KEY = 'sustenta_token';
 
 export function AppProvider({ children }) {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
@@ -49,6 +48,16 @@ export function AppProvider({ children }) {
   const notify = useCallback((message, severity = 'success') => {
     setNotification({ open: true, message, severity });
   }, []);
+
+  // O interceptor axios (fora do React) já limpou o token; aqui só limpamos o
+  // usuário da sessão — o RequireAuth em App.jsx cuida do redirect para /login.
+  useEffect(() => {
+    onUnauthorized(() => {
+      setUser(null);
+      notify('Sessão expirada. Faça login novamente.', 'warning');
+    });
+    return () => onUnauthorized(null);
+  }, [notify]);
 
   useEffect(() => {
     if (isOnline) {

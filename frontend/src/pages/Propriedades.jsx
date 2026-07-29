@@ -9,7 +9,6 @@ import {
   useMediaQuery, useTheme,
 } from '@mui/material';
 import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiX, FiTrendingUp } from 'react-icons/fi';
-import { MdOutlineEco } from 'react-icons/md';
 import { maskTelefone, maskUF, maskCEP, erroEmail } from '../utils/masks';
 import { propriedadesAPI, graosAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -44,7 +43,7 @@ function PreviewProducao({ info }) {
       </Typography>
     );
   }
-  const { rendimento_atual, rendimento_uf_atual, cultura } = info.data || {};
+  const { rendimento_atual, rendimento_uf_atual } = info.data || {};
   if (!rendimento_atual && !rendimento_uf_atual) {
     return (
       <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>
@@ -329,7 +328,7 @@ export default function Propriedades() {
         setTotal(r.data.total);
         setDadosEmCache(Boolean(r.fromCache));
       })
-      .catch((e) => setErro(e.message))
+      .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
   }, [search]);
 
@@ -338,8 +337,8 @@ export default function Propriedades() {
   useEffect(() => {
     graosAPI.listarAtivos()
       .then((r) => setGraosDisponiveis(r.data))
-      .catch(() => {});
-  }, []);
+      .catch((e) => notify(friendlyError(e), 'error'));
+  }, [notify]);
 
   // Busca dados IBGE para cada grão selecionado quando municipio/estado/graos mudam
   useEffect(() => {
@@ -357,8 +356,7 @@ export default function Propriedades() {
         producaoAPI.media(municipio, estado, g.id)
           .then((r) => setPreviewProducao((prev) => ({ ...prev, [g.id]: { data: r.data } })))
           .catch((e) => {
-            const msg = e.response?.data?.erro || e.message || 'Sem dados disponíveis';
-            setPreviewProducao((prev) => ({ ...prev, [g.id]: { erro: msg } }));
+            setPreviewProducao((prev) => ({ ...prev, [g.id]: { erro: e.message || 'Sem dados disponíveis' } }));
           });
       });
     }, 800);
@@ -382,7 +380,9 @@ export default function Propriedades() {
         id: g.id, nome: g.nome, codigo: g.codigo,
         ibge_categoria: g.ibge_categoria, area_plantada: g.area_plantada || '',
       }));
-    } catch {}
+    } catch (e) {
+      notify(`Não foi possível carregar os grãos desta propriedade: ${friendlyError(e)}`, 'error');
+    }
     setForm({
       ...p,
       area_total: p.area_total || '',
@@ -412,7 +412,7 @@ export default function Propriedades() {
       }
       fecharDialog();
       carregar();
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setSalvando(false); }
   };
 
@@ -423,7 +423,7 @@ export default function Propriedades() {
       await propriedadesAPI.excluir(id);
       notify('Propriedade excluída.');
       carregar();
-    } catch (e) { notify(e.message, 'error'); }
+    } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setExcluindo(null); }
   };
 

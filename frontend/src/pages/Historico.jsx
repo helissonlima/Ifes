@@ -44,7 +44,7 @@ export default function Historico() {
         setTotal(r.data.total);
         setDadosEmCache(Boolean(r.fromCache));
       })
-      .catch((e) => setErro(e.message))
+      .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
   }, [filtroStatus]);
 

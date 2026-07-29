@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Button, Divider,
@@ -6,7 +6,6 @@ import {
   TableBody, TableCell, TableRow, Paper, Tabs, Tab, TableHead, Tooltip,
 } from '@mui/material';
 import { FiArrowLeft, FiClipboard, FiPrinter, FiTrendingUp, FiAlertTriangle, FiCheckCircle, FiTarget, FiEdit3 } from 'react-icons/fi';
-import { MdOutlineEco } from 'react-icons/md';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer,
   Cell, LineChart, Line, Legend,
@@ -50,8 +49,9 @@ export default function Resultado() {
   const [tabDiag, setTabDiag] = useState(0);
   const [dadosEmCache, setDadosEmCache] = useState(false);
 
-  useEffect(() => {
+  const carregar = useCallback(() => {
     setLoading(true);
+    setErro('');
     avaliacoesAPI.buscar(id)
       .then(async (r) => {
         setAvaliacao(r.data);
@@ -66,6 +66,8 @@ export default function Resultado() {
       .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   if (loading) return (
     <Box>
@@ -84,7 +86,7 @@ export default function Resultado() {
   if (erro) return (
     <Alert
       severity="error"
-      action={<Button color="inherit" size="small" onClick={() => window.location.reload()}>Recarregar</Button>}
+      action={<Button color="inherit" size="small" onClick={carregar}>Tentar novamente</Button>}
     >
       {erro}
     </Alert>

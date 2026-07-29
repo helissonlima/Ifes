@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { isSafeToCache, readCachedGet, saveCachedGet } from '../utils/requestCache';
 
+export const TOKEN_KEY = 'sustenta_token';
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
   timeout: 6000,
@@ -18,6 +20,13 @@ api.interceptors.request.use((config) => {
   return nextConfig;
 });
 
+// Registrado pelo AppContext (fora deste módulo, que não tem acesso a hooks/estado
+// React) para limpar o usuário da sessão quando o backend recusa o token.
+let unauthorizedHandler = null;
+export function onUnauthorized(handler) {
+  unauthorizedHandler = handler;
+}
+
 api.interceptors.response.use(
   (response) => {
     const { config } = response;
@@ -28,19 +37,30 @@ api.interceptors.response.use(
   },
   (error) => {
     const config = error.config || {};
-    const cached = config.metadata?.cacheable ? readCachedGet(config.url, config.params) : null;
+    // Cache local só cobre falha de rede/timeout (sem resposta do servidor).
+    // Um erro HTTP (401/403/404/500...) tem que propagar — nunca ser mascarado
+    // por um dado potencialmente desatualizado/inválido do cache.
+    const isNetworkError = !error.response;
+    if (isNetworkError && config.metadata?.cacheable) {
+      const cached = readCachedGet(config.url, config.params);
+      if (cached) {
+        return Promise.resolve({
+          data: cached.data,
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config,
+          request: error.request,
+          fromCache: true,
+          cachedAt: cached.cachedAt,
+        });
+      }
+    }
 
-    if (cached) {
-      return Promise.resolve({
-        data: cached.data,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config,
-        request: error.request,
-        fromCache: true,
-        cachedAt: cached.cachedAt,
-      });
+    if (error.response?.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      setAuthToken(null);
+      unauthorizedHandler?.();
     }
 
     const msg = error.response?.data?.erro || error.message || 'Erro de conexão com o servidor';
@@ -98,6 +118,11 @@ export const indicadoresAPI = {
 // Grãos
 export const graosAPI = {
   listarAtivos: () => api.get('/graos'),
+  listarTodosAdmin: () => api.get('/graos/admin/todos'),
+  criar: (data) => api.post('/graos/admin/criar', data),
+  atualizar: (id, data) => api.put(`/graos/admin/${id}/atualizar`, data),
+  excluir: (id) => api.delete(`/graos/admin/${id}/deletar`),
+  sincronizarIBGE: () => api.post('/graos/admin/sincronizar-ibge'),
 };
 
 // Produção regional (IBGE)

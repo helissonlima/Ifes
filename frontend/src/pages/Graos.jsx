@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import {
   Box, Typography, Button, Card, CardContent, Grid, TextField,
   InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, Chip, CircularProgress, Alert, Divider,
+  IconButton, Chip, CircularProgress, Alert,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Switch, FormControlLabel, useMediaQuery, useTheme,
 } from '@mui/material';
 import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX, FiRefreshCw } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
-import { axiosInstance } from '../services/api';
+import { graosAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { friendlyError } from '../utils/errorMessages';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const FORM_INICIAL = { nome: '', codigo: '', descricao: '', ativo: true };
@@ -58,10 +59,10 @@ export default function Graos() {
     setLoading(true);
     setErro('');
     try {
-      const res = await axiosInstance.get('/graos/admin/todos');
+      const res = await graosAPI.listarTodosAdmin();
       setGraos(res.data);
     } catch (e) {
-      setErro('Erro ao carregar grãos: ' + (e.response?.data?.erro || e.message));
+      setErro(friendlyError(e));
     } finally {
       setLoading(false);
     }
@@ -85,16 +86,16 @@ export default function Graos() {
     setSalvando(true);
     try {
       if (dialog.editando) {
-        await axiosInstance.put(`/graos/admin/${dialog.editando.id}/atualizar`, form);
+        await graosAPI.atualizar(dialog.editando.id, form);
         notify('Grão atualizado!');
       } else {
-        await axiosInstance.post('/graos/admin/criar', form);
+        await graosAPI.criar(form);
         notify('Grão criado!');
       }
       fecharDialog();
       carregar();
     } catch (e) {
-      notify(e.response?.data?.erro || e.message, 'error');
+      notify(friendlyError(e), 'error');
     } finally {
       setSalvando(false);
     }
@@ -103,11 +104,11 @@ export default function Graos() {
   const sincronizarIBGE = async () => {
     setSincronizando(true);
     try {
-      const res = await axiosInstance.post('/graos/admin/sincronizar-ibge');
+      const res = await graosAPI.sincronizarIBGE();
       notify(`${res.data.mensagem} (${res.data.total_ibge} culturas no ES, ${res.data.ignorados} já existiam)`, 'success');
       carregar();
     } catch (e) {
-      notify(e.response?.data?.erro || e.message, 'error');
+      notify(friendlyError(e), 'error');
     } finally {
       setSincronizando(false);
     }
@@ -117,11 +118,11 @@ export default function Graos() {
     if (!window.confirm('Excluir este grão? Propriedades que o utilizam não serão afetadas.')) return;
     setExcluindo(id);
     try {
-      await axiosInstance.delete(`/graos/admin/${id}/deletar`);
+      await graosAPI.excluir(id);
       notify('Grão excluído.');
       carregar();
     } catch (e) {
-      notify(e.response?.data?.erro || e.message, 'error');
+      notify(friendlyError(e), 'error');
     } finally {
       setExcluindo(null);
     }

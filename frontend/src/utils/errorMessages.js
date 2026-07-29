@@ -14,7 +14,9 @@ const MAP = {
  */
 export function friendlyError(err) {
   if (!err) return 'Ocorreu um erro inesperado. Tente novamente.';
-  const msg = err?.response?.data?.erro || err?.message || String(err);
+  // O interceptor axios (services/api.js) já converte qualquer erro em um
+  // Error simples com a mensagem do backend — err.response nunca chega aqui.
+  const msg = err?.message || String(err);
   for (const [key, friendly] of Object.entries(MAP)) {
     if (msg.includes(key)) return friendly;
   }

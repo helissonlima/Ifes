@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { propriedadesAPI, avaliacoesAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { friendlyError } from '../utils/errorMessages';
 import IGSBadge from '../components/Common/IGSBadge';
 
 const COR_NOTA = {
@@ -72,7 +73,7 @@ export default function PropriedadeDetalhe() {
           setIdB(avs[avs.length - 1].id);
         }
       })
-      .catch((e) => setErro(e.message))
+      .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -81,7 +82,7 @@ export default function PropriedadeDetalhe() {
       setCarregandoComp(true);
       avaliacoesAPI.comparar(idA, idB)
         .then((r) => setComparativo(r.data))
-        .catch((e) => notify(e.message, 'error'))
+        .catch((e) => notify(friendlyError(e), 'error'))
         .finally(() => setCarregandoComp(false));
     } else {
       setComparativo(null);
@@ -94,7 +95,7 @@ export default function PropriedadeDetalhe() {
     setErroProd('');
     producaoAPI.media(prop.municipio, prop.estado)
       .then((r) => setProducao(r.data))
-      .catch((e) => setErroProd(e.message))
+      .catch((e) => setErroProd(friendlyError(e)))
       .finally(() => setCarregandoProd(false));
   };
 
