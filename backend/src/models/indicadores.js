@@ -497,7 +497,7 @@ const DIMENSOES = {
 const ESCALA_IGS = [
   { min: 0.00, max: 0.20, classificacao: 'Muito Baixa', cor: '#f44336', descricao: 'Situação crítica; intervenção urgente em múltiplas dimensões' },
   { min: 0.20, max: 0.40, classificacao: 'Baixa', cor: '#FF9800', descricao: 'Fragilidades significativas; programa de assistência intensiva' },
-  { min: 0.40, max: 0.60, classificacao: 'Moderada', cor: '#FFEB3B', descricao: 'Propriedade em transição; fortalecer dimensões específicas' },
+  { min: 0.40, max: 0.60, classificacao: 'Moderada', cor: '#FFC107', descricao: 'Propriedade em transição; fortalecer dimensões específicas' },
   { min: 0.60, max: 0.80, classificacao: 'Boa', cor: '#8BC34A', descricao: 'Boa performance; manter e potencial para certificações' },
   { min: 0.80, max: 1.00, classificacao: 'Alta', cor: '#4CAF50', descricao: 'Excelência; referência regional, mercados premium' },
 ];
@@ -514,6 +514,8 @@ function avaliarStatusIndicador(nota) {
   return STATUS_INDICADOR.find((s) => n <= s.max) || STATUS_INDICADOR[STATUS_INDICADOR.length - 1];
 }
 
+// Node é a única fonte de verdade do cálculo do IGS (não há mais função SQL
+// equivalente — ver migrations/006_remove_calcular_igs.sql).
 function calcularIGS(ie, ia, is_, igq) {
   const igs = (ie * 0.30) + (ia * 0.35) + (is_ * 0.20) + (igq * 0.15);
   const faixa = ESCALA_IGS.find((e) => igs <= e.max) || ESCALA_IGS[ESCALA_IGS.length - 1];

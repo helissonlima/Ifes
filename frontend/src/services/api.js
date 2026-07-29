@@ -113,6 +113,7 @@ export const avaliacoesAPI = {
 export const indicadoresAPI = {
   listar: () => api.get('/indicadores'),
   dimensoes: () => api.get('/indicadores/dimensoes'),
+  metodologia: () => api.get('/indicadores/metodologia'),
 };
 
 // Grãos

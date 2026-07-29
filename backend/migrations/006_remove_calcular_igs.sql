@@ -1,0 +1,17 @@
+-- =====================================================
+-- Migração 006: Remove a função SQL calcular_igs (dead code)
+-- =====================================================
+-- calcular_igs() foi criada na migração 001 e atualizada na 004, mas nunca
+-- chegou a ser chamada por nenhum código da aplicação — o cálculo do IGS
+-- sempre foi feito em Node (src/models/indicadores.js: calcularIGS +
+-- calcularIndiceDimensao, usados por avaliacoesController.js).
+--
+-- A função SQL também estava incompleta em relação à implementação Node:
+-- ela só combina os 4 índices de dimensão com os pesos 0.30/0.35/0.20/0.15,
+-- mas não faz a média ponderada interna por indicador que
+-- calcularIndiceDimensao() faz em Node. Mantê-la seria conservar uma
+-- segunda implementação parcial e divergente da mesma fórmula.
+--
+-- Decisão: Node é a única fonte de verdade do cálculo do IGS. Esta migração
+-- remove a função para não deixar código morto/enganoso no banco.
+DROP FUNCTION IF EXISTS calcular_igs(DECIMAL, DECIMAL, DECIMAL, DECIMAL);

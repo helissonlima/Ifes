@@ -1,18 +1,13 @@
 import { Box, Typography, LinearProgress, Chip, Alert, Tooltip } from '@mui/material';
 import { FiInfo } from 'react-icons/fi';
 import IndicadorCard from './IndicadorCard';
+import { calcularIndiceDimensao } from '../../utils/metodologia';
 
 export default function DimensaoStep({ dimensao, respostas, observacoes, onChange, onObservacaoChange }) {
   const total = dimensao.indicadores.length;
-  const respondidosArr = dimensao.indicadores.filter((ind) => respostas[ind.codigo] !== undefined);
-  const respondidos = respondidosArr.length;
+  const respondidos = dimensao.indicadores.filter((ind) => respostas[ind.codigo] !== undefined).length;
   const progresso = (respondidos / total) * 100;
-  const somaPesos = respondidosArr.reduce((acc, ind) => acc + (ind.peso || 0), 0);
-  const media = respondidosArr.length > 0
-    ? somaPesos > 0
-      ? respondidosArr.reduce((acc, ind) => acc + respostas[ind.codigo] * (ind.peso || 0), 0) / somaPesos
-      : respondidosArr.reduce((acc, ind) => acc + respostas[ind.codigo], 0) / respondidosArr.length
-    : null;
+  const media = calcularIndiceDimensao(dimensao.indicadores, respostas);
 
   return (
     <Box>

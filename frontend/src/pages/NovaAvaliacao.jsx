@@ -24,6 +24,9 @@ import {
   formatarDataRascunho,
 } from '../utils/avaliacaoCache';
 import { friendlyError } from '../utils/errorMessages';
+import { useMetodologia, calcularIndiceDimensao as calcularIndiceDimensaoUtil, calcularIGS as calcularIGSUtil, getClassificacao as getClassificacaoUtil } from '../utils/metodologia';
+import { COR_CLASSIFICACAO } from '../utils/coresICSR';
+import { formatarData } from '../utils/formatarData';
 
 const DIMENSOES_ORDEM = ['economica', 'ambiental', 'social', 'gestao_qualidade'];
 
@@ -46,6 +49,7 @@ export default function NovaAvaliacao() {
   const [searchParams] = useSearchParams();
   const { notify, user } = useApp();
   const { isOnline, wasOffline, resetWasOffline } = useNetworkStatus();
+  const { metodologia } = useMetodologia();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isCompactStepper = useMediaQuery(theme.breakpoints.down('lg'));
@@ -258,34 +262,22 @@ export default function NovaAvaliacao() {
     setObservacoes((o) => ({ ...o, [indicadorCodigo]: texto }));
   };
 
-  // Calcula média ponderada por dimensão (usa os pesos internos dos indicadores)
+  // Média ponderada por dimensão (pesos internos dos indicadores) e IGS final
+  // (pesos por dimensão) — mesma fórmula do backend, centralizada em
+  // utils/metodologia.js para não divergir entre preview e resultado salvo.
   const calcularIndiceDimensao = (dimCodigo) => {
     if (!dimensoes[dimCodigo]) return null;
-    const inds = dimensoes[dimCodigo].indicadores;
-    const respondidos = inds.filter((i) => respostas[i.codigo] !== undefined);
-    if (respondidos.length === 0) return null;
-    const somaPesos = respondidos.reduce((acc, i) => acc + (i.peso || 0), 0);
-    if (somaPesos === 0) {
-      return respondidos.reduce((acc, i) => acc + respostas[i.codigo], 0) / respondidos.length;
-    }
-    return respondidos.reduce((acc, i) => acc + respostas[i.codigo] * (i.peso || 0), 0) / somaPesos;
+    return calcularIndiceDimensaoUtil(dimensoes[dimCodigo].indicadores, respostas);
   };
 
-  const calcularIGS = () => {
-    const ie = calcularIndiceDimensao('economica') ?? 0;
-    const ia = calcularIndiceDimensao('ambiental') ?? 0;
-    const is_ = calcularIndiceDimensao('social') ?? 0;
-    const igq = calcularIndiceDimensao('gestao_qualidade') ?? 0;
-    return (ie * 0.30) + (ia * 0.35) + (is_ * 0.20) + (igq * 0.15);
-  };
+  const calcularIGS = () => calcularIGSUtil({
+    economica: calcularIndiceDimensao('economica'),
+    ambiental: calcularIndiceDimensao('ambiental'),
+    social: calcularIndiceDimensao('social'),
+    gestao_qualidade: calcularIndiceDimensao('gestao_qualidade'),
+  }, metodologia);
 
-  const getClassificacao = (igs) => {
-    if (igs <= 0.20) return 'Muito Baixa';
-    if (igs <= 0.40) return 'Baixa';
-    if (igs <= 0.60) return 'Moderada';
-    if (igs <= 0.80) return 'Boa';
-    return 'Alta';
-  };
+  const getClassificacao = (igs) => getClassificacaoUtil(igs, metodologia?.escala);
 
   const salvarRascunhoServidor = async () => {
     if (!info.propriedade) return;
@@ -1005,7 +997,6 @@ export default function NovaAvaliacao() {
 function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao, calcularIGS, getClassificacao, totalRespondidos, totalIndicadores }) {
   const igs = calcularIGS();
   const classificacao = getClassificacao(igs);
-  const COR_CLASS = { 'Muito Baixa': '#f44336', 'Baixa': '#FF9800', 'Moderada': '#FFC107', 'Boa': '#8BC34A', 'Alta': '#4CAF50' };
 
   return (
     <Box>
@@ -1027,20 +1018,20 @@ function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao,
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="caption" color="text.secondary">Data</Typography>
-              <Typography variant="body2">{new Date(info.data).toLocaleDateString('pt-BR')}</Typography>
+              <Typography variant="body2">{formatarData(info.data)}</Typography>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
 
       {/* IGS calculado */}
-      <Card sx={{ mb: 1.5, border: `2px solid ${COR_CLASS[classificacao]}` }}>
+      <Card sx={{ mb: 1.5, border: `2px solid ${COR_CLASSIFICACAO[classificacao]}` }}>
         <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 2.5 } }}>
-          <MdOutlineEco size={36} color={COR_CLASS[classificacao]} />
-          <Typography variant="h4" fontWeight={800} color={COR_CLASS[classificacao]} sx={{ mt: 0.75 }}>
+          <MdOutlineEco size={36} color={COR_CLASSIFICACAO[classificacao]} />
+          <Typography variant="h4" fontWeight={800} color={COR_CLASSIFICACAO[classificacao]} sx={{ mt: 0.75 }}>
             ICSR: {(igs * 100).toFixed(1)}%
           </Typography>
-          <Typography variant="h6" fontWeight={700} color={COR_CLASS[classificacao]}>
+          <Typography variant="h6" fontWeight={700} color={COR_CLASSIFICACAO[classificacao]}>
             {classificacao} Sustentabilidade
           </Typography>
           <Typography variant="caption" color="text.secondary">

@@ -1,27 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
-
-const COR_MAPA = {
-  'Muito Baixa': '#f44336',
-  'Baixa': '#FF9800',
-  'Moderada': '#FFC107',
-  'Boa': '#8BC34A',
-  'Alta': '#4CAF50',
-};
-
-// Cores de texto acessíveis para cada classificação (mínimo 4.5:1 sobre branco)
-const COR_TEXTO_MAPA = {
-  'Muito Baixa': '#c62828',
-  'Baixa':       '#e65100',
-  'Moderada':    '#8B6000',
-  'Boa':         '#33691e',
-  'Alta':        '#2E7D32',
-};
+import { COR_CLASSIFICACAO, COR_CLASSIFICACAO_TEXTO } from '../../utils/coresICSR';
 
 export default function IGSGauge({ igs, classificacao, size = 200 }) {
   const pct = igs != null ? Math.round(igs * 100) : 0;
-  const cor = COR_MAPA[classificacao] || '#9E9E9E';
-  const corTexto = COR_TEXTO_MAPA[classificacao] || '#424242';
+  const cor = COR_CLASSIFICACAO[classificacao] || '#9E9E9E';
+  const corTexto = COR_CLASSIFICACAO_TEXTO[classificacao] || '#424242';
   const data = [{ value: pct }];
 
   return (

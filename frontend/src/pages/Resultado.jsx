@@ -12,22 +12,20 @@ import {
 } from 'recharts';
 import { avaliacoesAPI } from '../services/api';
 import { friendlyError } from '../utils/errorMessages';
+import { COR_NOTA, COR_NOTA_TEXTO, COR_CLASSIFICACAO } from '../utils/coresICSR';
+import { useMetodologia } from '../utils/metodologia';
+import { formatarData, formatarDataCurta } from '../utils/formatarData';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
 
-const COR_NOTA = {
-  0: '#f44336', 0.25: '#FF9800', 0.5: '#FFC107', 0.75: '#8BC34A', 1: '#4CAF50',
-};
-// Cores de texto acessíveis (≥4.5:1 em fundo branco)
-const COR_NOTA_TEXTO = {
-  0: '#b71c1c', 0.25: '#e65100', 0.5: '#8B6000', 0.75: '#33691e', 1: '#1B5E20',
-};
-const DIM_INFO = {
-  ambiental:       { nome: 'Ambiental',         cor: '#4CAF50', peso: 35, campo: 'indice_ambiental' },
-  economica:       { nome: 'Econômica',          cor: '#2196F3', peso: 30, campo: 'indice_economico' },
-  social:          { nome: 'Social',             cor: '#FF9800', peso: 20, campo: 'indice_social' },
-  gestao_qualidade:{ nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 15, campo: 'indice_gestao_qualidade' },
+// Nome do campo de índice de cada dimensão na resposta de GET /avaliacoes/:id
+// (convenção própria dessa API — por isso não faz parte de utils/metodologia.js).
+const CAMPO_POR_DIMENSAO = {
+  ambiental: 'indice_ambiental',
+  economica: 'indice_economico',
+  social: 'indice_social',
+  gestao_qualidade: 'indice_gestao_qualidade',
 };
 
 const STATUS_ICON = {
@@ -48,6 +46,10 @@ export default function Resultado() {
   const [tabAtiva, setTabAtiva] = useState(0);
   const [tabDiag, setTabDiag] = useState(0);
   const [dadosEmCache, setDadosEmCache] = useState(false);
+  const { dimInfo, carregando: carregandoMetodologia } = useMetodologia();
+  const DIM_INFO = dimInfo && Object.fromEntries(
+    Object.entries(dimInfo).map(([codigo, info]) => [codigo, { ...info, campo: CAMPO_POR_DIMENSAO[codigo] }])
+  );
 
   const carregar = useCallback(() => {
     setLoading(true);
@@ -69,7 +71,7 @@ export default function Resultado() {
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  if (loading) return (
+  if (loading || carregandoMetodologia) return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
         <Skeleton width={70} height={32} />
@@ -107,14 +109,14 @@ export default function Resultado() {
   }));
 
   const timelineData = timeline.map((t) => ({
-    data: new Date(t.data_avaliacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' }),
+    data: formatarDataCurta(t.data_avaliacao),
     ICSR: Math.round((Number(t.igs) || 0) * 100),
     Ambiental: Math.round((Number(t.indice_ambiental) || 0) * 100),
     Econômica: Math.round((Number(t.indice_economico) || 0) * 100),
     Social: Math.round((Number(t.indice_social) || 0) * 100),
     'IGQG': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
   }));
-  const dimensaoCritica = getDimensaoCritica(avaliacao);
+  const dimensaoCritica = getDimensaoCritica(avaliacao, DIM_INFO);
   const prioridadePrincipal = diagnostico?.plano_acao_top5?.[0] || null;
 
   return (
@@ -146,7 +148,7 @@ export default function Resultado() {
       )}
 
       {/* ICSR Principal — card limpo sem gradiente escuro */}
-      <Card sx={{ mb: 2, borderTop: `4px solid ${COR_NOTA[avaliacao.classificacao === 'Alta' ? 1 : avaliacao.classificacao === 'Boa' ? 0.75 : avaliacao.classificacao === 'Moderada' ? 0.5 : avaliacao.classificacao === 'Baixa' ? 0.25 : 0] || '#9E9E9E'}` }}>
+      <Card sx={{ mb: 2, borderTop: `4px solid ${COR_CLASSIFICACAO[avaliacao.classificacao] || '#9E9E9E'}` }}>
         <CardContent>
           <Grid container spacing={2} sx={{ alignItems: 'center' }}>
             <Grid size={{ xs: 12, sm: 3 }} sx={{ textAlign: 'center' }}>
@@ -176,7 +178,7 @@ export default function Resultado() {
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Typography variant="caption" color="text.secondary">Data</Typography>
-                  <Typography variant="body2" fontWeight={600}>{new Date(avaliacao.data_avaliacao).toLocaleDateString('pt-BR')}</Typography>
+                  <Typography variant="body2" fontWeight={600}>{formatarData(avaliacao.data_avaliacao)}</Typography>
                 </Grid>
               </Grid>
             </Grid>
@@ -528,9 +530,9 @@ export default function Resultado() {
   );
 }
 
-function getDimensaoCritica(avaliacao) {
-  if (!avaliacao) return null;
-  return Object.values(DIM_INFO)
+function getDimensaoCritica(avaliacao, dimInfo) {
+  if (!avaliacao || !dimInfo) return null;
+  return Object.values(dimInfo)
     .map((info) => ({ ...info, valor: Number(avaliacao[info.campo] || 0) }))
     .sort((a, b) => a.valor - b.valor)[0] || null;
 }

@@ -8,6 +8,8 @@ import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiTren
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { friendlyError } from '../utils/errorMessages';
+import { useMetodologia, getClassificacao } from '../utils/metodologia';
+import { formatarData } from '../utils/formatarData';
 import StatCard from '../components/Dashboard/StatCard';
 import EmptyState from '../components/Common/EmptyState';
 import IGSGauge from '../components/Dashboard/IGSGauge';
@@ -15,12 +17,14 @@ import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 
-const DIMENSOES = [
-  { key: 'media_economica', label: 'Econômica', cor: '#2196F3', peso: '30%' },
-  { key: 'media_ambiental', label: 'Ambiental', cor: '#4CAF50', peso: '35%' },
-  { key: 'media_social', label: 'Social', cor: '#FF9800', peso: '20%' },
-  { key: 'media_gestao', label: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: '15%' },
-];
+// Nome do campo de cada dimensão na resposta de GET /avaliacoes/estatisticas
+// (médias agregadas — convenção própria dessa API).
+const CAMPO_STATS_POR_DIMENSAO = {
+  economica: 'media_economica',
+  ambiental: 'media_ambiental',
+  social: 'media_social',
+  gestao_qualidade: 'media_gestao',
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -29,6 +33,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [dadosEmCache, setDadosEmCache] = useState(false);
+  const { metodologia, dimInfo } = useMetodologia();
+  const DIMENSOES = dimInfo && Object.values(dimInfo).map((info) => ({
+    key: CAMPO_STATS_POR_DIMENSAO[info.codigo],
+    label: info.nome,
+    cor: info.cor,
+    peso: `${info.pesoPercentual}%`,
+  }));
 
   const carregarDados = () => {
     setLoading(true);
@@ -48,7 +59,7 @@ export default function Dashboard() {
 
   useEffect(() => { carregarDados(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading) return (
+  if (loading || !DIMENSOES) return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box><Skeleton width={160} height={32} /><Skeleton width={280} height={20} sx={{ mt: 0.5 }} /></Box>
@@ -84,8 +95,8 @@ export default function Dashboard() {
     </Box>
   );
 
-  const classificacaoMedia = getClassificacao(stats?.media_igs);
-  const dimensaoPrioritaria = getDimensaoPrioritaria(stats);
+  const classificacaoMedia = getClassificacao(stats?.media_igs, metodologia?.escala);
+  const dimensaoPrioritaria = getDimensaoPrioritaria(stats, DIMENSOES);
 
   return (
     <Box>
@@ -220,7 +231,7 @@ export default function Dashboard() {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {av.municipio} · {new Date(av.data_avaliacao).toLocaleDateString('pt-BR')} · {av.tecnico_responsavel || 'Técnico'}
+                          {av.municipio} · {formatarData(av.data_avaliacao)} · {av.tecnico_responsavel || 'Técnico'}
                         </Typography>
                       </Box>
                       <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
@@ -240,7 +251,7 @@ export default function Dashboard() {
               </Typography>
               <IGSGauge
                 igs={stats?.media_igs ?? 0}
-                classificacao={getClassificacao(stats?.media_igs)}
+                classificacao={getClassificacao(stats?.media_igs, metodologia?.escala)}
               />
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" fontWeight={700} gutterBottom>
@@ -318,19 +329,10 @@ export default function Dashboard() {
   );
 }
 
-function getDimensaoPrioritaria(stats) {
-  if (!stats) return null;
-  return DIMENSOES
+function getDimensaoPrioritaria(stats, dimensoes) {
+  if (!stats || !dimensoes) return null;
+  return dimensoes
     .map((d) => ({ ...d, valor: stats[d.key] }))
     .filter((d) => typeof d.valor === 'number')
     .sort((a, b) => a.valor - b.valor)[0] || null;
-}
-
-function getClassificacao(igs) {
-  if (!igs) return null;
-  if (igs <= 0.20) return 'Muito Baixa';
-  if (igs <= 0.40) return 'Baixa';
-  if (igs <= 0.60) return 'Moderada';
-  if (igs <= 0.80) return 'Boa';
-  return 'Alta';
 }

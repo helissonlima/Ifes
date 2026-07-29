@@ -4,20 +4,9 @@ import {
 } from '@mui/material';
 import { FiCheckSquare, FiEdit3, FiChevronDown, FiChevronUp, FiCheck, FiInfo } from 'react-icons/fi';
 import { getDefinicao } from '../../utils/glossario';
+import { COR_NOTA, COR_NOTA_TEXTO, COR_NOTA_BADGE_SELECIONADO } from '../../utils/coresICSR';
 
 const LABEL_NOTA = { 0: '0,00', 0.25: '0,25', 0.5: '0,50', 0.75: '0,75', 1: '1,00' };
-// Cores de fundo/acento para cada nota
-const COR_NOTA = {
-  0: '#f44336', 0.25: '#FF9800', 0.5: '#FFC107', 0.75: '#8BC34A', 1: '#4CAF50',
-};
-// Cores de texto acessíveis em fundo branco (≥4.5:1)
-const COR_NOTA_TEXTO = {
-  0: '#b71c1c', 0.25: '#e65100', 0.5: '#8B6000', 0.75: '#33691e', 1: '#1B5E20',
-};
-// Cores de texto para fundo do badge colorido selecionado (≥4.5:1 sobre a cor de fundo)
-const COR_BADGE_SELECIONADO = {
-  0: '#fff', 0.25: '#3E1F00', 0.5: '#5D4000', 0.75: '#1B3A00', 1: '#1B5E20',
-};
 const NIVEL = {
   0: 'Crítico', 0.25: 'Insuficiente', 0.5: 'Regular', 0.75: 'Bom', 1: 'Excelente',
 };
@@ -107,7 +96,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                   py: 0.2,
                   borderRadius: 1,
                   bgcolor: selected ? cor : cor + '18',
-                  color: selected ? COR_BADGE_SELECIONADO[c.nota] : COR_NOTA_TEXTO[c.nota],
+                  color: selected ? COR_NOTA_BADGE_SELECIONADO[c.nota] : COR_NOTA_TEXTO[c.nota],
                   fontSize: '0.68rem',
                   fontWeight: 800,
                   flexShrink: 0,

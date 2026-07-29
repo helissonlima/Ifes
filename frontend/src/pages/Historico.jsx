@@ -12,6 +12,7 @@ import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
 import { friendlyError } from '../utils/errorMessages';
+import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const COR_DIMS = {
@@ -181,7 +182,7 @@ export default function Historico() {
                     <Box>
                       <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {av.municipio} · {new Date(av.data_avaliacao).toLocaleDateString('pt-BR')}
+                        {av.municipio} · {formatarData(av.data_avaliacao)}
                       </Typography>
                     </Box>
                     <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
@@ -253,7 +254,7 @@ export default function Historico() {
                 >
                   <TableCell><Typography variant="body2" fontWeight={600}>{av.propriedade_nome}</Typography></TableCell>
                   <TableCell><Typography variant="body2">{av.municipio}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{new Date(av.data_avaliacao).toLocaleDateString('pt-BR')}</Typography></TableCell>
+                  <TableCell><Typography variant="body2">{formatarData(av.data_avaliacao)}</Typography></TableCell>
                   <TableCell><Typography variant="body2">{av.tecnico_responsavel || '—'}</Typography></TableCell>
                   {[
                     { val: av.indice_economico, cor: COR_DIMS.economico },

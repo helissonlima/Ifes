@@ -7,6 +7,7 @@ import {
 import { FiChevronDown, FiInfo } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import { COR_CLASSIFICACAO } from '../utils/coresICSR';
 
 const DIMENSOES = [
   {
@@ -32,12 +33,12 @@ const DIMENSOES = [
 ];
 
 const ESCALA = [
-  { faixa: '0,00 – 0,20', classificacao: 'Muito Baixa', cor: '#f44336', descricao: 'Situação crítica — intervenção urgente necessária' },
-  { faixa: '0,21 – 0,40', classificacao: 'Baixa', cor: '#FF9800', descricao: 'Sustentabilidade comprometida — ações corretivas necessárias' },
-  { faixa: '0,41 – 0,60', classificacao: 'Moderada', cor: '#FFC107', descricao: 'Em transição — práticas sustentáveis em implantação' },
-  { faixa: '0,61 – 0,80', classificacao: 'Boa', cor: '#8BC34A', descricao: 'Bom desempenho sustentável — manter e aprimorar' },
-  { faixa: '0,81 – 1,00', classificacao: 'Alta', cor: '#4CAF50', descricao: 'Excelência em sustentabilidade — referência regional' },
-];
+  { faixa: '0,00 – 0,20', classificacao: 'Muito Baixa', descricao: 'Situação crítica — intervenção urgente necessária' },
+  { faixa: '0,20 – 0,40', classificacao: 'Baixa', descricao: 'Sustentabilidade comprometida — ações corretivas necessárias' },
+  { faixa: '0,40 – 0,60', classificacao: 'Moderada', descricao: 'Em transição — práticas sustentáveis em implantação' },
+  { faixa: '0,60 – 0,80', classificacao: 'Boa', descricao: 'Bom desempenho sustentável — manter e aprimorar' },
+  { faixa: '0,80 – 1,00', classificacao: 'Alta', descricao: 'Excelência em sustentabilidade — referência regional' },
+].map((e) => ({ ...e, cor: COR_CLASSIFICACAO[e.classificacao] }));
 
 export default function Metodologia() {
   return (

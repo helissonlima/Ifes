@@ -20,19 +20,10 @@ import {
 import { propriedadesAPI, avaliacoesAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { friendlyError } from '../utils/errorMessages';
+import { COR_NOTA } from '../utils/coresICSR';
+import { useMetodologia } from '../utils/metodologia';
+import { formatarData as fmtData, formatarDataCurta } from '../utils/formatarData';
 import IGSBadge from '../components/Common/IGSBadge';
-
-const COR_NOTA = {
-  0: '#f44336', 0.25: '#FF9800', 0.5: '#FFC107', 0.75: '#8BC34A', 1: '#4CAF50',
-};
-const DIM_INFO = {
-  ambiental: { nome: 'Ambiental', cor: '#4CAF50', peso: 35 },
-  economica: { nome: 'Econômica', cor: '#2196F3', peso: 30 },
-  social: { nome: 'Social', cor: '#FF9800', peso: 20 },
-  gestao_qualidade: { nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 15 },
-};
-
-const fmtData = (d) => new Date(d).toLocaleDateString('pt-BR');
 
 export default function PropriedadeDetalhe() {
   const { id } = useParams();
@@ -46,6 +37,7 @@ export default function PropriedadeDetalhe() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [tab, setTab] = useState(0);
+  const { dimInfo } = useMetodologia();
 
   // Comparativo
   const [idA, setIdA] = useState('');
@@ -112,7 +104,7 @@ export default function PropriedadeDetalhe() {
 
   const concluidas = timeline.filter((t) => t.status === 'concluida');
   const timelineData = concluidas.map((t) => ({
-    data: new Date(t.data_avaliacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' }),
+    data: formatarDataCurta(t.data_avaliacao),
     id: t.id,
     ICSR: Math.round((Number(t.igs) || 0) * 100),
     Ambiental: Math.round((Number(t.indice_ambiental) || 0) * 100),
@@ -383,7 +375,7 @@ export default function PropriedadeDetalhe() {
               {carregandoComp && <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}><CircularProgress /></Box>}
 
               {comparativo && !carregandoComp && (
-                <Comparativo comp={comparativo} />
+                <Comparativo comp={comparativo} dimInfo={dimInfo} />
               )}
             </Box>
           )}
@@ -450,7 +442,7 @@ function Trend({ delta, hidePct = false }) {
   );
 }
 
-function Comparativo({ comp }) {
+function Comparativo({ comp, dimInfo }) {
   const navigate = useNavigate();
   const barChartData = comp.dimensoes.map((d) => ({
     nome: d.nome, cor: d.cor,
@@ -559,7 +551,7 @@ function Comparativo({ comp }) {
             </TableHead>
             <TableBody>
               {comp.indicadores.map((it) => {
-                const dim = DIM_INFO[it.dimensao] || {};
+                const dim = dimInfo?.[it.dimensao] || {};
                 return (
                   <TableRow key={it.codigo} hover>
                     <TableCell>

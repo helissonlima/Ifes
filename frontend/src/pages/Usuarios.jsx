@@ -14,6 +14,7 @@ import {
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { friendlyError } from '../utils/errorMessages';
+import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 
 const PERMISSION_KEYS = [
@@ -323,7 +324,7 @@ export default function Usuarios() {
                             {isSelf && <Chip label="você" size="small" sx={{ height: 18, fontSize: '0.65rem' }} />}
                           </Box>
                           <Typography variant="caption" color="text.secondary">
-                            cadastrado em {new Date(u.criado_em).toLocaleDateString('pt-BR')}
+                            cadastrado em {formatarData(u.criado_em)}
                           </Typography>
                         </Box>
                       </Box>
