@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import {
   FiUserPlus, FiSearch, FiEdit2, FiTrash2, FiKey, FiShield, FiUsers,
-  FiUserCheck, FiUserX, FiEye, FiEyeOff, FiPlus,
+  FiUserCheck, FiUserX, FiEye, FiEyeOff, FiPlus, FiWifiOff,
 } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -227,7 +227,7 @@ export default function Usuarios() {
         ) : null}
       />
 
-      {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && usuarios.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
 
       {/* Stats */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -274,6 +274,18 @@ export default function Usuarios() {
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
+      ) : erro && usuarios.length === 0 ? (
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={<FiWifiOff size={40} />}
+              title="Não foi possível carregar os usuários"
+              description={erro}
+              actionLabel="Tentar novamente"
+              onAction={carregar}
+            />
+          </CardContent>
+        </Card>
       ) : usuariosFiltrados.length === 0 ? (
         <Card>
           <CardContent>

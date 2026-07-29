@@ -4,7 +4,7 @@ import {
   Grid, Card, CardContent, Typography, Box, Button,
   Divider, Alert, LinearProgress, Tooltip, Skeleton, Chip,
 } from '@mui/material';
-import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiTrendingUp } from 'react-icons/fi';
+import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiTrendingUp, FiWifiOff } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { friendlyError } from '../utils/errorMessages';
@@ -34,7 +34,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [dadosEmCache, setDadosEmCache] = useState(false);
-  const { metodologia, dimInfo } = useMetodologia();
+  const { metodologia, dimInfo, erro: erroMetodologia, recarregar: recarregarMetodologia } = useMetodologia();
   const DIMENSOES = dimInfo && Object.values(dimInfo).map((info) => ({
     key: CAMPO_STATS_POR_DIMENSAO[info.codigo],
     label: info.nome,
@@ -60,7 +60,7 @@ export default function Dashboard() {
 
   useEffect(() => { carregarDados(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading || !DIMENSOES) return (
+  if (loading || (!DIMENSOES && !erroMetodologia)) return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box><Skeleton width={160} height={32} /><Skeleton width={280} height={20} sx={{ mt: 0.5 }} /></Box>
@@ -93,6 +93,29 @@ export default function Dashboard() {
           </CardContent></Card>
         </Grid>
       </Grid>
+    </Box>
+  );
+
+  // Sem a metodologia (pesos/escala) não dá pra montar o painel — em vez de
+  // ficar preso no skeleton pra sempre (ex.: 1º acesso offline, sem cache
+  // ainda salvo), mostra um estado claro com opção de tentar de novo.
+  if (!DIMENSOES) return (
+    <Box>
+      <PageHeaderCard
+        title="Visão Geral"
+        subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · referência metodológica regional"
+      />
+      <Card>
+        <CardContent>
+          <EmptyState
+            icon={<FiWifiOff size={40} />}
+            title="Não foi possível carregar o painel"
+            description={friendlyError(erroMetodologia)}
+            actionLabel="Tentar novamente"
+            onAction={() => { recarregarMetodologia(); carregarDados(); }}
+          />
+        </CardContent>
+      </Card>
     </Box>
   );
 

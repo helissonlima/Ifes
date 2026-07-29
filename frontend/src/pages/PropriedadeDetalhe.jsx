@@ -50,8 +50,9 @@ export default function PropriedadeDetalhe() {
   const [carregandoProd, setCarregandoProd] = useState(false);
   const [erroProd, setErroProd] = useState('');
 
-  useEffect(() => {
+  const carregarDetalhe = () => {
     setLoading(true);
+    setErro('');
     Promise.all([
       propriedadesAPI.buscar(id),
       avaliacoesAPI.timeline(id),
@@ -67,6 +68,11 @@ export default function PropriedadeDetalhe() {
       })
       .catch((e) => setErro(friendlyError(e)))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    carregarDetalhe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -108,7 +114,14 @@ export default function PropriedadeDetalhe() {
       <Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} />
     </Box>
   );
-  if (erro) return <Alert severity="error">{erro}</Alert>;
+  if (erro) return (
+    <Alert
+      severity="error"
+      action={<Button color="inherit" size="small" onClick={carregarDetalhe}>Tentar novamente</Button>}
+    >
+      {erro}
+    </Alert>
+  );
   if (!propriedade) return null;
 
   const concluidas = timeline.filter((t) => t.status === 'concluida');

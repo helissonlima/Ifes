@@ -8,7 +8,7 @@ import {
   Autocomplete, Tooltip,
   useMediaQuery, useTheme,
 } from '@mui/material';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiX, FiTrendingUp } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiClipboard, FiMap, FiX, FiTrendingUp, FiWifiOff } from 'react-icons/fi';
 import { maskTelefone, maskUF, maskCEP, erroEmail } from '../utils/masks';
 import { propriedadesAPI, graosAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -441,7 +441,7 @@ export default function Propriedades() {
         ) : null}
       />
 
-      {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && propriedades.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
         <CachedDataBanner mensagem="Lista carregada do cache local. Novas propriedades ou edições recentes podem aparecer somente após reconexão." />
       )}
@@ -459,6 +459,18 @@ export default function Propriedades() {
             <Skeleton key={i} variant="rectangular" height={64} sx={{ borderRadius: 2 }} />
           ))}
         </Box>
+      ) : erro && propriedades.length === 0 ? (
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={<FiWifiOff size={40} />}
+              title="Não foi possível carregar as propriedades"
+              description={erro}
+              actionLabel="Tentar novamente"
+              onAction={carregar}
+            />
+          </CardContent>
+        </Card>
       ) : propriedades.length === 0 ? (
         <Card>
           <CardContent>

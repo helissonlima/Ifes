@@ -71,6 +71,7 @@ export default function NovaAvaliacao() {
   const [dialogRascunho, setDialogRascunho] = useState({ open: false, draft: null });
   const autoSaveTimer = useRef(null);
   const sincronizandoAutoRef = useRef(false);
+  const avisoQuotaMostradoRef = useRef(false);
 
   // ── Tutorial campo a campo ────────────────────────────────────────────────
   const [tutorialAtivo, setTutorialAtivo] = useState(false);
@@ -167,8 +168,16 @@ export default function NovaAvaliacao() {
         observacoes,
         syncPendente: true,
       };
-      salvarRascunhoLocal(userId, estado);
-      setUltimoSalvoLocal(new Date().toISOString());
+      const salvou = salvarRascunhoLocal(userId, estado);
+      if (salvou) {
+        avisoQuotaMostradoRef.current = false;
+        setUltimoSalvoLocal(new Date().toISOString());
+      } else if (!avisoQuotaMostradoRef.current) {
+        // Evita repetir o aviso a cada 1,5s enquanto a cota continuar cheia —
+        // avisa uma vez por "episódio" de falha, não a cada tentativa.
+        avisoQuotaMostradoRef.current = true;
+        notify('Não foi possível salvar o rascunho localmente (armazenamento cheio). Conclua ou sincronize esta avaliação com conexão à internet o quanto antes para não perder o que já foi preenchido.', 'error');
+      }
       setSyncPendente(true);
     }, 1500);
 

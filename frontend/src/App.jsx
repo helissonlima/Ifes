@@ -5,6 +5,7 @@ import theme from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import MainLayout from './components/Layout/MainLayout';
 import ErrorBoundary from './components/Common/ErrorBoundary';
+import UpdatePrompt from './components/Common/UpdatePrompt';
 
 const AcessoNegado = lazy(() => import('./pages/AcessoNegado'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -108,6 +109,7 @@ export default function App() {
         <ErrorBoundary>
           <AppRoutes />
         </ErrorBoundary>
+        <UpdatePrompt />
       </AppProvider>
     </ThemeProvider>
   );

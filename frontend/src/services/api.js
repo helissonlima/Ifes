@@ -1,5 +1,14 @@
 import axios from 'axios';
-import { isSafeToCache, readCachedGet, saveCachedGet } from '../utils/requestCache';
+import { isSafeToCache, readCachedGet, saveCachedGet, invalidateCachedGet } from '../utils/requestCache';
+
+// Primeiro segmento do caminho (ex.: "/propriedades/abc123" -> "/propriedades")
+// — usado pra invalidar de uma vez todo o cache GET de um recurso quando uma
+// mutação (POST/PUT/DELETE) nele é bem-sucedida.
+function recursoBase(url) {
+  if (!url) return '';
+  const primeiroSegmento = url.split('?')[0].split('/').filter(Boolean)[0];
+  return primeiroSegmento ? `/${primeiroSegmento}` : '';
+}
 
 export const TOKEN_KEY = 'sustenta_token';
 
@@ -32,6 +41,11 @@ api.interceptors.response.use(
     const { config } = response;
     if (config?.metadata?.cacheable) {
       saveCachedGet(config.url, config.params, response.data);
+    } else {
+      // Mutação (POST/PUT/DELETE) bem-sucedida: o cache GET desse recurso
+      // ficou desatualizado — remove pra não ressurgir como fallback de
+      // erro de rede numa leitura futura.
+      invalidateCachedGet(recursoBase(config?.url));
     }
     return response;
   },
@@ -64,7 +78,12 @@ api.interceptors.response.use(
     }
 
     const msg = error.response?.data?.erro || error.message || 'Erro de conexão com o servidor';
-    return Promise.reject(new Error(msg));
+    const rejeicao = new Error(msg);
+    // Sinaliza "sem conexão" (em vez do servidor ter recusado a requisição)
+    // pra quem chama poder reagir diferente — ex.: AppContext não desloga o
+    // técnico em campo só porque /auth/me não pôde ser confirmado agora.
+    rejeicao.isOffline = isNetworkError;
+    return Promise.reject(rejeicao);
   }
 );
 

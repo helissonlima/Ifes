@@ -6,7 +6,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Switch, FormControlLabel, useMediaQuery, useTheme,
 } from '@mui/material';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
 import { graosAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -153,7 +153,7 @@ export default function Graos() {
         ) : null}
       />
 
-      {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && graos.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
 
       <TextField
         fullWidth placeholder="Buscar por nome ou código..."
@@ -168,6 +168,18 @@ export default function Graos() {
             <Skeleton key={i} variant="rectangular" height={64} sx={{ borderRadius: 2 }} />
           ))}
         </Box>
+      ) : erro && graos.length === 0 ? (
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={<FiWifiOff size={40} />}
+              title="Não foi possível carregar os grãos"
+              description={erro}
+              actionLabel="Tentar novamente"
+              onAction={carregar}
+            />
+          </CardContent>
+        </Card>
       ) : graosFiltrados.length === 0 ? (
         <Card>
           <CardContent>

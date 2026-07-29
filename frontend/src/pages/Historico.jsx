@@ -6,7 +6,7 @@ import {
   Alert, Chip, IconButton, Divider, useMediaQuery, useTheme, LinearProgress, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
 } from '@mui/material';
-import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus } from 'react-icons/fi';
+import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus, FiWifiOff } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -105,7 +105,7 @@ export default function Historico() {
         )}
       />
 
-      {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && avaliacoes.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
         <CachedDataBanner mensagem="Histórico exibido a partir do cache local. Os registros podem não refletir alterações mais recentes do servidor." />
       )}
@@ -171,6 +171,18 @@ export default function Historico() {
             <Skeleton key={i} variant="rectangular" height={56} sx={{ borderRadius: 2 }} />
           ))}
         </Box>
+      ) : erro && avaliacoes.length === 0 ? (
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={<FiWifiOff size={40} />}
+              title="Não foi possível carregar o histórico"
+              description={erro}
+              actionLabel="Tentar novamente"
+              onAction={carregar}
+            />
+          </CardContent>
+        </Card>
       ) : filtradas.length === 0 ? (
         <Card>
           <CardContent>

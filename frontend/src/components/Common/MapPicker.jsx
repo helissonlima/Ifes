@@ -7,13 +7,18 @@ import {
 } from '@mui/material';
 import { FiNavigation, FiMap, FiMaximize2, FiCrosshair } from 'react-icons/fi';
 import { MdSatellite } from 'react-icons/md';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Corrige os ícones padrão do Leaflet no Vite (URLs das imagens ficam quebradas sem isso)
+// Corrige os ícones padrão do Leaflet no Vite (URLs das imagens ficam quebradas
+// sem isso). Usa os arquivos locais do pacote (não o CDN unpkg) para o mapa
+// continuar funcionando offline com o cache do service worker.
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 });
 
 const TILES = {
@@ -82,13 +87,30 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
   const center = hasPos ? [parsedLat, parsedLng] : DEFAULT_CENTER;
   const zoom   = hasPos ? 15 : DEFAULT_ZOOM;
 
+  // Throttle simples (≥1s entre chamadas) para respeitar a política de uso
+  // do Nominatim (serviço público gratuito, sem chave de API).
+  const ultimaBuscaRef = useRef(0);
+  const GEOCODAR_INTERVALO_MIN_MS = 1000;
+
   const geocodar = useCallback(async (query) => {
     if (!query?.trim()) return;
+    const agora = Date.now();
+    if (agora - ultimaBuscaRef.current < GEOCODAR_INTERVALO_MIN_MS) {
+      setErroGeo('Aguarde um instante antes de buscar novamente.');
+      return;
+    }
+    ultimaBuscaRef.current = agora;
     setGeocodando(true);
     setErroGeo('');
     try {
       const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&countrycodes=br`;
       const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
+      if (!res.ok) {
+        setErroGeo(res.status === 429
+          ? 'Muitas buscas em pouco tempo. Aguarde alguns segundos e tente novamente.'
+          : 'Falha ao buscar endereço. Tente novamente.');
+        return;
+      }
       const data = await res.json();
       if (!data.length) {
         setErroGeo('Endereço não encontrado. Tente um nome mais preciso.');

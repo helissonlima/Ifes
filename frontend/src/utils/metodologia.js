@@ -55,6 +55,10 @@ async function buscarMetodologia() {
 export function useMetodologia() {
   const [metodologia, setMetodologia] = useState(memoria);
   const [carregando, setCarregando] = useState(!memoria);
+  // Sem valor em memória/cache e sem rede (ex.: 1º acesso offline): sem isso,
+  // `carregando` vira false mas `metodologia` continua null pra sempre e a
+  // tela que depende de dimInfo fica presa no skeleton indefinidamente.
+  const [erro, setErro] = useState(null);
 
   useEffect(() => {
     // Não pula com base em `memoria` aqui: sob Strict Mode (efeito roda,
@@ -66,12 +70,24 @@ export function useMetodologia() {
     // memoria/cache na hora quando disponível.
     let ativo = true;
     buscarMetodologia()
-      .then((data) => { if (ativo) setMetodologia(data); })
+      .then((data) => { if (ativo) { setMetodologia(data); setErro(null); } })
+      .catch((e) => { if (ativo) setErro(e); })
       .finally(() => { if (ativo) setCarregando(false); });
     return () => { ativo = false; };
   }, []);
 
-  return { metodologia, carregando, dimInfo: metodologia ? montarDimInfo(metodologia) : null };
+  // Força uma nova tentativa de rede, ignorando o cache em memória do módulo
+  // (usado pelo botão "Tentar novamente" das telas quando erro !== null).
+  const recarregar = () => {
+    memoria = null;
+    setCarregando(true);
+    buscarMetodologia()
+      .then((data) => { setMetodologia(data); setErro(null); })
+      .catch((e) => setErro(e))
+      .finally(() => setCarregando(false));
+  };
+
+  return { metodologia, carregando, erro, recarregar, dimInfo: metodologia ? montarDimInfo(metodologia) : null };
 }
 
 /**
