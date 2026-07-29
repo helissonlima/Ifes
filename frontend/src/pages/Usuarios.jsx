@@ -16,6 +16,7 @@ import { useApp } from '../context/AppContext';
 import { friendlyError } from '../utils/errorMessages';
 import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import EmptyState from '../components/Common/EmptyState';
 
 const PERMISSION_KEYS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -275,9 +276,12 @@ export default function Usuarios() {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
       ) : usuariosFiltrados.length === 0 ? (
         <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <FiUsers size={48} color="#aaa" />
-            <Typography color="text.secondary" mt={1}>Nenhum usuário encontrado.</Typography>
+          <CardContent>
+            <EmptyState
+              icon={<FiUsers size={40} />}
+              title="Nenhum usuário encontrado"
+              description="Ajuste os filtros ou cadastre um novo usuário."
+            />
           </CardContent>
         </Card>
       ) : isMobile ? (

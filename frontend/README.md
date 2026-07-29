@@ -1,16 +1,23 @@
-# React + Vite
+# SustentaCafé — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web (PWA) do Sistema de Avaliação de Sustentabilidade Rural — ICSR (Índice Consolidado de Sustentabilidade Rural).
 
-Currently, two official plugins are available:
+React 19 + MUI + Vite. Consome a API em [`../backend`](../backend).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Desenvolvimento
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Requer a variável `VITE_API_URL` apontando para a API (ver [`../.env.example`](../.env.example)). Sem ela, usa `http://localhost:3001/api` em desenvolvimento.
 
-## Expanding the ESLint configuration
+## Scripts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `npm run dev` — servidor de desenvolvimento
+- `npm run build` — build de produção (`dist/`)
+- `npm run preview` — serve o build de produção localmente
+- `npm run lint` — ESLint
+
+Para rodar o sistema completo (frontend + backend + banco), veja o `make up` na raiz do projeto.

@@ -73,10 +73,14 @@ function SidebarContent({ onClose, isMobile }) {
         <Typography variant="caption" color="text.disabled">
           referência metodológica regional
         </Typography>
-        <br />
-        <Typography variant="caption" color="text.disabled">
-          {localidade || 'Caparaó · Minas Gerais / ES'}
-        </Typography>
+        {localidade && (
+          <>
+            <br />
+            <Typography variant="caption" color="text.disabled">
+              {localidade}
+            </Typography>
+          </>
+        )}
       </Box>
     </Box>
   );

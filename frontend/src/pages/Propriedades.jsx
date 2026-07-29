@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Grid, TextField,
   InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, Chip, CircularProgress, Alert, Divider, Fab,
+  IconButton, Chip, CircularProgress, Alert, Divider, Fab, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Autocomplete, Tooltip,
   useMediaQuery, useTheme,
@@ -17,6 +17,8 @@ import { friendlyError } from '../utils/errorMessages';
 import IGSBadge from '../components/Common/IGSBadge';
 import MapPicker from '../components/Common/MapPicker';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import ConfirmDialog from '../components/Common/ConfirmDialog';
+import CachedDataBanner from '../components/Common/CachedDataBanner';
 
 const FORM_INICIAL = {
   nome: '', municipio: '', estado: 'ES', proprietario: '',
@@ -315,6 +317,7 @@ export default function Propriedades() {
   const [form, setForm] = useState(FORM_INICIAL);
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState(null);
+  const [confirmExcluir, setConfirmExcluir] = useState(null); // propriedade | null
   const [graosDisponiveis, setGraosDisponiveis] = useState([]);
   const [previewProducao, setPreviewProducao] = useState({});
   const debounceRef = useRef(null);
@@ -416,12 +419,13 @@ export default function Propriedades() {
     finally { setSalvando(false); }
   };
 
-  const excluir = async (id) => {
-    if (!window.confirm('Excluir esta propriedade e todas as avaliações vinculadas?')) return;
+  const confirmarExclusao = async () => {
+    const id = confirmExcluir.id;
     setExcluindo(id);
     try {
       await propriedadesAPI.excluir(id);
       notify('Propriedade excluída.');
+      setConfirmExcluir(null);
       carregar();
     } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setExcluindo(null); }
@@ -439,9 +443,7 @@ export default function Propriedades() {
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Lista carregada do cache local. Novas propriedades ou edições recentes podem aparecer somente após reconexão.
-        </Alert>
+        <CachedDataBanner mensagem="Lista carregada do cache local. Novas propriedades ou edições recentes podem aparecer somente após reconexão." />
       )}
 
       <TextField
@@ -452,7 +454,11 @@ export default function Propriedades() {
       />
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 6 }}><CircularProgress /></Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} variant="rectangular" height={64} sx={{ borderRadius: 2 }} />
+          ))}
+        </Box>
       ) : propriedades.length === 0 ? (
         <Card>
           <CardContent>
@@ -490,7 +496,7 @@ export default function Propriedades() {
                       Avaliar
                     </Button>
                     <IconButton size="small" onClick={() => abrirEditar(p)}><FiEdit2 size={16} /></IconButton>
-                    <IconButton size="small" color="error" onClick={() => excluir(p.id)} disabled={excluindo === p.id}>
+                    <IconButton size="small" color="error" onClick={() => setConfirmExcluir(p)} disabled={excluindo === p.id}>
                       <FiTrash2 size={16} />
                     </IconButton>
                   </Box>
@@ -537,7 +543,7 @@ export default function Propriedades() {
                       <IconButton size="small" onClick={() => abrirEditar(p)} title="Editar">
                         <FiEdit2 size={16} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => excluir(p.id)}
+                      <IconButton size="small" color="error" onClick={() => setConfirmExcluir(p)}
                         disabled={excluindo === p.id} title="Excluir">
                         {excluindo === p.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
@@ -575,6 +581,16 @@ export default function Propriedades() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmExcluir}
+        title="Excluir propriedade"
+        message={`Excluir "${confirmExcluir?.nome}" e todas as avaliações vinculadas? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setConfirmExcluir(null)}
+        loading={excluindo === confirmExcluir?.id}
+      />
     </Box>
   );
 }

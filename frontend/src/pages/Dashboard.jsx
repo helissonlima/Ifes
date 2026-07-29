@@ -16,6 +16,7 @@ import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import CachedDataBanner from '../components/Common/CachedDataBanner';
 
 // Nome do campo de cada dimensão na resposta de GET /avaliacoes/estatisticas
 // (médias agregadas — convenção própria dessa API).
@@ -130,9 +131,7 @@ export default function Dashboard() {
       )}
 
       {dadosEmCache && !erro && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Painel carregado do cache local. Use este resumo como referência rápida e atualize novamente quando a conexão estabilizar.
-        </Alert>
+        <CachedDataBanner mensagem="Painel carregado do cache local. Use este resumo como referência rápida e atualize novamente quando a conexão estabilizar." />
       )}
 
       <Card sx={{ mb: 3, border: '1px solid', borderColor: 'rgba(46,125,50,0.12)' }}>

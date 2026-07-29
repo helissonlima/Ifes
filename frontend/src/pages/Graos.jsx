@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Box, Typography, Button, Card, CardContent, Grid, TextField,
   InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, Chip, CircularProgress, Alert,
+  IconButton, Chip, CircularProgress, Alert, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Switch, FormControlLabel, useMediaQuery, useTheme,
 } from '@mui/material';
@@ -12,6 +12,8 @@ import { graosAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { friendlyError } from '../utils/errorMessages';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import ConfirmDialog from '../components/Common/ConfirmDialog';
+import EmptyState from '../components/Common/EmptyState';
 
 const FORM_INICIAL = { nome: '', codigo: '', descricao: '', ativo: true };
 
@@ -53,6 +55,7 @@ export default function Graos() {
   const [form, setForm] = useState(FORM_INICIAL);
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState(null);
+  const [confirmExcluir, setConfirmExcluir] = useState(null); // grao | null
   const [sincronizando, setSincronizando] = useState(false);
 
   const carregar = async () => {
@@ -114,12 +117,13 @@ export default function Graos() {
     }
   };
 
-  const excluir = async (id) => {
-    if (!window.confirm('Excluir este grão? Propriedades que o utilizam não serão afetadas.')) return;
+  const confirmarExclusao = async () => {
+    const id = confirmExcluir.id;
     setExcluindo(id);
     try {
       await graosAPI.excluir(id);
       notify('Grão excluído.');
+      setConfirmExcluir(null);
       carregar();
     } catch (e) {
       notify(friendlyError(e), 'error');
@@ -159,15 +163,21 @@ export default function Graos() {
       />
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 6 }}><CircularProgress /></Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} variant="rectangular" height={64} sx={{ borderRadius: 2 }} />
+          ))}
+        </Box>
       ) : graosFiltrados.length === 0 ? (
         <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <MdGrain size={48} color="#aaa" />
-            <Typography variant="h6" color="text.secondary" mt={1}>Nenhum grão encontrado</Typography>
-            <Button variant="contained" sx={{ mt: 2 }} onClick={abrirNovo} startIcon={<FiPlus />}>
-              Adicionar primeiro grão
-            </Button>
+          <CardContent>
+            <EmptyState
+              icon={<MdGrain size={40} />}
+              title="Nenhum grão encontrado"
+              description={search ? 'Nenhum grão corresponde a essa busca.' : 'Cadastre os grãos cultivados na região para associá-los às propriedades.'}
+              actionLabel="Adicionar primeiro grão"
+              onAction={abrirNovo}
+            />
           </CardContent>
         </Card>
       ) : isMobile ? (
@@ -193,7 +203,7 @@ export default function Graos() {
                     <Button size="small" variant="outlined" startIcon={<FiEdit2 />} onClick={() => abrirEditar(g)} fullWidth>
                       Editar
                     </Button>
-                    <Button size="small" variant="outlined" color="error" startIcon={<FiTrash2 />} onClick={() => excluir(g.id)} disabled={excluindo === g.id} fullWidth>
+                    <Button size="small" variant="outlined" color="error" startIcon={<FiTrash2 />} onClick={() => setConfirmExcluir(g)} disabled={excluindo === g.id} fullWidth>
                       {excluindo === g.id ? <CircularProgress size={20} /> : 'Deletar'}
                     </Button>
                   </Box>
@@ -233,7 +243,7 @@ export default function Graos() {
                       <IconButton size="small" onClick={() => abrirEditar(g)} title="Editar">
                         <FiEdit2 size={18} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => excluir(g.id)} disabled={excluindo === g.id} title="Deletar">
+                      <IconButton size="small" color="error" onClick={() => setConfirmExcluir(g)} disabled={excluindo === g.id} title="Deletar">
                         {excluindo === g.id ? <CircularProgress size={18} /> : <FiTrash2 size={18} />}
                       </IconButton>
                     </Box>
@@ -264,6 +274,16 @@ export default function Graos() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmExcluir}
+        title="Excluir grão"
+        message={`Excluir "${confirmExcluir?.nome}"? Propriedades que o utilizam não serão afetadas.`}
+        confirmLabel="Excluir"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setConfirmExcluir(null)}
+        loading={excluindo === confirmExcluir?.id}
+      />
     </Box>
   );
 }

@@ -15,6 +15,7 @@ import { friendlyError } from '../utils/errorMessages';
 import { COR_NOTA, COR_NOTA_TEXTO, COR_CLASSIFICACAO } from '../utils/coresICSR';
 import { useMetodologia } from '../utils/metodologia';
 import { formatarData, formatarDataCurta } from '../utils/formatarData';
+import CachedDataBanner from '../components/Common/CachedDataBanner';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
@@ -142,9 +143,7 @@ export default function Resultado() {
       </Box>
 
       {dadosEmCache && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Este resultado está sendo exibido com apoio do cache local. Confirme os dados novamente quando a conexão estabilizar.
-        </Alert>
+        <CachedDataBanner mensagem="Este resultado está sendo exibido com apoio do cache local. Confirme os dados novamente quando a conexão estabilizar." />
       )}
 
       {/* ICSR Principal — card limpo sem gradiente escuro */}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, TextField, InputAdornment,
   Select, MenuItem, FormControl, InputLabel, Button, CircularProgress,
-  Alert, Chip, IconButton, Divider, useMediaQuery, useTheme, LinearProgress,
+  Alert, Chip, IconButton, Divider, useMediaQuery, useTheme, LinearProgress, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
 } from '@mui/material';
 import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus } from 'react-icons/fi';
@@ -11,9 +11,12 @@ import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import IGSBadge from '../components/Common/IGSBadge';
+import EmptyState from '../components/Common/EmptyState';
 import { friendlyError } from '../utils/errorMessages';
 import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import ConfirmDialog from '../components/Common/ConfirmDialog';
+import CachedDataBanner from '../components/Common/CachedDataBanner';
 
 const COR_DIMS = {
   economico: '#2196F3', ambiental: '#4CAF50', social: '#FF9800', gestao: '#9C27B0',
@@ -35,6 +38,7 @@ export default function Historico() {
   const [filtroLocalizacao, setFiltroLocalizacao] = useState('');
   const [search, setSearch] = useState('');
   const [excluindo, setExcluindo] = useState(null);
+  const [confirmExcluir, setConfirmExcluir] = useState(null); // { id, nome } | null
 
   const carregar = useCallback(() => {
     setLoading(true);
@@ -75,12 +79,15 @@ export default function Historico() {
   const tecnicos = [...new Set(avaliacoes.map((a) => a.tecnico_responsavel).filter(Boolean))].sort();
   const localizacoes = [...new Set(avaliacoes.map((a) => `${a.municipio}/${a.estado}`).filter(Boolean))].sort();
 
-  const excluir = async (id, nomePropriedade) => {
-    if (!window.confirm(`Excluir a avaliação de "${nomePropriedade || 'esta propriedade'}" permanentemente? Esta ação não pode ser desfeita.`)) return;
+  const pedirExclusao = (id, nomePropriedade) => setConfirmExcluir({ id, nome: nomePropriedade });
+
+  const confirmarExclusao = async () => {
+    const { id, nome } = confirmExcluir;
     setExcluindo(id);
     try {
       await avaliacoesAPI.excluir(id);
-      notify(`Avaliação de "${nomePropriedade || 'propriedade'}" excluída com sucesso.`, 'success');
+      notify(`Avaliação de "${nome || 'propriedade'}" excluída com sucesso.`, 'success');
+      setConfirmExcluir(null);
       carregar();
     } catch (e) { notify(friendlyError(e), 'error'); }
     finally { setExcluindo(null); }
@@ -100,9 +107,7 @@ export default function Historico() {
 
       {erro && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
       {dadosEmCache && !erro && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Histórico exibido a partir do cache local. Os registros podem não refletir alterações mais recentes do servidor.
-        </Alert>
+        <CachedDataBanner mensagem="Histórico exibido a partir do cache local. Os registros podem não refletir alterações mais recentes do servidor." />
       )}
 
       {/* Filtros */}
@@ -161,14 +166,19 @@ export default function Historico() {
       </Card>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 6 }}><CircularProgress /></Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} variant="rectangular" height={56} sx={{ borderRadius: 2 }} />
+          ))}
+        </Box>
       ) : filtradas.length === 0 ? (
         <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <MdOutlineEco size={48} color="#aaa" />
-            <Typography variant="h6" color="text.secondary" mt={1}>
-              {search || filtroStatus ? 'Nenhuma avaliação encontrada para este filtro.' : 'Nenhuma avaliação registrada.'}
-            </Typography>
+          <CardContent>
+            <EmptyState
+              icon={<MdOutlineEco size={40} />}
+              title={search || filtroStatus ? 'Nenhuma avaliação encontrada' : 'Nenhuma avaliação registrada'}
+              description={search || filtroStatus ? 'Ajuste os filtros ou o termo de busca.' : 'Cadastre uma propriedade e inicie a primeira avaliação ICSR.'}
+            />
           </CardContent>
         </Card>
       ) : isMobile ? (
@@ -224,7 +234,7 @@ export default function Historico() {
                       <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)}>
                         <FiEye size={16} />
                       </IconButton>
-                      <IconButton size="small" color="error" onClick={() => excluir(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
+                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>
@@ -283,7 +293,7 @@ export default function Historico() {
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="error" onClick={() => excluir(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
+                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id}>
                         {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
                       </IconButton>
                     </Box>
@@ -294,6 +304,16 @@ export default function Historico() {
           </Table>
         </TableContainer>
       )}
+
+      <ConfirmDialog
+        open={!!confirmExcluir}
+        title="Excluir avaliação"
+        message={`Excluir a avaliação de "${confirmExcluir?.nome || 'esta propriedade'}" permanentemente? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setConfirmExcluir(null)}
+        loading={excluindo === confirmExcluir?.id}
+      />
     </Box>
   );
 }

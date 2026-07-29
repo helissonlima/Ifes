@@ -24,6 +24,7 @@ import {
   formatarDataRascunho,
 } from '../utils/avaliacaoCache';
 import { friendlyError } from '../utils/errorMessages';
+import ConfirmDialog from '../components/Common/ConfirmDialog';
 import { useMetodologia, calcularIndiceDimensao as calcularIndiceDimensaoUtil, calcularIGS as calcularIGSUtil, getClassificacao as getClassificacaoUtil } from '../utils/metodologia';
 import { COR_CLASSIFICACAO } from '../utils/coresICSR';
 import { formatarData } from '../utils/formatarData';
@@ -62,6 +63,7 @@ export default function NovaAvaliacao() {
   const [salvando, setSalvando] = useState(false);
   const [avaliacaoId, setAvaliacaoId] = useState(null);
   const [erro, setErro] = useState('');
+  const [confirmConcluirPendente, setConfirmConcluirPendente] = useState(false);
 
   // Cache offline
   const [ultimoSalvoLocal, setUltimoSalvoLocal] = useState(null);
@@ -337,12 +339,17 @@ export default function NovaAvaliacao() {
     }
   };
 
-  const concluir = async () => {
+  const concluir = () => {
     if (!info.propriedade) { notify('Selecione uma propriedade', 'error'); return; }
     if (totalRespondidos < totalIndicadores) {
-      const faltam = totalIndicadores - totalRespondidos;
-      if (!window.confirm(`Ainda faltam ${faltam} indicador(es) para avaliar. Deseja concluir mesmo assim?`)) return;
+      setConfirmConcluirPendente(true);
+      return;
     }
+    executarConclusao();
+  };
+
+  const executarConclusao = async () => {
+    setConfirmConcluirPendente(false);
     if (!isOnline) {
       notify('Sem conexão. Conecte-se à internet para concluir a avaliação. Os dados estão salvos localmente.', 'warning');
       return;
@@ -990,6 +997,17 @@ export default function NovaAvaliacao() {
           </Paper>
         );
       })()}
+
+      <ConfirmDialog
+        open={confirmConcluirPendente}
+        title="Concluir avaliação"
+        message={`Ainda faltam ${totalIndicadores - totalRespondidos} indicador(es) para avaliar. Deseja concluir mesmo assim?`}
+        confirmLabel="Concluir mesmo assim"
+        severity="warning"
+        onConfirm={executarConclusao}
+        onCancel={() => setConfirmConcluirPendente(false)}
+        loading={salvando}
+      />
     </Box>
   );
 }

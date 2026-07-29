@@ -4,7 +4,7 @@ import {
   Box, Typography, Card, CardContent, Grid, Button, Divider, CircularProgress,
   Alert, Chip, IconButton, Table, TableBody, TableCell, TableHead, TableRow,
   Select, MenuItem, FormControl, InputLabel, Paper, Tabs, Tab, LinearProgress,
-  Tooltip, useMediaQuery, useTheme,
+  Tooltip, useMediaQuery, useTheme, Skeleton,
 } from '@mui/material';
 import {
   FiArrowLeft, FiClipboard, FiEye, FiMap, FiCalendar, FiUser, FiPhone, FiMail,
@@ -98,7 +98,16 @@ export default function PropriedadeDetalhe() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, propriedade]);
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress /></Box>;
+  if (loading) return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Skeleton width={70} height={32} />
+        <Box sx={{ flexGrow: 1 }}><Skeleton width={220} height={28} /><Skeleton width={160} height={20} sx={{ mt: 0.5 }} /></Box>
+      </Box>
+      <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
+      <Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} />
+    </Box>
+  );
   if (erro) return <Alert severity="error">{erro}</Alert>;
   if (!propriedade) return null;
 
