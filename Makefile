@@ -37,9 +37,8 @@ env:
 			echo "DB_USER=postgres"; \
 			echo "DB_PASSWORD=$$(openssl rand -hex 16)"; \
 			echo ""; \
-			echo "# --- Segredos JWT (32 bytes / 64 caracteres cada) ---"; \
+			echo "# --- Segredo JWT (32 bytes / 64 caracteres) ---"; \
 			echo "JWT_SECRET=$$(openssl rand -hex 32)"; \
-			echo "JWT_REFRESH_SECRET=$$(openssl rand -hex 32)"; \
 			echo ""; \
 			echo "# --- Usuário Admin inicial ---"; \
 			echo "ADMIN_EMAIL=$$ADMIN_EMAIL"; \

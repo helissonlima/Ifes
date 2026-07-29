@@ -49,8 +49,8 @@ make up
 O `make up` faz duas coisas:
 
 1. **Gera o `.env` automaticamente na primeira execução**, preenchendo
-   `DB_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET` com senhas aleatórias de
-   **32 caracteres**. Se o `.env` já existir, os segredos são preservados.
+   `DB_PASSWORD` e `JWT_SECRET` com senhas aleatórias de **32 caracteres**.
+   Se o `.env` já existir, os segredos são preservados.
 2. Roda `docker compose up -d --build`.
 
 A aplicação fica disponível em **http://localhost:5173** (frontend Nginx, que

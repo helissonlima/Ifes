@@ -12,8 +12,16 @@ function recursoBase(url) {
 
 export const TOKEN_KEY = 'sustenta_token';
 
+// Sem VITE_API_URL definida: em build de produção cai pra "/api" (mesma
+// origem, o caminho que o nginx.conf deste projeto já sabe proxiar) — nunca
+// pra localhost:3001, que não existe fora da máquina de quem fez o build e
+// deixaria todo o app fora do ar em silêncio. Em dev, localhost:3001 continua
+// sendo o padrão de conveniência (backend local sem precisar de .env).
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: API_BASE_URL,
   timeout: 6000,
   headers: { 'Content-Type': 'application/json' },
 });

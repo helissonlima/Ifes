@@ -42,6 +42,12 @@ const allowedOrigins = buildAllowedOrigins();
 app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
+    // Sem header Origin (!origin): requests same-origin, curl/Postman, apps
+    // mobile e o healthcheck do docker-compose (node http.get interno ao
+    // container) nunca enviam Origin — CORS é uma política de navegador, não
+    // se aplica a esses casos, então aceitar aqui não abre brecha nova. Só
+    // requests de NAVEGADOR chegam com Origin setado, e essas continuam
+    // restritas à allowlist abaixo.
     if (!origin || allowedOrigins.has(origin)) {
       callback(null, true);
       return;

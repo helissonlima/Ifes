@@ -36,9 +36,8 @@ DB_NAME=sustentabilidade_rural
 DB_USER=postgres
 DB_PASSWORD=${secret()}
 
-# --- Segredos JWT (32 bytes / 64 caracteres cada) ---
+# --- Segredo JWT (32 bytes / 64 caracteres) ---
 JWT_SECRET=${jwtSecret()}
-JWT_REFRESH_SECRET=${jwtSecret()}
 
 # --- Usuário Admin inicial ---
 ADMIN_EMAIL=${adminEmail}
