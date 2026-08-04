@@ -8,7 +8,7 @@ const NOTAS_VALIDAS = [0, 0.25, 0.5, 0.75, 1];
 const paginacaoSchema = z
   .object({
     page: z.coerce.number().int().positive().max(1_000_000).default(1),
-    limit: z.coerce.number().int().positive().max(100).default(20),
+    limit: z.coerce.number().int().positive().max(500).default(20),
   })
   .passthrough();
 
