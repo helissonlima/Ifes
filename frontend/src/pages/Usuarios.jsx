@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { erroEmail } from '../utils/masks';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, TextField, InputAdornment,
-  Select, MenuItem, FormControl, InputLabel, Chip, IconButton, Dialog,
-  DialogTitle, DialogContent, DialogActions, FormControlLabel, Checkbox, Switch,
-  Avatar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Tooltip, CircularProgress, Alert, Divider, useMediaQuery, useTheme, Fab,
-} from '@mui/material';
-import {
   FiUserPlus, FiSearch, FiEdit2, FiTrash2, FiKey, FiShield, FiUsers,
   FiUserCheck, FiUserX, FiEye, FiEyeOff, FiPlus, FiWifiOff,
 } from 'react-icons/fi';
@@ -18,6 +11,15 @@ import { formatarData } from '../utils/formatarData';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 import EmptyState from '../components/Common/EmptyState';
 import BackupCard from '../components/Admin/BackupCard';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { Card, CardContent } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Badge from '../components/ui/Badge';
+import Dialog from '../components/ui/Dialog';
+import Switch from '../components/ui/Switch';
+import Tooltip from '../components/ui/Tooltip';
+import { cn } from '../utils/cn';
 
 const PERMISSION_KEYS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -28,9 +30,9 @@ const PERMISSION_KEYS = [
 ];
 
 const ROLES = [
-  { value: 'admin', label: 'Administrador', cor: '#1B5E20', desc: 'Acesso total + gerência de usuários' },
-  { value: 'tecnico', label: 'Técnico', cor: '#1565C0', desc: 'Cadastra propriedades e realiza avaliações' },
-  { value: 'visualizador', label: 'Visualizador', cor: '#6A1B9A', desc: 'Apenas consulta dashboards e históricos' },
+  { value: 'admin', label: 'Administrador', cor: '#1B4D24', desc: 'Acesso total + gerência de usuários' },
+  { value: 'tecnico', label: 'Técnico', cor: '#0284C7', desc: 'Cadastra propriedades e realiza avaliações' },
+  { value: 'visualizador', label: 'Visualizador', cor: '#7C3AED', desc: 'Apenas consulta dashboards e históricos' },
 ];
 
 const PRESETS_PERMISSAO = {
@@ -44,7 +46,7 @@ const FORM_VAZIO = {
   permissions: { ...PRESETS_PERMISSAO.tecnico },
 };
 
-const corPapel = (role) => ROLES.find((r) => r.value === role)?.cor || '#666';
+const corPapel = (role) => ROLES.find((r) => r.value === role)?.cor || '#64748B';
 const labelPapel = (role) => ROLES.find((r) => r.value === role)?.label || role;
 
 const iniciais = (nome = '') =>
@@ -52,8 +54,7 @@ const iniciais = (nome = '') =>
 
 export default function Usuarios() {
   const { notify, user: usuarioLogado } = useApp();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +102,7 @@ export default function Usuarios() {
     return usuarios.filter((u) => {
       if (filtroRole && u.role !== filtroRole) return false;
       if (filtroStatus === 'ativo' && !u.ativo) return false;
-      if (filtroStatus === 'inativo' && u.ativo) return false;
+      if (filtroStatus === 'inativo' && !u.ativo === false) return false;
       if (search) {
         const q = search.toLowerCase();
         return u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
@@ -110,12 +111,12 @@ export default function Usuarios() {
     });
   }, [usuarios, search, filtroRole, filtroStatus]);
 
-  // ====== Form (Criar / Editar) ======
   const abrirNovo = () => {
     setForm({ ...FORM_VAZIO });
     setShowSenha(false);
     setDialogForm({ open: true, editando: null });
   };
+
   const abrirEditar = (u) => {
     setForm({
       nome: u.nome,
@@ -128,7 +129,11 @@ export default function Usuarios() {
     setShowSenha(false);
     setDialogForm({ open: true, editando: u });
   };
-  const fecharForm = () => { setDialogForm({ open: false, editando: null }); setForm(FORM_VAZIO); };
+
+  const fecharForm = () => {
+    setDialogForm({ open: false, editando: null });
+    setForm(FORM_VAZIO);
+  };
 
   const aplicarPresetRole = (role) => {
     setForm((f) => ({ ...f, role, permissions: { ...PRESETS_PERMISSAO[role] } }));
@@ -145,14 +150,12 @@ export default function Usuarios() {
     setSalvando(true);
     try {
       if (dialogForm.editando) {
-        // Atualiza dados básicos
         await authAPI.atualizarUsuario(dialogForm.editando.id, {
           nome: form.nome,
           email: form.email,
           foto_url: form.foto_url,
           role: form.role,
         });
-        // Atualiza permissões (independente de role)
         await authAPI.atualizarPermissoes(dialogForm.editando.id, {
           permissions: form.permissions,
         });
@@ -177,7 +180,6 @@ export default function Usuarios() {
     }
   };
 
-  // ====== Toggle ativo direto na tabela ======
   const toggleAtivo = async (u) => {
     try {
       await authAPI.atualizarPermissoes(u.id, { ativo: !u.ativo });
@@ -186,7 +188,6 @@ export default function Usuarios() {
     } catch (e) { notify(friendlyError(e), 'error'); }
   };
 
-  // ====== Reset senha ======
   const abrirResetSenha = (u) => { setNovaSenha(''); setDialogSenha({ open: true, usuario: u }); };
   const fecharResetSenha = () => { setDialogSenha({ open: false, usuario: null }); setNovaSenha(''); };
   const confirmarResetSenha = async () => {
@@ -200,7 +201,6 @@ export default function Usuarios() {
     finally { setResetando(false); }
   };
 
-  // ====== Excluir ======
   const abrirExcluir = (u) => setDialogExcluir({ open: true, usuario: u });
   const fecharExcluir = () => setDialogExcluir({ open: false, usuario: null });
   const confirmarExcluir = async () => {
@@ -215,66 +215,74 @@ export default function Usuarios() {
   };
 
   return (
-    <Box>
+    <div className="space-y-6">
       <PageHeaderCard
         title="Administração"
         subtitle="Gestão de usuários, papéis e permissões do sistema."
-        icon={<FiShield size={22} />}
-        titleAdornment={<Chip label="Acesso restrito" size="small" sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 700 }} />}
-        actions={!isMobile ? (
-          <Button variant="contained" startIcon={<FiUserPlus />} onClick={abrirNovo}>
+        icon={<FiShield size={20} />}
+        titleAdornment={<Badge variant="danger" size="sm">Acesso restrito</Badge>}
+        actions={
+          <Button variant="primary" icon={<FiUserPlus />} onClick={abrirNovo}>
             Novo Usuário
           </Button>
-        ) : null}
+        }
       />
 
-      {erro && usuarios.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && usuarios.length > 0 && <Alert variant="error">{erro}</Alert>}
 
-      {/* Stats */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <StatBox icon={<FiUsers />} label="Total" value={stats.total} cor="#1B5E20" />
-        <StatBox icon={<FiUserCheck />} label="Ativos" value={stats.ativos} cor="#2E7D32" />
-        <StatBox icon={<FiUserX />} label="Inativos" value={stats.inativos} cor="#C62828" />
-        <StatBox icon={<FiShield />} label="Admins" value={stats.admins} cor="#6A1B9A" />
-      </Grid>
+      {/* Cards de Métricas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatBox icon={<FiUsers />} label="Total" value={stats.total} cor="#1B4D24" />
+        <StatBox icon={<FiUserCheck />} label="Ativos" value={stats.ativos} cor="#16A34A" />
+        <StatBox icon={<FiUserX />} label="Inativos" value={stats.inativos} cor="#DC2626" />
+        <StatBox icon={<FiShield />} label="Admins" value={stats.admins} cor="#7C3AED" />
+      </div>
 
       {/* Filtros */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent sx={{ pb: '12px !important' }}>
-          <Grid container spacing={1.5} sx={{ alignItems: 'center' }}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth size="small"
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+            <div className="sm:col-span-6 relative">
+              <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+              <input
+                type="text"
                 placeholder="Buscar por nome ou e-mail..."
-                value={search} onChange={(e) => setSearch(e.target.value)}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><FiSearch /></InputAdornment> } }}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
               />
-            </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Papel</InputLabel>
-                <Select value={filtroRole} label="Papel" onChange={(e) => setFiltroRole(e.target.value)}>
-                  <MenuItem value="">Todos</MenuItem>
-                  {ROLES.map((r) => <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Status</InputLabel>
-                <Select value={filtroStatus} label="Status" onChange={(e) => setFiltroStatus(e.target.value)}>
-                  <MenuItem value="">Todos</MenuItem>
-                  <MenuItem value="ativo">Ativos</MenuItem>
-                  <MenuItem value="inativo">Inativos</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+            </div>
+            <div className="sm:col-span-3">
+              <select
+                value={filtroRole}
+                onChange={(e) => setFiltroRole(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              >
+                <option value="">Todos os papéis</option>
+                {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+            <div className="sm:col-span-3">
+              <select
+                value={filtroStatus}
+                onChange={(e) => setFiltroStatus(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              >
+                <option value="">Todos os status</option>
+                <option value="ativo">Ativos</option>
+                <option value="inativo">Inativos</option>
+              </select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
+        <div className="space-y-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-16 w-full rounded-xl bg-slate-200 animate-pulse" />
+          ))}
+        </div>
       ) : erro && usuarios.length === 0 ? (
         <Card>
           <CardContent>
@@ -298,400 +306,415 @@ export default function Usuarios() {
           </CardContent>
         </Card>
       ) : isMobile ? (
-        <Grid container spacing={1.5}>
-          {usuariosFiltrados.map((u) => (
-            <Grid size={12} key={u.id}>
-              <UsuarioCard
-                u={u}
-                isSelf={u.id === usuarioLogado?.id}
-                onEdit={() => abrirEditar(u)}
-                onResetSenha={() => abrirResetSenha(u)}
-                onExcluir={() => abrirExcluir(u)}
-                onToggleAtivo={() => toggleAtivo(u)}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        /* Mobile Cards */
+        <div className="space-y-3">
+          {usuariosFiltrados.map((u) => {
+            const isSelf = u.id === usuarioLogado?.id;
+            const permsAtivas = PERMISSION_KEYS.filter((p) => u.permissions?.[p.key]).length;
+            return (
+              <Card key={u.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    {u.foto_url ? (
+                      <img src={u.foto_url} alt={u.nome} className="h-10 w-10 rounded-full object-cover" />
+                    ) : (
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white"
+                        style={{ backgroundColor: corPapel(u.role) }}
+                      >
+                        {iniciais(u.nome)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-slate-900 truncate">{u.nome}</span>
+                        {isSelf && <Badge variant="outline" size="sm">você</Badge>}
+                      </div>
+                      <span className="block text-xs text-slate-500 truncate">{u.email}</span>
+                    </div>
+                    <Switch
+                      checked={u.ativo}
+                      disabled={isSelf}
+                      onCheckedChange={() => toggleAtivo(u)}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 my-2">
+                    <Badge variant="outline" size="sm" style={{ color: corPapel(u.role) }}>
+                      {labelPapel(u.role)}
+                    </Badge>
+                    <Badge variant="outline" size="sm">
+                      {u.role === 'admin' ? 'Total' : `${permsAtivas}/${PERMISSION_KEYS.length} permissões`}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-2 mt-2">
+                    <Button variant="ghost" size="sm" icon={<FiEdit2 />} onClick={() => abrirEditar(u)}>
+                      Editar
+                    </Button>
+                    <Button variant="ghost" size="sm" icon={<FiKey />} onClick={() => abrirResetSenha(u)}>
+                      Senha
+                    </Button>
+                    <Button variant="ghost" size="sm" icon={<FiTrash2 />} onClick={() => abrirExcluir(u)} disabled={isSelf} className="text-red-600 hover:text-red-700">
+                      Excluir
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       ) : (
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 2,
-            border: '1px solid rgba(15, 23, 42, 0.08)',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-            overflow: 'hidden',
-          }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#F8FAFC' }}>
-                {['Usuário', 'E-mail', 'Papel', 'Status', 'Permissões', 'Ações'].map((h) => (
-                  <TableCell
-                    key={h}
-                    sx={{
-                      color: '#475569',
-                      fontWeight: 700,
-                      fontSize: '0.74rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.04em',
-                      borderBottom: '1px solid #E2E8F0',
-                      py: 1.5,
-                    }}
-                  >
-                    {h}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        /* Desktop Table */
+        <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="py-3 px-4">Usuário</th>
+                <th className="py-3 px-4">E-mail</th>
+                <th className="py-3 px-4">Papel</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Permissões</th>
+                <th className="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
               {usuariosFiltrados.map((u) => {
                 const isSelf = u.id === usuarioLogado?.id;
                 const permsAtivas = PERMISSION_KEYS.filter((p) => u.permissions?.[p.key]).length;
                 return (
-                  <TableRow
-                    key={u.id}
-                    sx={{
-                      transition: 'background-color 120ms ease',
-                      '&:hover': { bgcolor: '#F8FAFC' },
-                    }}
-                  >
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar src={u.foto_url || undefined} sx={{ bgcolor: corPapel(u.role), width: 38, height: 38 }}>
-                          {iniciais(u.nome)}
-                        </Avatar>
-                        <Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                            <Typography variant="body2" fontWeight={700}>
-                              {u.nome}
-                            </Typography>
-                            {isSelf && <Chip label="você" size="small" sx={{ height: 18, fontSize: '0.65rem' }} />}
-                          </Box>
-                          <Typography variant="caption" color="text.secondary">
+                  <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        {u.foto_url ? (
+                          <img src={u.foto_url} alt={u.nome} className="h-9 w-9 rounded-full object-cover" />
+                        ) : (
+                          <div
+                            className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
+                            style={{ backgroundColor: corPapel(u.role) }}
+                          >
+                            {iniciais(u.nome)}
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-900 text-sm">{u.nome}</span>
+                            {isSelf && <Badge variant="outline" size="sm">você</Badge>}
+                          </div>
+                          <span className="text-[11px] text-slate-400">
                             cadastrado em {formatarData(u.criado_em)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell><Typography variant="body2">{u.email}</Typography></TableCell>
-                    <TableCell>
-                      <Chip
-                        icon={u.role === 'admin' ? <FiShield size={12} /> : undefined}
-                        label={labelPapel(u.role)} size="small"
-                        sx={{ bgcolor: corPapel(u.role) + '22', color: corPapel(u.role), fontWeight: 700 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title={u.ativo ? 'Clique para desativar' : 'Clique para ativar'}>
-                        <span>
-                          <Switch
-                            checked={u.ativo} size="small"
-                            disabled={isSelf}
-                            onChange={() => toggleAtivo(u)}
-                          />
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={`${u.role === 'admin' ? 'Total' : `${permsAtivas}/${PERMISSION_KEYS.length}`}`} size="small" variant="outlined" />
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Tooltip title="Editar">
-                          <IconButton size="small" onClick={() => abrirEditar(u)} aria-label={`Editar ${u.nome}`}>
-                            <FiEdit2 size={16} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Redefinir senha">
-                          <IconButton size="small" color="warning" onClick={() => abrirResetSenha(u)} aria-label={`Redefinir senha de ${u.nome}`}>
-                            <FiKey size={16} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={isSelf ? 'Você não pode se excluir' : 'Excluir'}>
-                          <span>
-                            <IconButton size="small" color="error" disabled={isSelf} onClick={() => abrirExcluir(u)} aria-label={`Excluir ${u.nome}`}>
-                              <FiTrash2 size={16} />
-                            </IconButton>
                           </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">{u.email}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
+                        style={{
+                          backgroundColor: `${corPapel(u.role)}18`,
+                          color: corPapel(u.role),
+                        }}
+                      >
+                        {u.role === 'admin' && <FiShield size={12} />}
+                        {labelPapel(u.role)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Tooltip content={u.ativo ? 'Clique para desativar' : 'Clique para ativar'}>
+                        <Switch
+                          checked={u.ativo}
+                          disabled={isSelf}
+                          onCheckedChange={() => toggleAtivo(u)}
+                        />
+                      </Tooltip>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant="outline" size="sm">
+                        {u.role === 'admin' ? 'Total' : `${permsAtivas}/${PERMISSION_KEYS.length}`}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Tooltip content="Editar">
+                          <button
+                            type="button"
+                            onClick={() => abrirEditar(u)}
+                            aria-label={`Editar ${u.nome}`}
+                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                          >
+                            <FiEdit2 size={16} />
+                          </button>
                         </Tooltip>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                        <Tooltip content="Redefinir senha">
+                          <button
+                            type="button"
+                            onClick={() => abrirResetSenha(u)}
+                            aria-label={`Redefinir senha de ${u.nome}`}
+                            className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50"
+                          >
+                            <FiKey size={16} />
+                          </button>
+                        </Tooltip>
+                        <Tooltip content={isSelf ? 'Você não pode se excluir' : 'Excluir'}>
+                          <button
+                            type="button"
+                            disabled={isSelf}
+                            onClick={() => abrirExcluir(u)}
+                            aria-label={`Excluir ${u.nome}`}
+                            className="rounded-lg p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        </Tooltip>
+                      </div>
+                    </td>
+                  </tr>
                 );
               })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
       )}
 
-      {/* ========= Backup e restauração ========= */}
+      {/* Backup e restauração */}
       <BackupCard onRestaurado={carregar} />
 
-      {/* FAB mobile */}
-      {isMobile && (
-        <Fab color="primary" sx={{ position: 'fixed', bottom: 80, right: 24 }} onClick={abrirNovo}>
-          <FiPlus size={24} />
-        </Fab>
-      )}
-
-      {/* ========= Dialog Criar/Editar ========= */}
-      <Dialog open={dialogForm.open} onClose={fecharForm} fullWidth maxWidth="md" fullScreen={isMobile}>
-        <DialogTitle fontWeight={700}>
-          {dialogForm.editando ? 'Editar Usuário' : 'Novo Usuário'}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField autoFocus label="Nome completo *" fullWidth value={form.nome}
-                onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))} />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="E-mail *"
+      {/* Dialog Criar/Editar */}
+      <Dialog
+        open={dialogForm.open}
+        onOpenChange={(open) => !open && !salvando && fecharForm()}
+        title={dialogForm.editando ? 'Editar Usuário' : 'Novo Usuário'}
+        className="max-w-xl"
+        footer={
+          <div className="flex w-full items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={fecharForm} disabled={salvando}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={salvarForm} loading={salvando}>
+              {dialogForm.editando ? 'Salvar alterações' : 'Cadastrar usuário'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 py-1 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Nome completo *</label>
+              <input
+                type="text"
+                autoFocus
+                value={form.nome}
+                onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))}
+                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">E-mail *</label>
+              <input
                 type="email"
-                fullWidth
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="usuario@dominio.com.br"
-                error={!!erroEmail(form.email)}
-                helperText={erroEmail(form.email) || 'Ex.: tecnico@empresa.com.br'}
-                slotProps={{ htmlInput: { inputMode: 'email' } }}
+                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
               />
-            </Grid>
+              {erroEmail(form.email) && <span className="block mt-1 text-red-600">{erroEmail(form.email)}</span>}
+            </div>
+
             {!dialogForm.editando && (
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Senha inicial *"
-                  type={showSenha ? 'text' : 'password'} fullWidth value={form.senha}
-                  onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
-                  error={form.senha.length > 0 && form.senha.length < 6}
-                  helperText={
-                    form.senha.length > 0 && form.senha.length < 6
-                      ? `Muito curta: ${form.senha.length}/6 caracteres mínimos`
-                      : 'Mínimo 6 caracteres. O usuário pode alterar depois.'
-                  }
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <IconButton size="small" onClick={() => setShowSenha((v) => !v)} aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}>
-                          {showSenha ? <FiEyeOff /> : <FiEye />}
-                        </IconButton>
-                      ),
-                    },
-                  }}
-                />
-              </Grid>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Senha inicial *</label>
+                <div className="relative">
+                  <input
+                    type={showSenha ? 'text' : 'password'}
+                    value={form.senha}
+                    onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 p-2 pr-8 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSenha((v) => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showSenha ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+                  </button>
+                </div>
+                <span className="block mt-1 text-[11px] text-slate-500">Mínimo 6 caracteres</span>
+              </div>
             )}
-            <Grid size={{ xs: 12, md: dialogForm.editando ? 6 : 6 }}>
-              <TextField
-                label="URL da Foto (opcional)"
-                fullWidth
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">URL da Foto (opcional)</label>
+              <input
+                type="url"
                 value={form.foto_url}
                 onChange={(e) => setForm((f) => ({ ...f, foto_url: e.target.value }))}
                 placeholder="https://exemplo.com/foto.jpg"
-                error={!!form.foto_url && !/^https?:\/\/.+/.test(form.foto_url)}
-                helperText={
-                  form.foto_url && !/^https?:\/\/.+/.test(form.foto_url)
-                    ? 'URL inválida. Deve começar com http:// ou https://'
-                    : 'URL pública de imagem (opcional)'
-                }
-                slotProps={{ htmlInput: { inputMode: 'url' } }}
+                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
               />
-            </Grid>
+            </div>
+          </div>
 
-            <Grid size={12}>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="subtitle2" fontWeight={700} gutterBottom>Papel no sistema</Typography>
-              <Grid container spacing={1}>
-                {ROLES.map((r) => {
-                  const selecionado = form.role === r.value;
-                  return (
-                    <Grid size={{ xs: 12, sm: 4 }} key={r.value}>
-                      <Paper
-                        variant="outlined"
-                        sx={{
-                          p: 1.25, cursor: 'pointer',
-                          borderColor: selecionado ? r.cor : undefined,
-                          borderWidth: selecionado ? 2 : 1,
-                          bgcolor: selecionado ? r.cor + '11' : 'transparent',
-                        }}
-                        onClick={() => aplicarPresetRole(r.value)}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <FiShield color={r.cor} />
-                          <Typography variant="subtitle2" fontWeight={700} color={r.cor}>{r.label}</Typography>
-                        </Box>
-                        <Typography variant="caption" color="text.secondary">{r.desc}</Typography>
-                      </Paper>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Grid>
+          <div className="border-t border-slate-100 pt-3">
+            <label className="block font-bold text-slate-700 mb-2">Papel no sistema</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {ROLES.map((r) => {
+                const selecionado = form.role === r.value;
+                return (
+                  <div
+                    key={r.value}
+                    onClick={() => aplicarPresetRole(r.value)}
+                    className={cn(
+                      'cursor-pointer rounded-xl border p-3 transition-all',
+                      selecionado ? 'border-caparao-700 bg-caparao-50/50 shadow-xs' : 'border-slate-200 hover:bg-slate-50'
+                    )}
+                  >
+                    <div className="flex items-center gap-1.5 font-bold" style={{ color: r.cor }}>
+                      <FiShield size={14} />
+                      <span>{r.label}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-500 leading-snug">{r.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-            {form.role !== 'admin' && (
-              <Grid size={12}>
-                <Divider sx={{ my: 1 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-                  <Typography variant="subtitle2" fontWeight={700}>Permissões de acesso</Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <Button size="small" onClick={() => setForm((f) => ({ ...f, permissions: PERMISSION_KEYS.reduce((a, p) => ({ ...a, [p.key]: true }), {}) }))}>
-                      Marcar todas
-                    </Button>
-                    <Button size="small" onClick={() => setForm((f) => ({ ...f, permissions: PERMISSION_KEYS.reduce((a, p) => ({ ...a, [p.key]: false }), {}) }))}>
-                      Limpar
-                    </Button>
-                  </Box>
-                </Box>
-                <Grid container spacing={1} sx={{ mt: 0.5 }}>
-                  {PERMISSION_KEYS.map((p) => (
-                    <Grid size={{ xs: 12, sm: 6 }} key={p.key}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={Boolean(form.permissions[p.key])}
-                            onChange={(e) => setForm((f) => ({
-                              ...f,
-                              permissions: { ...f.permissions, [p.key]: e.target.checked },
-                            }))}
-                          />
-                        }
-                        label={p.label}
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-              </Grid>
-            )}
+          {form.role !== 'admin' && (
+            <div className="border-t border-slate-100 pt-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-slate-700">Permissões de acesso</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, permissions: PERMISSION_KEYS.reduce((a, p) => ({ ...a, [p.key]: true }), {}) }))}
+                    className="text-[11px] font-semibold text-caparao-700 hover:underline"
+                  >
+                    Marcar todas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, permissions: PERMISSION_KEYS.reduce((a, p) => ({ ...a, [p.key]: false }), {}) }))}
+                    className="text-[11px] font-semibold text-slate-500 hover:underline"
+                  >
+                    Limpar
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {PERMISSION_KEYS.map((p) => (
+                  <label key={p.key} className="flex items-center gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-50">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(form.permissions[p.key])}
+                      onChange={(e) => setForm((f) => ({
+                        ...f,
+                        permissions: { ...f.permissions, [p.key]: e.target.checked },
+                      }))}
+                      className="h-4 w-4 rounded border-slate-300 text-caparao-700 focus:ring-caparao-700"
+                    />
+                    <span className="text-xs text-slate-800">{p.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
-            {form.role === 'admin' && (
-              <Grid size={12}>
-                <Alert severity="info">
-                  Administradores têm acesso a todas as funcionalidades, incluindo a gestão de usuários.
-                </Alert>
-              </Grid>
-            )}
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={fecharForm} disabled={salvando}>Cancelar</Button>
-          <Button variant="contained" onClick={salvarForm} disabled={salvando}>
-            {salvando ? <CircularProgress size={20} /> : (dialogForm.editando ? 'Salvar alterações' : 'Cadastrar usuário')}
-          </Button>
-        </DialogActions>
+          {form.role === 'admin' && (
+            <Alert variant="info">
+              Administradores têm acesso a todas as funcionalidades do sistema.
+            </Alert>
+          )}
+        </div>
       </Dialog>
 
-      {/* ========= Dialog Redefinir Senha ========= */}
-      <Dialog open={dialogSenha.open} onClose={fecharResetSenha} fullWidth maxWidth="xs">
-        <DialogTitle fontWeight={700}>Redefinir senha</DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body2" sx={{ mb: 2 }} color="text.secondary">
+      {/* Dialog Redefinir Senha */}
+      <Dialog
+        open={dialogSenha.open}
+        onOpenChange={(open) => !open && !resetando && fecharResetSenha()}
+        title="Redefinir senha"
+        className="max-w-sm"
+        footer={
+          <div className="flex w-full items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={fecharResetSenha} disabled={resetando}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={confirmarResetSenha} loading={resetando}>
+              Redefinir senha
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-1 text-xs">
+          <p className="text-slate-600">
             Defina uma nova senha para <strong>{dialogSenha.usuario?.nome}</strong>.
-            O usuário deve alterá-la no primeiro acesso.
-          </Typography>
-          <TextField
-            autoFocus fullWidth label="Nova senha"
-            type={showSenha ? 'text' : 'password'}
-            value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)}
-            error={novaSenha.length > 0 && novaSenha.length < 6}
-            helperText={
-              novaSenha.length > 0 && novaSenha.length < 6
-                ? `Muito curta: ${novaSenha.length}/6 caracteres mínimos`
-                : 'Mínimo 6 caracteres.'
-            }
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <IconButton size="small" onClick={() => setShowSenha((v) => !v)} aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}>
-                    {showSenha ? <FiEyeOff /> : <FiEye />}
-                  </IconButton>
-                ),
-              },
-            }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={fecharResetSenha} disabled={resetando}>Cancelar</Button>
-          <Button variant="contained" color="warning" onClick={confirmarResetSenha} disabled={resetando}>
-            {resetando ? <CircularProgress size={20} /> : 'Redefinir senha'}
-          </Button>
-        </DialogActions>
+          </p>
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">Nova senha</label>
+            <div className="relative">
+              <input
+                type={showSenha ? 'text' : 'password'}
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 p-2 pr-8 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowSenha((v) => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showSenha ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+              </button>
+            </div>
+            <span className="block mt-1 text-[11px] text-slate-500">Mínimo 6 caracteres</span>
+          </div>
+        </div>
       </Dialog>
 
-      {/* ========= Dialog Excluir ========= */}
-      <Dialog open={dialogExcluir.open} onClose={fecharExcluir} fullWidth maxWidth="xs">
-        <DialogTitle fontWeight={700} color="error">Excluir usuário</DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body2">
+      {/* Dialog Excluir */}
+      <Dialog
+        open={dialogExcluir.open}
+        onOpenChange={(open) => !open && !excluindo && fecharExcluir()}
+        title="Excluir usuário"
+        className="max-w-sm"
+        footer={
+          <div className="flex w-full items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={fecharExcluir} disabled={excluindo}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmarExcluir} loading={excluindo}>
+              Excluir definitivamente
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-1 text-xs">
+          <p className="text-slate-700">
             Tem certeza que deseja excluir <strong>{dialogExcluir.usuario?.nome}</strong> ({dialogExcluir.usuario?.email})?
-          </Typography>
-          <Alert severity="warning" sx={{ mt: 2 }}>
-            Esta ação é permanente. O histórico das avaliações já realizadas será preservado,
-            mas o usuário perderá o acesso ao sistema.
+          </p>
+          <Alert variant="warning">
+            Esta ação é permanente. O histórico das avaliações já realizadas será preservado.
           </Alert>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button autoFocus onClick={fecharExcluir} disabled={excluindo}>Cancelar</Button>
-          <Button variant="contained" color="error" onClick={confirmarExcluir} disabled={excluindo}>
-            {excluindo ? <CircularProgress size={20} /> : 'Excluir definitivamente'}
-          </Button>
-        </DialogActions>
+        </div>
       </Dialog>
-    </Box>
+    </div>
   );
 }
 
 function StatBox({ icon, label, value, cor }) {
   return (
-    <Grid size={{ xs: 6, md: 3 }}>
-      <Paper variant="outlined" sx={{ p: 1.5, borderTop: `3px solid ${cor}` }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ color: cor }}>{icon}</Box>
-          <Typography variant="caption" color="text.secondary" fontWeight={600}>{label}</Typography>
-        </Box>
-        <Typography variant="h4" fontWeight={900} color={cor}>{value}</Typography>
-      </Paper>
-    </Grid>
-  );
-}
-
-function UsuarioCard({ u, isSelf, onEdit, onResetSenha, onExcluir, onToggleAtivo }) {
-  const permsAtivas = PERMISSION_KEYS.filter((p) => u.permissions?.[p.key]).length;
-  return (
-    <Card>
-      <CardContent sx={{ pb: '12px !important' }}>
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 1 }}>
-          <Avatar src={u.foto_url || undefined} sx={{ bgcolor: corPapel(u.role), width: 44, height: 44 }}>
-            {iniciais(u.nome)}
-          </Avatar>
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography variant="subtitle1" fontWeight={700} noWrap>
-                {u.nome}
-              </Typography>
-              {isSelf && <Chip label="você" size="small" sx={{ height: 18, fontSize: '0.65rem' }} />}
-            </Box>
-            <Typography variant="caption" color="text.secondary" noWrap display="block">{u.email}</Typography>
-          </Box>
-          <Switch checked={u.ativo} size="small" disabled={isSelf} onChange={onToggleAtivo} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
-          <Chip
-            icon={u.role === 'admin' ? <FiShield size={12} /> : undefined}
-            label={labelPapel(u.role)} size="small"
-            sx={{ bgcolor: corPapel(u.role) + '22', color: corPapel(u.role), fontWeight: 700 }}
-          />
-          <Chip label={u.role === 'admin' ? 'Acesso total' : `${permsAtivas}/${PERMISSION_KEYS.length} permissões`} size="small" variant="outlined" />
-          <Chip label={u.ativo ? 'Ativo' : 'Inativo'} size="small"
-            color={u.ativo ? 'success' : 'default'} variant="outlined" />
-        </Box>
-        <Divider sx={{ my: 1 }} />
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Button size="small" startIcon={<FiEdit2 />} onClick={onEdit}>Editar</Button>
-          <Button size="small" color="warning" startIcon={<FiKey />} onClick={onResetSenha}>Senha</Button>
-          <Button size="small" color="error" startIcon={<FiTrash2 />} onClick={onExcluir} disabled={isSelf}>Excluir</Button>
-        </Box>
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs"
+      style={{ borderTop: `3px solid ${cor}` }}
+    >
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
+        <span style={{ color }}>{icon}</span>
+        <span>{label}</span>
+      </div>
+      <div className="text-2xl font-black tabular-nums" style={{ color }}>
+        {value}
+      </div>
+    </div>
   );
 }

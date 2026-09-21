@@ -1,4 +1,4 @@
-import { Box, Typography, Button } from '@mui/material';
+import Button from '../ui/Button';
 
 /**
  * Componente padrão de empty state para todo o sistema.
@@ -6,35 +6,25 @@ import { Box, Typography, Button } from '@mui/material';
  */
 export default function EmptyState({ icon, title, description, actionLabel, onAction, small = false }) {
   return (
-    <Box sx={{
-      textAlign: 'center',
-      py: small ? 3 : 6,
-      px: 2,
-      color: 'text.secondary',
-    }}>
+    <div className={`flex flex-col items-center justify-center text-center text-slate-500 ${small ? 'py-6 px-4' : 'py-12 px-6'}`}>
       {icon && (
-        <Box sx={{ mb: 1.5, opacity: 0.8, color: 'primary.main', fontSize: small ? '2rem' : '3rem' }}>
+        <div className={`mb-3 text-caparao-600 opacity-90 ${small ? 'text-3xl' : 'text-5xl'}`}>
           {icon}
-        </Box>
+        </div>
       )}
-      <Typography
-        variant={small ? 'body2' : 'subtitle1'}
-        fontWeight={700}
-        color="text.secondary"
-        gutterBottom
-      >
+      <h3 className={`font-bold text-slate-800 ${small ? 'text-sm' : 'text-base'}`}>
         {title}
-      </Typography>
+      </h3>
       {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 380, mx: 'auto', mb: actionLabel ? 2 : 0, lineHeight: 1.6 }}>
+        <p className={`mt-1 max-w-sm text-sm text-slate-500 leading-relaxed ${actionLabel ? 'mb-4' : ''}`}>
           {description}
-        </Typography>
+        </p>
       )}
       {actionLabel && onAction && (
-        <Button variant="contained" size="small" onClick={onAction} sx={{ mt: 1 }}>
+        <Button variant="primary" size="sm" onClick={onAction} className="mt-2">
           {actionLabel}
         </Button>
       )}
-    </Box>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import { Box, Typography } from '@mui/material';
 
 export default function DimensaoChart({ economica, ambiental, social, gestao }) {
   const data = [
@@ -10,28 +9,34 @@ export default function DimensaoChart({ economica, ambiental, social, gestao }) 
   ];
 
   return (
-    <Box sx={{ width: '100%', height: 280 }}>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="w-full h-72">
+      <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
-          <PolarGrid stroke="#e0e0e0" />
+          <PolarGrid stroke="#e2e8f0" />
           <PolarAngleAxis
             dataKey="dimensao"
-            tick={{ fontSize: 12, fontWeight: 600, fill: '#555' }}
+            tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }}
           />
           <Radar
             name="ICSR"
             dataKey="valor"
-            stroke="#2E7D32"
-            fill="#4CAF50"
-            fillOpacity={0.35}
+            stroke="#1B4D24"
+            fill="#2E7D32"
+            fillOpacity={0.3}
             strokeWidth={2}
           />
           <Tooltip
             formatter={(v) => [`${v}%`, 'Índice']}
-            contentStyle={{ borderRadius: 8, border: '1px solid #eee' }}
+            contentStyle={{
+              backgroundColor: '#ffffff',
+              borderRadius: '0.5rem',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              fontSize: '0.85rem',
+            }}
           />
         </RadarChart>
       </ResponsiveContainer>
-    </Box>
+    </div>
   );
 }

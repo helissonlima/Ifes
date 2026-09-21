@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, Divider, CircularProgress,
-  Alert, Chip, IconButton, Table, TableBody, TableCell, TableHead, TableRow,
-  Select, MenuItem, FormControl, InputLabel, Paper, Tabs, Tab, LinearProgress,
-  Tooltip, useMediaQuery, useTheme, Skeleton,
-} from '@mui/material';
-import {
   FiArrowLeft, FiClipboard, FiEye, FiMap, FiCalendar, FiUser, FiPhone, FiMail,
   FiTrendingUp, FiTrendingDown, FiMinus, FiBarChart2, FiActivity, FiDatabase,
   FiRefreshCw,
@@ -15,7 +9,7 @@ import { MdOutlineEco } from 'react-icons/md';
 import MapPicker from '../components/Common/MapPicker';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend, BarChart, Bar, Cell, ReferenceLine,
+  ResponsiveContainer, Legend, BarChart, Bar, Cell,
 } from 'recharts';
 import { propriedadesAPI, avaliacoesAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -24,13 +18,18 @@ import { COR_NOTA } from '../utils/coresICSR';
 import { useMetodologia } from '../utils/metodologia';
 import { formatarData as fmtData, formatarDataCurta } from '../utils/formatarData';
 import IGSBadge from '../components/Common/IGSBadge';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Badge from '../components/ui/Badge';
+import Skeleton from '../components/ui/Skeleton';
+import Tooltip from '../components/ui/Tooltip';
+import { cn } from '../utils/cn';
 
 export default function PropriedadeDetalhe() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { notify } = useApp();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [propriedade, setPropriedade] = useState(null);
   const [timeline, setTimeline] = useState([]);
@@ -72,8 +71,7 @@ export default function PropriedadeDetalhe() {
 
   useEffect(() => {
     carregarDetalhe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (idA && idB && idA !== idB) {
@@ -101,27 +99,36 @@ export default function PropriedadeDetalhe() {
     if (tab === 3 && propriedade && !producao && !carregandoProd) {
       carregarProducao(propriedade);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, propriedade]);
+  }, [tab, propriedade]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading) return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Skeleton width={70} height={32} />
-        <Box sx={{ flexGrow: 1 }}><Skeleton width={220} height={28} /><Skeleton width={160} height={20} sx={{ mt: 0.5 }} /></Box>
-      </Box>
-      <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
-      <Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} />
-    </Box>
-  );
-  if (erro) return (
-    <Alert
-      severity="error"
-      action={<Button color="inherit" size="small" onClick={carregarDetalhe}>Tentar novamente</Button>}
-    >
-      {erro}
-    </Alert>
-  );
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-7 w-64" />
+        </div>
+        <Skeleton className="h-36 w-full rounded-xl" />
+        <Skeleton className="h-72 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <Alert
+        variant="error"
+        action={
+          <Button variant="secondary" size="sm" onClick={carregarDetalhe}>
+            Tentar novamente
+          </Button>
+        }
+      >
+        {erro}
+      </Alert>
+    );
+  }
+
   if (!propriedade) return null;
 
   const concluidas = timeline.filter((t) => t.status === 'concluida');
@@ -139,35 +146,60 @@ export default function PropriedadeDetalhe() {
   const ultima = concluidas[concluidas.length - 1];
   const evolucaoIGS = ultima && primeira ? (Number(ultima.igs || 0) - Number(primeira.igs || 0)) : 0;
 
+  const tabsInfo = [
+    { id: 0, label: 'Histórico', icon: <FiClipboard size={16} />, disabled: false },
+    { id: 1, label: 'Evolução', icon: <FiBarChart2 size={16} />, disabled: timelineData.length === 0 },
+    { id: 2, label: 'Comparar avaliações', icon: <FiActivity size={16} />, disabled: concluidas.length < 2 },
+    { id: 3, label: 'Produção Regional', icon: <FiDatabase size={16} />, disabled: false },
+    { id: 4, label: 'Localização', icon: <FiMap size={16} />, disabled: false },
+  ];
+
   return (
-    <Box>
+    <div className="space-y-6">
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Button startIcon={<FiArrowLeft />} onClick={() => navigate('/propriedades')} size="small">Voltar</Button>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">{propriedade.nome}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            {propriedade.municipio}/{propriedade.estado} · {propriedade.proprietario}
-          </Typography>
-        </Box>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<FiArrowLeft />}
+            onClick={() => navigate('/propriedades')}
+          >
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              {propriedade.nome}
+            </h1>
+            <p className="text-xs text-slate-500">
+              {propriedade.municipio}/{propriedade.estado} · {propriedade.proprietario}
+            </p>
+          </div>
+        </div>
+
         <Button
-          variant="contained" startIcon={<FiClipboard />}
+          variant="primary"
+          icon={<FiClipboard />}
           onClick={() => navigate(`/avaliacao/nova?propriedade=${propriedade.id}`)}
         >
           Nova Avaliação
         </Button>
-      </Box>
+      </div>
 
-      {/* Card de informações + último IGS */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Card sx={{ height: '100%' }}>
+      {/* Cards de informações + último IGS */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div className="md:col-span-7">
+          <Card className="h-full">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <FiMap className="text-caparao-700" />
+                <CardTitle className="text-base font-bold text-slate-900">
+                  Dados da Propriedade
+                </CardTitle>
+              </div>
+            </CardHeader>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                <FiMap color="#1B5E20" />
-                <Typography variant="h6" fontWeight={700}>Dados da Propriedade</Typography>
-              </Box>
-              <Grid container spacing={1.5}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <Info icon={<FiUser />} label="Proprietário" valor={propriedade.proprietario} />
                 <Info icon={<FiMap />} label="Município/UF" valor={`${propriedade.municipio}/${propriedade.estado}`} />
                 <Info icon={<MdOutlineEco />} label="Área total" valor={propriedade.area_total ? `${propriedade.area_total} ha` : '—'} />
@@ -176,230 +208,244 @@ export default function PropriedadeDetalhe() {
                 <Info icon={<FiMail />} label="E-mail" valor={propriedade.email || '—'} />
                 <Info icon={<FiCalendar />} label="Cadastrada em" valor={fmtData(propriedade.criado_em)} />
                 <Info icon={<FiActivity />} label="Total de avaliações" valor={timeline.length} />
-              </Grid>
+              </div>
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Card
-            sx={{
-              height: '100%',
+        <div className="md:col-span-5">
+          <div
+            className="flex h-full flex-col justify-center rounded-xl p-6 text-white shadow-xs"
+            style={{
               background: ultima
-                ? 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)'
-                : 'linear-gradient(135deg, #757575 0%, #9E9E9E 100%)',
-              color: 'white',
+                ? 'linear-gradient(135deg, #122A16 0%, #1B4D24 100%)'
+                : 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
             }}
           >
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-              {ultima ? (
-                <>
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)' }}>Última avaliação concluída</Typography>
-                  <Typography variant="h3" fontWeight={900} sx={{ lineHeight: 1.05 }}>
-                    ICSR {(Number(ultima.igs) * 100).toFixed(1)}%
-                  </Typography>
-                  <Box sx={{ mt: 0.5 }}>
-                    <IGSBadge classificacao={ultima.classificacao} size="medium" />
-                  </Box>
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', display: 'block', mt: 0.5 }}>
-                    {fmtData(ultima.data_avaliacao)} · {ultima.tecnico_responsavel || 'Técnico não informado'}
-                  </Typography>
+            {ultima ? (
+              <>
+                <span className="text-xs font-semibold text-white/80">
+                  Última avaliação concluída
+                </span>
+                <div className="mt-1 text-3xl sm:text-4xl font-black tracking-tight tabular-nums">
+                  ICSR {(Number(ultima.igs) * 100).toFixed(1)}%
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <IGSBadge classificacao={ultima.classificacao} size="medium" />
+                </div>
+                <p className="mt-1 text-xs text-white/70">
+                  {fmtData(ultima.data_avaliacao)} · {ultima.tecnico_responsavel || 'Técnico não informado'}
+                </p>
 
-                  {concluidas.length > 1 && (
-                    <>
-                      <Divider sx={{ my: 1.5, borderColor: 'rgba(255,255,255,0.2)' }} />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {evolucaoIGS >= 0 ? <FiTrendingUp /> : <FiTrendingDown />}
-                        <Typography variant="body2" fontWeight={700}>
-                          {evolucaoIGS >= 0 ? '+' : ''}{(evolucaoIGS * 100).toFixed(1)}%
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)' }}>
-                          desde a 1ª avaliação ({fmtData(primeira.data_avaliacao)})
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
-                  <Button
-                    variant="contained"
-                    sx={{ mt: 1.5, bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}
-                    startIcon={<FiEye />}
-                    onClick={() => navigate(`/avaliacao/${ultima.id}`)}
-                  >
-                    Ver resultado completo
-                  </Button>
-                </>
-              ) : (
-                <Box sx={{ textAlign: 'center', py: 2 }}>
-                  <MdOutlineEco size={40} />
-                  <Typography variant="body2" sx={{ mt: 1 }}>Nenhuma avaliação concluída</Typography>
-                  <Button
-                    variant="contained" color="warning" sx={{ mt: 1.5 }}
-                    startIcon={<FiClipboard />}
-                    onClick={() => navigate(`/avaliacao/nova?propriedade=${propriedade.id}`)}
-                  >
-                    Iniciar primeira avaliação
-                  </Button>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+                {concluidas.length > 1 && (
+                  <div className="mt-4 border-t border-white/20 pt-3 flex items-center gap-2 text-xs font-semibold">
+                    {evolucaoIGS >= 0 ? <FiTrendingUp /> : <FiTrendingDown />}
+                    <span>{evolucaoIGS >= 0 ? '+' : ''}{(evolucaoIGS * 100).toFixed(1)}%</span>
+                    <span className="text-white/75 font-normal">
+                      desde a 1ª avaliação ({fmtData(primeira.data_avaliacao)})
+                    </span>
+                  </div>
+                )}
 
-      {/* Abas: Histórico / Evolução / Comparativo */}
+                <button
+                  type="button"
+                  onClick={() => navigate(`/avaliacao/${ultima.id}`)}
+                  className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
+                >
+                  <FiEye size={14} />
+                  Ver resultado completo
+                </button>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <MdOutlineEco size={40} className="mx-auto text-white/60 mb-2" />
+                <p className="text-sm font-semibold">Nenhuma avaliação concluída</p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="mt-3 bg-white text-slate-900 hover:bg-white/90"
+                  icon={<FiClipboard />}
+                  onClick={() => navigate(`/avaliacao/nova?propriedade=${propriedade.id}`)}
+                >
+                  Iniciar primeira avaliação
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Abas com Conteúdo */}
       <Card>
-        <CardContent>
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2 }}>
-            <Tab icon={<FiClipboard size={16} />} iconPosition="start" label="Histórico" sx={{ fontWeight: 600, minHeight: 44 }} />
-            <Tab icon={<FiBarChart2 size={16} />} iconPosition="start" label="Evolução" sx={{ fontWeight: 600, minHeight: 44 }} disabled={timelineData.length === 0} />
-            <Tab icon={<FiActivity size={16} />} iconPosition="start" label="Comparar avaliações" sx={{ fontWeight: 600, minHeight: 44 }} disabled={concluidas.length < 2} />
-            <Tab icon={<FiDatabase size={16} />} iconPosition="start" label="Produção Regional" sx={{ fontWeight: 600, minHeight: 44 }} />
-            <Tab icon={<FiMap size={16} />} iconPosition="start" label="Localização" sx={{ fontWeight: 600, minHeight: 44 }} />
-          </Tabs>
-
+        <CardHeader className="pb-3 border-b border-slate-100">
+          <div className="flex gap-2 overflow-x-auto">
+            {tabsInfo.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                disabled={t.disabled}
+                onClick={() => setTab(t.id)}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors',
+                  tab === t.id
+                    ? 'bg-caparao-700 text-white shadow-xs'
+                    : t.disabled
+                    ? 'text-slate-300 cursor-not-allowed'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                )}
+              >
+                {t.icon}
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
           {/* TAB 0 — Histórico */}
           {tab === 0 && (
-            <Box>
+            <div>
               {timeline.length === 0 ? (
-                <Alert severity="info">Nenhuma avaliação registrada para esta propriedade ainda.</Alert>
-              ) : isMobile ? (
-                <Grid container spacing={1.5}>
-                  {timeline.map((av) => (
-                    <Grid size={12} key={av.id}>
-                      <Paper variant="outlined" sx={{ p: 1.5 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                          <Typography variant="subtitle2" fontWeight={700}>{fmtData(av.data_avaliacao)}</Typography>
-                          {av.classificacao
-                            ? <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
-                            : <Chip label="Rascunho" size="small" color="warning" variant="outlined" />}
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" display="block">
-                          {av.tecnico_responsavel || 'Técnico não informado'}
-                        </Typography>
-                        <Button
-                          size="small" startIcon={<FiEye />} sx={{ mt: 0.5 }}
-                          onClick={() => navigate(`/avaliacao/${av.id}`)}
-                        >
-                          Abrir
-                        </Button>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
+                <Alert variant="info">
+                  Nenhuma avaliação registrada para esta propriedade ainda.
+                </Alert>
               ) : (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: 'primary.main' }}>
-                      {['Data', 'Técnico', 'Ambiental', 'Econômica', 'Social', 'IGQG', 'ICSR', 'Status', 'Ações'].map((h) => (
-                        <TableCell key={h} sx={{ color: '#fff', fontWeight: 700 }}>{h}</TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {timeline.map((av, i) => (
-                      <TableRow
-                        key={av.id}
-                        hover
-                        sx={{ cursor: 'pointer', bgcolor: i % 2 === 0 ? 'inherit' : 'action.hover' }}
-                        onClick={() => navigate(`/avaliacao/${av.id}`)}
-                      >
-                        <TableCell sx={{ fontWeight: 600 }}>{fmtData(av.data_avaliacao)}</TableCell>
-                        <TableCell>{av.tecnico_responsavel || '—'}</TableCell>
-                        {[
-                          ['indice_ambiental', '#4CAF50'],
-                          ['indice_economico', '#2196F3'],
-                          ['indice_social', '#FF9800'],
-                          ['indice_gestao_qualidade', '#9C27B0'],
-                        ].map(([k, c]) => (
-                          <TableCell key={k}>
-                            <Typography variant="body2" fontWeight={700} color={c}>
+                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                      <tr>
+                        <th className="py-2.5 px-3">Data</th>
+                        <th className="py-2.5 px-3">Técnico</th>
+                        <th className="py-2.5 px-3">Ambiental</th>
+                        <th className="py-2.5 px-3">Econômica</th>
+                        <th className="py-2.5 px-3">Social</th>
+                        <th className="py-2.5 px-3">IGQG</th>
+                        <th className="py-2.5 px-3">ICSR</th>
+                        <th className="py-2.5 px-3">Status</th>
+                        <th className="py-2.5 px-3 text-right">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {timeline.map((av) => (
+                        <tr
+                          key={av.id}
+                          onClick={() => navigate(`/avaliacao/${av.id}`)}
+                          className="hover:bg-slate-50/80 cursor-pointer transition-colors"
+                        >
+                          <td className="py-2.5 px-3 font-semibold text-slate-800">{fmtData(av.data_avaliacao)}</td>
+                          <td className="py-2.5 px-3 text-slate-600">{av.tecnico_responsavel || '—'}</td>
+                          {[
+                            ['indice_ambiental', '#2E7D32'],
+                            ['indice_economico', '#0284C7'],
+                            ['indice_social', '#D97706'],
+                            ['indice_gestao_qualidade', '#7C3AED'],
+                          ].map(([k, c]) => (
+                            <td key={k} className="py-2.5 px-3 font-bold tabular-nums" style={{ color: c }}>
                               {av[k] !== null && av[k] !== undefined ? `${(Number(av[k]) * 100).toFixed(0)}%` : '—'}
-                            </Typography>
-                          </TableCell>
-                        ))}
-                        <TableCell>
-                          {av.classificacao
-                            ? <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
-                            : <Typography variant="caption" color="text.disabled">—</Typography>}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={av.status === 'concluida' ? 'Concluída' : 'Rascunho'} size="small"
-                            color={av.status === 'concluida' ? 'success' : 'warning'} variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell onClick={(e) => e.stopPropagation()}>
-                          <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)}>
-                            <FiEye size={16} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                            </td>
+                          ))}
+                          <td className="py-2.5 px-3">
+                            {av.classificacao ? (
+                              <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
+                            ) : (
+                              <span className="text-slate-400">—</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <Badge variant={av.status === 'concluida' ? 'success' : 'warning'} size="sm">
+                              {av.status === 'concluida' ? 'Concluída' : 'Rascunho'}
+                            </Badge>
+                          </td>
+                          <td className="py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/avaliacao/${av.id}`)}
+                              className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                            >
+                              <FiEye size={15} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-            </Box>
+            </div>
           )}
 
           {/* TAB 1 — Evolução */}
           {tab === 1 && timelineData.length > 0 && (
-            <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            <div className="space-y-3">
+              <p className="text-xs text-slate-500">
                 Evolução dos índices ao longo das {timelineData.length} avaliação(ões) concluída(s).
-              </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={timelineData} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                  <XAxis dataKey="data" tick={{ fontSize: 11 }} />
-                  <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-                  <RTooltip />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="ICSR" stroke="#1B5E20" strokeWidth={3} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Econômica" stroke="#2196F3" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Social" stroke="#FF9800" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="IGQG" stroke="#9C27B0" strokeWidth={2} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Box>
+              </p>
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={timelineData} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="data" tick={{ fontSize: 11, fill: '#64748b' }} />
+                    <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} />
+                    <RTooltip />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line type="monotone" dataKey="ICSR" stroke="#1B4D24" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="Econômica" stroke="#0284C7" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="Social" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="IGQG" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           )}
 
           {/* TAB 2 — Comparar */}
           {tab === 2 && (
-            <Box>
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Avaliação A (antes)</InputLabel>
-                    <Select value={idA} label="Avaliação A (antes)" onChange={(e) => setIdA(e.target.value)}>
-                      {concluidas.map((a) => (
-                        <MenuItem key={a.id} value={a.id} disabled={a.id === idB}>
-                          {fmtData(a.data_avaliacao)} — ICSR {(Number(a.igs) * 100).toFixed(1)}%
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Avaliação B (depois)</InputLabel>
-                    <Select value={idB} label="Avaliação B (depois)" onChange={(e) => setIdB(e.target.value)}>
-                      {concluidas.map((a) => (
-                        <MenuItem key={a.id} value={a.id} disabled={a.id === idA}>
-                          {fmtData(a.data_avaliacao)} — ICSR {(Number(a.igs) * 100).toFixed(1)}%
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Avaliação A (antes)
+                  </label>
+                  <select
+                    value={idA}
+                    onChange={(e) => setIdA(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                  >
+                    {concluidas.map((a) => (
+                      <option key={a.id} value={a.id} disabled={a.id === idB}>
+                        {fmtData(a.data_avaliacao)} — ICSR {(Number(a.igs) * 100).toFixed(1)}%
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Avaliação B (depois)
+                  </label>
+                  <select
+                    value={idB}
+                    onChange={(e) => setIdB(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                  >
+                    {concluidas.map((a) => (
+                      <option key={a.id} value={a.id} disabled={a.id === idA}>
+                        {fmtData(a.data_avaliacao)} — ICSR {(Number(a.igs) * 100).toFixed(1)}%
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-              {carregandoComp && <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}><CircularProgress /></Box>}
+              {carregandoComp && (
+                <div className="flex justify-center py-6">
+                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-caparao-700 border-t-transparent" />
+                </div>
+              )}
 
               {comparativo && !carregandoComp && (
                 <Comparativo comp={comparativo} dimInfo={dimInfo} />
               )}
-            </Box>
+            </div>
           )}
 
           {/* TAB 3 — Produção Regional */}
@@ -422,45 +468,37 @@ export default function PropriedadeDetalhe() {
           )}
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }
 
 function Info({ icon, label, valor }) {
   return (
-    <Grid size={{ xs: 12, sm: 6 }}>
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-        <Box sx={{ mt: 0.5, color: 'text.secondary' }}>{icon}</Box>
-        <Box>
-          <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-          <Typography variant="body2" fontWeight={600}>{valor}</Typography>
-        </Box>
-      </Box>
-    </Grid>
+    <div className="flex items-start gap-2">
+      <span className="mt-0.5 text-slate-400">{icon}</span>
+      <div>
+        <span className="block text-[10px] text-slate-400 uppercase tracking-wider">{label}</span>
+        <span className="block font-semibold text-slate-800">{valor}</span>
+      </div>
+    </div>
   );
 }
 
 function Trend({ delta, hidePct = false }) {
-  if (delta === null || delta === undefined) return <Chip size="small" label="—" variant="outlined" />;
+  if (delta === null || delta === undefined) return <span className="text-slate-400">—</span>;
   if (Math.abs(delta) < 0.005) {
     return (
-      <Chip
-        icon={<FiMinus size={12} />}
-        size="small" label="estável"
-        sx={{ bgcolor: '#ECEFF1', color: '#455A64', fontWeight: 700, fontSize: '0.7rem' }}
-      />
+      <Badge variant="outline" size="sm">
+        <FiMinus size={11} className="mr-1 inline" /> estável
+      </Badge>
     );
   }
   const up = delta > 0;
-  const cor = up ? '#2E7D32' : '#C62828';
-  const bg = up ? '#E8F5E9' : '#FFEBEE';
   return (
-    <Chip
-      icon={up ? <FiTrendingUp size={12} /> : <FiTrendingDown size={12} />}
-      size="small"
-      label={`${up ? '+' : ''}${(delta * 100).toFixed(hidePct ? 0 : 1)}${hidePct ? ' pts' : '%'}`}
-      sx={{ bgcolor: bg, color: cor, fontWeight: 700, fontSize: '0.7rem' }}
-    />
+    <Badge variant={up ? 'success' : 'danger'} size="sm">
+      {up ? <FiTrendingUp size={11} className="mr-1 inline" /> : <FiTrendingDown size={11} className="mr-1 inline" />}
+      {up ? '+' : ''}{(delta * 100).toFixed(hidePct ? 0 : 1)}{hidePct ? ' pts' : '%'}
+    </Badge>
   );
 }
 
@@ -473,156 +511,173 @@ function Comparativo({ comp, dimInfo }) {
   }));
 
   return (
-    <Box>
+    <div className="space-y-4">
       {/* Cabeçalho IGS */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '3px solid #90A4AE' }}>
-            <Typography variant="caption" color="text.secondary" display="block">Avaliação A</Typography>
-            <Typography variant="caption" color="text.secondary">{fmtData(comp.a.data)}</Typography>
-            <Typography variant="h4" fontWeight={900} sx={{ mt: 0.5 }}>
-              {(comp.a.igs * 100).toFixed(1)}%
-            </Typography>
-            <IGSBadge classificacao={comp.a.classificacao} size="small" />
-            <Button size="small" sx={{ mt: 1 }} onClick={() => navigate(`/avaliacao/${comp.a.id}`)}>Ver</Button>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: `3px solid ${comp.delta_igs >= 0 ? '#2E7D32' : '#C62828'}` }}>
-            <Typography variant="caption" color="text.secondary" display="block">Variação do ICSR</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1 }}>
-              {comp.delta_igs >= 0 ? <FiTrendingUp size={26} color="#2E7D32" /> : <FiTrendingDown size={26} color="#C62828" />}
-              <Typography variant="h4" fontWeight={900} color={comp.delta_igs >= 0 ? '#2E7D32' : '#C62828'}>
-                {comp.delta_igs >= 0 ? '+' : ''}{(comp.delta_igs * 100).toFixed(1)}%
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
-              <Chip size="small" label={`${comp.resumo.melhoraram} melhoraram`} sx={{ bgcolor: '#E8F5E9', color: '#2E7D32', fontWeight: 700 }} />
-              <Chip size="small" label={`${comp.resumo.pioraram} pioraram`} sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 700 }} />
-              <Chip size="small" label={`${comp.resumo.estaveis} estáveis`} sx={{ bgcolor: '#ECEFF1', color: '#455A64', fontWeight: 700 }} />
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '3px solid #2E7D32' }}>
-            <Typography variant="caption" color="text.secondary" display="block">Avaliação B</Typography>
-            <Typography variant="caption" color="text.secondary">{fmtData(comp.b.data)}</Typography>
-            <Typography variant="h4" fontWeight={900} sx={{ mt: 0.5 }}>
-              {(comp.b.igs * 100).toFixed(1)}%
-            </Typography>
-            <IGSBadge classificacao={comp.b.classificacao} size="small" />
-            <Button size="small" sx={{ mt: 1 }} onClick={() => navigate(`/avaliacao/${comp.b.id}`)}>Ver</Button>
-          </Paper>
-        </Grid>
-      </Grid>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-slate-400">
+          <span className="block text-xs text-slate-500">Avaliação A</span>
+          <span className="block text-[11px] text-slate-400">{fmtData(comp.a.data)}</span>
+          <div className="text-3xl font-black text-slate-800 tabular-nums my-1">
+            {(comp.a.igs * 100).toFixed(1)}%
+          </div>
+          <IGSBadge classificacao={comp.a.classificacao} size="small" />
+          <button
+            type="button"
+            onClick={() => navigate(`/avaliacao/${comp.a.id}`)}
+            className="mt-2 block mx-auto text-xs font-semibold text-caparao-700 hover:underline"
+          >
+            Ver
+          </button>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-caparao-700">
+          <span className="block text-xs text-slate-500">Variação do ICSR</span>
+          <div className="my-2 flex items-center justify-center gap-1">
+            {comp.delta_igs >= 0 ? (
+              <FiTrendingUp size={24} className="text-emerald-700" />
+            ) : (
+              <FiTrendingDown size={24} className="text-rose-700" />
+            )}
+            <span
+              className={cn(
+                'text-3xl font-black tabular-nums',
+                comp.delta_igs >= 0 ? 'text-emerald-700' : 'text-rose-700'
+              )}
+            >
+              {comp.delta_igs >= 0 ? '+' : ''}{(comp.delta_igs * 100).toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-1 mt-2">
+            <Badge variant="success" size="sm">{comp.resumo.melhoraram} melhoraram</Badge>
+            <Badge variant="danger" size="sm">{comp.resumo.pioraram} pioraram</Badge>
+            <Badge variant="outline" size="sm">{comp.resumo.estaveis} estáveis</Badge>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-caparao-800">
+          <span className="block text-xs text-slate-500">Avaliação B</span>
+          <span className="block text-[11px] text-slate-400">{fmtData(comp.b.data)}</span>
+          <div className="text-3xl font-black text-slate-800 tabular-nums my-1">
+            {(comp.b.igs * 100).toFixed(1)}%
+          </div>
+          <IGSBadge classificacao={comp.b.classificacao} size="small" />
+          <button
+            type="button"
+            onClick={() => navigate(`/avaliacao/${comp.b.id}`)}
+            className="mt-2 block mx-auto text-xs font-semibold text-caparao-700 hover:underline"
+          >
+            Ver
+          </button>
+        </div>
+      </div>
 
       {/* Comparativo dimensões */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle2" fontWeight={700} gutterBottom>Variação por Dimensão</Typography>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={barChartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-            <XAxis dataKey="nome" tick={{ fontSize: 11 }} />
-            <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-            <RTooltip />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="A" fill="#90A4AE" name="Antes" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="B" fill="#2E7D32" name="Depois" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-        <Table size="small" sx={{ mt: 1 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Dimensão</TableCell>
-              <TableCell sx={{ fontWeight: 700, width: 110 }}>Antes</TableCell>
-              <TableCell sx={{ fontWeight: 700, width: 110 }}>Depois</TableCell>
-              <TableCell sx={{ fontWeight: 700, width: 110 }}>Δ</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+          Variação por Dimensão
+        </h4>
+        <div className="h-56 w-full mb-3">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={barChartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="nome" tick={{ fontSize: 11, fill: '#64748b' }} />
+              <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} />
+              <RTooltip />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="A" fill="#94A3B8" name="Antes" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="B" fill="#1B4D24" name="Depois" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+            <tr>
+              <th className="py-2 px-3">Dimensão</th>
+              <th className="py-2 px-3 w-28">Antes</th>
+              <th className="py-2 px-3 w-28">Depois</th>
+              <th className="py-2 px-3 w-28">Δ</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
             {comp.dimensoes.map((d) => (
-              <TableRow key={d.codigo}>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={700} color={d.cor}>{d.nome}</Typography>
-                  <Typography variant="caption" color="text.secondary">peso {Math.round(d.peso * 100)}%</Typography>
-                </TableCell>
-                <TableCell>{(d.a * 100).toFixed(1)}%</TableCell>
-                <TableCell>{(d.b * 100).toFixed(1)}%</TableCell>
-                <TableCell><Trend delta={d.delta} /></TableCell>
-              </TableRow>
+              <tr key={d.codigo}>
+                <td className="py-2.5 px-3">
+                  <span className="font-bold block" style={{ color: d.cor }}>{d.nome}</span>
+                  <span className="text-[11px] text-slate-400">peso {Math.round(d.peso * 100)}%</span>
+                </td>
+                <td className="py-2.5 px-3 tabular-nums font-semibold text-slate-700">{(d.a * 100).toFixed(1)}%</td>
+                <td className="py-2.5 px-3 tabular-nums font-semibold text-slate-700">{(d.b * 100).toFixed(1)}%</td>
+                <td className="py-2.5 px-3"><Trend delta={d.delta} /></td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </Paper>
+          </tbody>
+        </table>
+      </div>
 
       {/* Detalhamento por indicador */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
           Indicadores que mais mudaram
-        </Typography>
-        <Box sx={{ overflowX: 'auto' }}>
-          <Table size="small" sx={{ minWidth: 640 }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'action.hover' }}>
-                <TableCell sx={{ fontWeight: 700 }}>Indicador</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 120 }}>Dimensão</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 80 }}>Antes</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 80 }}>Depois</TableCell>
-                <TableCell sx={{ fontWeight: 700, width: 100 }}>Variação</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        </h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs min-w-[600px]">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th className="py-2 px-3">Indicador</th>
+                <th className="py-2 px-3 w-32">Dimensão</th>
+                <th className="py-2 px-3 w-20">Antes</th>
+                <th className="py-2 px-3 w-20">Depois</th>
+                <th className="py-2 px-3 w-24">Variação</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
               {comp.indicadores.map((it) => {
                 const dim = dimInfo?.[it.dimensao] || {};
                 return (
-                  <TableRow key={it.codigo} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>{it.indicador_nome}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={dim.nome || it.dimensao_nome || it.dimensao}
-                        size="small"
-                        sx={{ bgcolor: (dim.cor || '#999') + '22', color: dim.cor || '#444', fontWeight: 700, fontSize: '0.7rem' }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <NotaCell nota={it.nota_a} />
-                    </TableCell>
-                    <TableCell>
-                      <NotaCell nota={it.nota_b} />
-                    </TableCell>
-                    <TableCell><Trend delta={it.delta} hidePct /></TableCell>
-                  </TableRow>
+                  <tr key={it.codigo} className="hover:bg-slate-50/70">
+                    <td className="py-2 px-3 font-semibold text-slate-800">{it.indicador_nome}</td>
+                    <td className="py-2 px-3">
+                      <span
+                        className="rounded-md px-2 py-0.5 text-[11px] font-bold"
+                        style={{
+                          backgroundColor: `${dim.cor || '#999'}22`,
+                          color: dim.cor || '#444',
+                        }}
+                      >
+                        {dim.nome || it.dimensao_nome || it.dimensao}
+                      </span>
+                    </td>
+                    <td className="py-2 px-3"><NotaCell nota={it.nota_a} /></td>
+                    <td className="py-2 px-3"><NotaCell nota={it.nota_b} /></td>
+                    <td className="py-2 px-3"><Trend delta={it.delta} hidePct /></td>
+                  </tr>
                 );
               })}
-            </TableBody>
-          </Table>
-        </Box>
-      </Paper>
-    </Box>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }) {
   if (carregando) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6, gap: 1.5 }}>
-        <CircularProgress />
-        <Typography variant="body2" color="text.secondary">
-          Consultando IBGE — Produção Agrícola Municipal…
-        </Typography>
-      </Box>
+      <div className="flex flex-col items-center justify-center py-10 gap-2">
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-caparao-700 border-t-transparent" />
+        <span className="text-xs text-slate-500">Consultando IBGE — Produção Agrícola Municipal…</span>
+      </div>
     );
   }
 
   if (erro) {
     return (
       <Alert
-        severity="warning"
-        sx={{ mb: 2 }}
+        variant="warning"
         action={
-          <Button size="small" startIcon={<FiRefreshCw size={14} />} onClick={onRecarregar}>
+          <Button variant="secondary" size="sm" icon={<FiRefreshCw />} onClick={onRecarregar}>
             Tentar novamente
           </Button>
         }
@@ -639,7 +694,6 @@ function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }
   const areaCafe = parseFloat(propriedade?.area_cafe) || null;
   const producaoEstimada = rendAtual && areaCafe ? (rendAtual.valor * areaCafe) / 1000 : null;
 
-  // Merge município + UF por ano para o gráfico
   const anosMap = {};
   dados.rendimento_municipio.forEach((d) => {
     anosMap[d.ano] = { ano: d.ano, municipio: d.valor };
@@ -648,147 +702,115 @@ function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }
     anosMap[d.ano] = { ...(anosMap[d.ano] || { ano: d.ano }), uf: d.valor };
   });
   const chartData = Object.values(anosMap).sort((a, b) => a.ano - b.ano);
-
   const fmtKg = (v) => v != null ? `${v.toLocaleString('pt-BR')} kg/ha` : '—';
 
   return (
-    <Box>
+    <div className="space-y-4">
       {/* Cards de resumo */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '4px solid #1B5E20' }}>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Rendimento médio — {dados.municipio}
-            </Typography>
-            <Typography variant="h4" fontWeight={900} color="#1B5E20" sx={{ my: 0.5 }}>
-              {rendAtual ? rendAtual.valor.toLocaleString('pt-BR') : '—'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              kg/ha {rendAtual ? `(${rendAtual.ano})` : ''}
-            </Typography>
-          </Paper>
-        </Grid>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-emerald-700">
+          <span className="block text-xs text-slate-500">Rendimento médio — {dados.municipio}</span>
+          <div className="text-3xl font-black text-emerald-800 tabular-nums my-1">
+            {rendAtual ? rendAtual.valor.toLocaleString('pt-BR') : '—'}
+          </div>
+          <span className="block text-xs text-slate-400">kg/ha {rendAtual ? `(${rendAtual.ano})` : ''}</span>
+        </div>
 
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', borderTop: '4px solid #1565C0' }}>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Rendimento médio — {dados.uf}
-            </Typography>
-            <Typography variant="h4" fontWeight={900} color="#1565C0" sx={{ my: 0.5 }}>
-              {rendUFAtual ? rendUFAtual.valor.toLocaleString('pt-BR') : '—'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              kg/ha {rendUFAtual ? `(${rendUFAtual.ano})` : ''}
-            </Typography>
-          </Paper>
-        </Grid>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-sky-700">
+          <span className="block text-xs text-slate-500">Rendimento médio — {dados.uf}</span>
+          <div className="text-3xl font-black text-sky-800 tabular-nums my-1">
+            {rendUFAtual ? rendUFAtual.valor.toLocaleString('pt-BR') : '—'}
+          </div>
+          <span className="block text-xs text-slate-400">kg/ha {rendUFAtual ? `(${rendUFAtual.ano})` : ''}</span>
+        </div>
 
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2, textAlign: 'center',
-              borderTop: `4px solid ${producaoEstimada ? '#6A1B9A' : '#9E9E9E'}`,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary" display="block">
-              Produção estimada (propriedade)
-            </Typography>
-            <Typography variant="h4" fontWeight={900} color={producaoEstimada ? '#6A1B9A' : 'text.disabled'} sx={{ my: 0.5 }}>
-              {producaoEstimada ? producaoEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '—'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {producaoEstimada
-                ? `toneladas · ${areaCafe} ha × ${rendAtual?.valor?.toLocaleString('pt-BR')} kg/ha`
-                : 'Informe a área de café na propriedade'}
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-purple-700">
+          <span className="block text-xs text-slate-500">Produção estimada (propriedade)</span>
+          <div className="text-3xl font-black text-purple-800 tabular-nums my-1">
+            {producaoEstimada ? producaoEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '—'}
+          </div>
+          <span className="block text-xs text-slate-400">
+            {producaoEstimada ? `toneladas · ${areaCafe} ha` : 'Informe a área de café na propriedade'}
+          </span>
+        </div>
+      </div>
 
-      {/* Comparativo com estado */}
       {rendAtual && rendUFAtual && (
-        <Alert
-          severity={rendAtual.valor >= rendUFAtual.valor ? 'success' : 'warning'}
-          sx={{ mb: 2 }}
-          icon={rendAtual.valor >= rendUFAtual.valor ? <FiTrendingUp /> : <FiTrendingDown />}
-        >
+        <Alert variant={rendAtual.valor >= rendUFAtual.valor ? 'success' : 'warning'}>
           O município <strong>{dados.municipio}</strong> apresenta rendimento médio de{' '}
           <strong>{fmtKg(rendAtual.valor)}</strong>{' '}
           {rendAtual.valor >= rendUFAtual.valor ? (
-            <>acima da média estadual ({fmtKg(rendUFAtual.valor)})</>
+            <>acima da média estadual ({fmtKg(rendUFAtual.valor)}).</>
           ) : (
             <>abaixo da média estadual ({fmtKg(rendUFAtual.valor)}) — diferença de{' '}
-              <strong>{fmtKg(rendUFAtual.valor - rendAtual.valor)}</strong></>
-          )}.
+              <strong>{fmtKg(rendUFAtual.valor - rendAtual.valor)}</strong>.</>
+          )}
         </Alert>
       )}
 
       {/* Gráfico de evolução do rendimento */}
       {chartData.length > 1 && (
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
             Evolução do Rendimento Médio (kg/ha) — Café
-          </Typography>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="ano" tick={{ fontSize: 12 }} />
-              <YAxis unit=" kg" tick={{ fontSize: 11 }} />
-              <RTooltip formatter={(v, name) => [`${v?.toLocaleString('pt-BR')} kg/ha`, name]} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="municipio" name={`Município (${dados.municipio})`} fill="#1B5E20" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="uf" name={`Estado (${dados.uf})`} fill="#1565C0" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Paper>
+          </h4>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="ano" tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis unit=" kg" tick={{ fontSize: 11, fill: '#64748b' }} />
+                <RTooltip formatter={(v, name) => [`${v?.toLocaleString('pt-BR')} kg/ha`, name]} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="municipio" name={`Município (${dados.municipio})`} fill="#1B4D24" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="uf" name={`Estado (${dados.uf})`} fill="#0284C7" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       )}
 
       {/* Tabela de histórico */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
           Dados Históricos — Município de {dados.municipio}
-        </Typography>
-        <Box sx={{ overflowX: 'auto' }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'action.hover' }}>
-                <TableCell sx={{ fontWeight: 700 }}>Ano</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Rendimento médio (kg/ha)</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Quantidade produzida (t)</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Área colhida (ha)</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        </h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th className="py-2.5 px-3">Ano</th>
+                <th className="py-2.5 px-3">Rendimento médio (kg/ha)</th>
+                <th className="py-2.5 px-3">Quantidade produzida (t)</th>
+                <th className="py-2.5 px-3">Área colhida (ha)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
               {dados.rendimento_municipio.slice().reverse().map((r) => {
                 const prod = dados.producao_municipio.find((p) => p.ano === r.ano);
                 const area = dados.area_colhida_municipio.find((a) => a.ano === r.ano);
                 const isLatest = r.ano === rendAtual?.ano;
                 return (
-                  <TableRow key={r.ano} sx={{ bgcolor: isLatest ? '#E8F5E9' : 'inherit' }}>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={isLatest ? 700 : 400}>
-                        {r.ano} {isLatest && <Chip label="mais recente" size="small" color="success" sx={{ ml: 0.5, height: 18, fontSize: '0.65rem' }} />}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={isLatest ? 700 : 400} color={isLatest ? '#1B5E20' : 'inherit'}>
-                        {r.valor.toLocaleString('pt-BR')}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{prod ? prod.valor.toLocaleString('pt-BR') : '—'}</TableCell>
-                    <TableCell>{area ? area.valor.toLocaleString('pt-BR') : '—'}</TableCell>
-                  </TableRow>
+                  <tr key={r.ano} className={isLatest ? 'bg-emerald-50/50' : 'hover:bg-slate-50/50'}>
+                    <td className="py-2 px-3 font-semibold text-slate-800">
+                      {r.ano} {isLatest && <Badge variant="success" size="sm" className="ml-1">mais recente</Badge>}
+                    </td>
+                    <td className="py-2 px-3 font-bold text-slate-900 tabular-nums">
+                      {r.valor.toLocaleString('pt-BR')}
+                    </td>
+                    <td className="py-2 px-3 text-slate-600">{prod ? prod.valor.toLocaleString('pt-BR') : '—'}</td>
+                    <td className="py-2 px-3 text-slate-600">{area ? area.valor.toLocaleString('pt-BR') : '—'}</td>
+                  </tr>
                 );
               })}
-            </TableBody>
-          </Table>
-        </Box>
-        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1.5 }}>
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-2 text-[11px] text-slate-400">
           Fonte: {dados.fonte} · Cultura: {dados.cultura}
-        </Typography>
-      </Paper>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -804,48 +826,37 @@ function LocalizacaoTab({ propriedade }) {
   ].filter(Boolean).join(', ');
 
   return (
-    <Box>
+    <div className="space-y-4">
       {!hasCoords && (
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert variant="info">
           Nenhuma coordenada registrada para esta propriedade. Edite a propriedade e use o mapa para definir a localização.
         </Alert>
       )}
 
-      {/* Endereço completo */}
       {enderecoCompleto && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <FiMap size={16} color="#666" />
-          <Typography variant="body2" color="text.secondary">{enderecoCompleto}</Typography>
-        </Box>
+        <div className="flex items-center gap-2 text-xs text-slate-600">
+          <FiMap className="text-slate-400 shrink-0" size={16} />
+          <span>{enderecoCompleto}</span>
+        </div>
       )}
 
-      {/* Mapa */}
       <MapPicker
         lat={propriedade.latitude}
         lng={propriedade.longitude}
         onChange={() => {}}
         readOnly
-        height={420}
+        height={380}
       />
-
-      {!hasCoords && (
-        <Box sx={{ textAlign: 'center', mt: 3, py: 2, border: '2px dashed', borderColor: 'divider', borderRadius: 2 }}>
-          <FiMap size={32} color="#aaa" />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Edite a propriedade para adicionar a localização no mapa
-          </Typography>
-        </Box>
-      )}
-    </Box>
+    </div>
   );
 }
 
 function NotaCell({ nota }) {
-  if (nota === null || nota === undefined) return <Typography variant="caption" color="text.disabled">—</Typography>;
+  if (nota === null || nota === undefined) return <span className="text-slate-400">—</span>;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: COR_NOTA[nota] || '#999' }} />
-      <Typography variant="body2" fontWeight={700}>{(nota * 100).toFixed(0)}%</Typography>
-    </Box>
+    <div className="flex items-center gap-1.5 font-bold tabular-nums">
+      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COR_NOTA[nota] || '#999' }} />
+      <span>{(nota * 100).toFixed(0)}%</span>
+    </div>
   );
 }

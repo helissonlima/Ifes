@@ -1,80 +1,59 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { FiHome, FiMap, FiClipboard, FiList } from 'react-icons/fi';
 import { useApp } from '../../context/AppContext';
+import { cn } from '../../utils/cn';
 
 const NAV_ITEMS = [
-  { label: 'Início',       icon: <FiHome size={20} />,      path: '/', permission: 'dashboard' },
-  { label: 'Propriedades', icon: <FiMap size={20} />,       path: '/propriedades', permission: 'propriedades' },
-  { label: 'Avaliar',      icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
-  { label: 'Histórico',    icon: <FiList size={20} />,      path: '/historico', permission: 'historico' },
+  { label: 'Início', icon: <FiHome size={20} />, path: '/', permission: 'dashboard' },
+  { label: 'Propriedades', icon: <FiMap size={20} />, path: '/propriedades', permission: 'propriedades' },
+  { label: 'Avaliar', icon: <FiClipboard size={20} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
+  { label: 'Histórico', icon: <FiList size={20} />, path: '/historico', permission: 'historico' },
 ];
 
 export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { hasPermission, user } = useApp();
+
   const visibleItems = NAV_ITEMS.filter((item) => (
     item.adminOnly ? user?.role === 'admin' : hasPermission(item.permission)
   ));
 
-  const activeIndex = visibleItems.findIndex((item) =>
-    item.path === '/'
-      ? location.pathname === '/'
-      : location.pathname.startsWith(item.path)
-  );
-
   return (
-    <Paper
-      sx={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1200,
-        borderRadius: 0,
-        bgcolor: '#FFFFFF',
-        borderTop: '1px solid rgba(15, 23, 42, 0.08)',
-        boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.04)',
-      }}
-      elevation={0}
+    <nav
+      aria-label="Navegação móvel"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-200/80 bg-white/95 px-2 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.04)] md:hidden"
     >
-      <BottomNavigation
-        value={activeIndex === -1 ? false : activeIndex}
-        onChange={(_, idx) => navigate(visibleItems[idx].path)}
-        sx={{
-          bgcolor: 'transparent',
-          height: 64,
-          '& .MuiBottomNavigationAction-root': {
-            minWidth: 0,
-            px: 0.5,
-            py: 0.75,
-            color: '#64748B',
-            transition: 'color 150ms ease',
-            '&.Mui-selected': {
-              color: '#1B4D24',
-              '& .MuiBottomNavigationAction-label': {
-                fontWeight: 700,
-                color: '#1B4D24',
-              },
-            },
-          },
-          '& .MuiBottomNavigationAction-label': {
-            fontSize: '0.72rem',
-            fontWeight: 500,
-            mt: 0.25,
-          },
-        }}
-      >
-        {visibleItems.map((item) => (
-          <BottomNavigationAction
+      {visibleItems.map((item) => {
+        const active =
+          item.path === '/'
+            ? location.pathname === '/'
+            : location.pathname.startsWith(item.path);
+
+        return (
+          <button
             key={item.path}
-            label={item.label}
-            icon={item.icon}
-            showLabel
-          />
-        ))}
-      </BottomNavigation>
-    </Paper>
+            type="button"
+            onClick={() => navigate(item.path)}
+            className={cn(
+              'flex flex-1 flex-col items-center justify-center py-1.5 transition-colors focus:outline-hidden',
+              active ? 'text-caparao-700' : 'text-slate-500 hover:text-slate-800'
+            )}
+          >
+            <span className={cn('transition-transform duration-150', active && 'scale-110')}>
+              {item.icon}
+            </span>
+            <span
+              className={cn(
+                'mt-1 text-[11px] leading-none',
+                active ? 'font-bold text-caparao-800' : 'font-medium'
+              )}
+            >
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
+    </nav>
   );
 }

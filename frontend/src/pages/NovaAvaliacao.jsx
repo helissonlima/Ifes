@@ -1,13 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  Box, Typography, Stepper, Step, StepButton,
-  Button, Card, CardContent, Grid, TextField, Autocomplete,
-  CircularProgress, Alert, LinearProgress, Paper, Skeleton,
-  useMediaQuery, useTheme,
-  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip,
-} from '@mui/material';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle, FiX, FiSearch } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -15,6 +8,7 @@ import DimensaoStep from '../components/Evaluation/DimensaoStep';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useEvaluationKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import {
   salvarRascunhoLocal,
   carregarRascunhoLocal,
@@ -28,6 +22,13 @@ import ConfirmDialog from '../components/Common/ConfirmDialog';
 import { useMetodologia, calcularIndiceDimensao as calcularIndiceDimensaoUtil, calcularIGS as calcularIGSUtil, getClassificacao as getClassificacaoUtil } from '../utils/metodologia';
 import { COR_CLASSIFICACAO } from '../utils/coresICSR';
 import { formatarData } from '../utils/formatarData';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Skeleton from '../components/ui/Skeleton';
+import Tooltip from '../components/ui/Tooltip';
+import Dialog from '../components/ui/Dialog';
+import { cn } from '../utils/cn';
 
 const DIMENSOES_ORDEM = ['economica', 'ambiental', 'social', 'gestao_qualidade'];
 
@@ -42,19 +43,13 @@ const formatAreaCafe = (areaCafe) => {
   return `${areaCafe} ha`;
 };
 
-const formatPropriedadeOption = (propriedade) =>
-  `${propriedade?.nome || 'Propriedade sem nome'} - ${formatLocalizacao(propriedade)}`;
-
 export default function NovaAvaliacao() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { notify, user } = useApp();
   const { isOnline, wasOffline, resetWasOffline } = useNetworkStatus();
   const { metodologia } = useMetodologia();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isCompactStepper = useMediaQuery(theme.breakpoints.down('lg'));
-  const isLargeDesktop = useMediaQuery(theme.breakpoints.up('xl'));
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const [step, setStep] = useState(0); // 0=info, 1-4=dimensões, 5=revisão
   const [propriedades, setPropriedades] = useState([]);
@@ -64,6 +59,10 @@ export default function NovaAvaliacao() {
   const [avaliacaoId, setAvaliacaoId] = useState(null);
   const [erro, setErro] = useState('');
   const [confirmConcluirPendente, setConfirmConcluirPendente] = useState(false);
+
+  // Busca de propriedades
+  const [buscaPropriedade, setBuscaPropriedade] = useState('');
+  const [seletorPropAberto, setSeletorPropAberto] = useState(false);
 
   // Cache offline
   const [ultimoSalvoLocal, setUltimoSalvoLocal] = useState(null);
@@ -96,11 +95,11 @@ export default function NovaAvaliacao() {
     data: new Date().toISOString().split('T')[0],
     observacoes: '',
   });
-  const [respostas, setRespostas] = useState({}); // { [indicadorCodigo]: nota }
-  const [respostasDetalhes, setRespostasDetalhes] = useState({}); // { [codigo]: { criterio, nome } }
-  const [observacoes, setObservacoes] = useState({}); // { [indicadorCodigo]: texto }
+  const [respostas, setRespostas] = useState({});
+  const [respostasDetalhes, setRespostasDetalhes] = useState({});
+  const [observacoes, setObservacoes] = useState({});
 
-  // Cálculos que dependem do estado (usados em useEffects)
+  // Cálculos que dependem do estado
   const totalRespondidos = Object.keys(respostas).length;
   const totalIndicadores = Object.values(dimensoes).reduce((acc, d) => acc + (d?.indicadores?.length || 0), 0);
 
@@ -113,21 +112,17 @@ export default function NovaAvaliacao() {
       setPropriedades(p.data.data);
       setDimensoes(ind.data.dimensoes);
 
-      // Preenche técnico responsável com o nome do usuário logado
       if (user?.nome) {
         setInfo((i) => ({ ...i, tecnico: user.nome }));
       }
 
-      // Verifica rascunho salvo ANTES de aplicar parâmetros da URL
       const userId = user?.id;
       if (userId && temRascunhoLocal(userId)) {
         const draft = carregarRascunhoLocal(userId);
-        // Se houver pendência e conexão, restaura direto para disparar sincronização automática.
         if (isOnline && draft?.syncPendente && draft?.info?.propriedade) {
           restaurarRascunho(draft, p.data.data);
           return;
         }
-        // Se vier parâmetro de URL e bater com o rascunho → restaura direto
         const propId = searchParams.get('propriedade');
         if (propId && draft?.info?.propriedade?.id === propId) {
           restaurarRascunho(draft, p.data.data);
@@ -137,7 +132,6 @@ export default function NovaAvaliacao() {
         return;
       }
 
-      // Sem rascunho: aplica parâmetros da URL normalmente
       const propId = searchParams.get('propriedade');
       if (propId) {
         const prop = p.data.data.find((x) => x.id === propId);
@@ -145,12 +139,7 @@ export default function NovaAvaliacao() {
       }
     }).catch((e) => setErro(friendlyError(e)))
     .finally(() => setCarregando(false));
-  // Roda só uma vez, na montagem: propositalmente NÃO depende de isOnline
-  // (nem de user/searchParams) para não re-buscar dados nem reabrir o diálogo
-  // de rascunho a cada oscilação de rede — a checagem de "está online" usa o
-  // valor do momento em que a página abriu, e é só isso que importa aqui.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Auto-save no localStorage (debounce 1,5s) ────────────────────────────
   useEffect(() => {
@@ -173,10 +162,8 @@ export default function NovaAvaliacao() {
         avisoQuotaMostradoRef.current = false;
         setUltimoSalvoLocal(new Date().toISOString());
       } else if (!avisoQuotaMostradoRef.current) {
-        // Evita repetir o aviso a cada 1,5s enquanto a cota continuar cheia —
-        // avisa uma vez por "episódio" de falha, não a cada tentativa.
         avisoQuotaMostradoRef.current = true;
-        notify('Não foi possível salvar o rascunho localmente (armazenamento cheio). Conclua ou sincronize esta avaliação com conexão à internet o quanto antes para não perder o que já foi preenchido.', 'error');
+        notify('Não foi possível salvar o rascunho localmente (armazenamento cheio). Conclua ou sincronize esta avaliação com conexão à internet o quanto antes.', 'error');
       }
       setSyncPendente(true);
     }, 1500);
@@ -184,7 +171,7 @@ export default function NovaAvaliacao() {
     return () => clearTimeout(autoSaveTimer.current);
   }, [step, avaliacaoId, info, respostas, respostasDetalhes, observacoes, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── beforeunload: avisa se há dados não sincronizados ────────────────────
+  // ── beforeunload ──────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (syncPendente && totalRespondidos > 0) {
@@ -196,7 +183,7 @@ export default function NovaAvaliacao() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [syncPendente, totalRespondidos]);
 
-  // ── Atalhos de teclado para navegação no wizard ───────────────────────────
+  // ── Atalhos de teclado ───────────────────────────────────────────────────
   useEvaluationKeyboardShortcuts({
     onNext: () => {
       if (step < STEP_LABELS.length - 1) setStep((s) => s + 1);
@@ -207,7 +194,7 @@ export default function NovaAvaliacao() {
     onSave: () => salvarRascunho(),
   }, !carregando);
 
-  // ── Sincroniza com o servidor ao voltar online ────────────────────────────
+  // ── Sincroniza ao voltar online ──────────────────────────────────────────
   useEffect(() => {
     if (isOnline && wasOffline && syncPendente && info.propriedade) {
       resetWasOffline();
@@ -215,7 +202,6 @@ export default function NovaAvaliacao() {
     }
   }, [isOnline, wasOffline, syncPendente, info.propriedade]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Se abrir a tela já com internet e houver pendência local, sincroniza em segundo plano.
   useEffect(() => {
     if (!isOnline || !syncPendente || !info.propriedade || carregando) return;
     sincronizarAutomaticamente({ silencioso: true });
@@ -224,7 +210,6 @@ export default function NovaAvaliacao() {
   // ── Funções de rascunho ───────────────────────────────────────────────────
   const restaurarRascunho = (draft, listaPropriedades) => {
     if (!draft) return;
-    // Reconecta o objeto propriedade à lista atualizada (pode ter mudado no servidor)
     const propAtualizada = listaPropriedades
       ? listaPropriedades.find((p) => p.id === draft.info?.propriedade?.id) ?? draft.info?.propriedade
       : draft.info?.propriedade;
@@ -244,7 +229,6 @@ export default function NovaAvaliacao() {
   const descartarRascunho = () => {
     limparRascunhoLocal(user?.id);
     setDialogRascunho({ open: false, draft: null });
-    // Aplica parâmetro URL se houver
     const propId = searchParams.get('propriedade');
     if (propId && propriedades.length > 0) {
       const prop = propriedades.find((x) => x.id === propId);
@@ -274,9 +258,6 @@ export default function NovaAvaliacao() {
     setObservacoes((o) => ({ ...o, [indicadorCodigo]: texto }));
   };
 
-  // Média ponderada por dimensão (pesos internos dos indicadores) e IGS final
-  // (pesos por dimensão) — mesma fórmula do backend, centralizada em
-  // utils/metodologia.js para não divergir entre preview e resultado salvo.
   const calcularIndiceDimensao = (dimCodigo) => {
     if (!dimensoes[dimCodigo]) return null;
     return calcularIndiceDimensaoUtil(dimensoes[dimCodigo].indicadores, respostas);
@@ -341,7 +322,7 @@ export default function NovaAvaliacao() {
       setSyncPendente(false);
       atualizarSyncPendenteLocal(user?.id, false);
       notify('Rascunho salvo no servidor!');
-    } catch (e) {
+    } catch {
       atualizarSyncPendenteLocal(user?.id, true);
       notify('Falha ao salvar no servidor. Dados mantidos localmente.', 'warning');
     } finally {
@@ -407,9 +388,6 @@ export default function NovaAvaliacao() {
       })()
     : 100;
 
-  // ── Passos do tutorial (contextuais ao wizard step) ───────────────────────
-  // ATENÇÃO: este useCallback DEVE ficar antes de qualquer early return para
-  // não violar as Rules of Hooks.
   const getTutorialSteps = useCallback(() => {
     const base = [
       {
@@ -420,7 +398,7 @@ export default function NovaAvaliacao() {
       {
         ref: refProgressoCard,
         titulo: '📊 Progresso e etapas',
-        descricao: 'Acompanhe o progresso geral (todos os indicadores) e o da etapa atual. Clique em qualquer etapa no stepper para navegar diretamente entre elas sem precisar usar os botões.',
+        descricao: 'Acompanhe o progresso geral (todos os indicadores) e o da etapa atual. Clique em qualquer etapa para navegar diretamente sem precisar usar os botões.',
       },
     ];
     if (step === 0) {
@@ -445,12 +423,12 @@ export default function NovaAvaliacao() {
         {
           ref: refConteudoStep,
           titulo: `🌱 Dimensão: ${dim?.nome}`,
-          descricao: `Esta dimensão possui ${dim?.indicadores?.length || 0} indicadores e representa ${Math.round((dim?.peso || 0) * 100)}% do Índice Geral de Sustentabilidade.\n\nPara cada indicador, leia o enunciado e selecione o critério que melhor descreve a realidade da propriedade. Uma nota de 0 a 1 é atribuída automaticamente. Você pode adicionar observações individuais em cada indicador.`,
+          descricao: `Esta dimensão possui ${dim?.indicadores?.length || 0} indicadores e representa ${Math.round((dim?.peso || 0) * 100)}% do ICSR.\n\nPara cada indicador, selecione o critério correspondente. Você pode adicionar observações individuais em cada indicador.`,
         },
         {
           ref: refNavegacao,
           titulo: '➡️ Navegação entre etapas',
-          descricao: 'Avance para a próxima dimensão ao concluir. Não é obrigatório responder todos os indicadores para continuar, mas o cálculo do IGS será parcial se houver indicadores sem resposta.',
+          descricao: 'Avance para a próxima dimensão ao concluir. O salvamento local é instantâneo a cada resposta.',
         },
       ];
     }
@@ -459,20 +437,16 @@ export default function NovaAvaliacao() {
       {
         ref: refConteudoStep,
         titulo: '🔍 Revisão e resultado',
-        descricao: 'Confira o resumo com os índices calculados por dimensão e o ICSR (Índice de Sustentabilidade) preliminar. Se precisar corrigir algo, use o Stepper acima para voltar a qualquer etapa.',
+        descricao: 'Confira o resumo com os índices calculados por dimensão e o ICSR preliminar. Se precisar corrigir algo, volte a qualquer etapa anterior.',
       },
       {
         ref: refNavegacao,
         titulo: '✅ Concluir avaliação',
-        descricao: 'Clique em Concluir Avaliação para finalizar e enviar os dados ao servidor. Você precisa estar conectado à internet para concluir. Os dados ficam salvos localmente até você se conectar.',
+        descricao: 'Clique em Concluir Avaliação para finalizar e gerar o laudo técnico definitivo.',
       },
     ];
-  }, [step, dimensoesLista]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, dimensoesLista]);
 
-  // Scroll + highlight + foco quando muda o passo do tutorial. Mover o foco
-  // de verdade (não só o destaque visual) é o que permite quem navega por
-  // teclado/leitor de tela acompanhar o tutorial; o aria-live abaixo anuncia
-  // o conteúdo do passo sem depender de enxergar o card flutuante.
   useEffect(() => {
     if (!tutorialAtivo) return;
     const steps = getTutorialSteps();
@@ -482,47 +456,43 @@ export default function NovaAvaliacao() {
     if (!el) return;
     document.querySelectorAll('[data-tutorial-hl]').forEach((e) => {
       e.style.outline = '';
-      e.style.outlineOffset = '';
       e.removeAttribute('data-tutorial-hl');
     });
     el.setAttribute('data-tutorial-hl', '1');
-    el.style.outline = '3px solid #2E7D32';
+    el.style.outline = '3px solid #1B4D24';
     el.style.outlineOffset = '4px';
     el.style.borderRadius = '12px';
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    el.focus({ preventScroll: true });
     if (refAnuncioTutorial.current) {
       refAnuncioTutorial.current.textContent = `Passo ${idx + 1} de ${steps.length}: ${passoAtual.titulo}. ${passoAtual.descricao}`;
     }
     return () => {
       el.style.outline = '';
-      el.style.outlineOffset = '';
       el.removeAttribute('data-tutorial-hl');
     };
   }, [tutorialAtivo, passoTutorial, getTutorialSteps]);
 
-  // Fecha e limpa highlights ao desativar tutorial
   useEffect(() => {
     if (!tutorialAtivo) {
       document.querySelectorAll('[data-tutorial-hl]').forEach((e) => {
         e.style.outline = '';
-        e.style.outlineOffset = '';
         e.removeAttribute('data-tutorial-hl');
       });
       if (refAnuncioTutorial.current) refAnuncioTutorial.current.textContent = '';
     }
   }, [tutorialAtivo]);
 
-  if (carregando) return (
-    <Box>
-      <Skeleton variant="rectangular" height={88} sx={{ borderRadius: 2, mb: 1.5 }} />
-      <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
-      <Skeleton variant="rectangular" height={320} sx={{ borderRadius: 2 }} />
-    </Box>
-  );
+  if (carregando) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-20 w-full rounded-xl" />
+        <Skeleton className="h-28 w-full rounded-xl" />
+        <Skeleton className="h-80 w-full rounded-xl" />
+      </div>
+    );
+  }
 
   const STEP_LABELS = ['Informações', ...dimensoesLista.map((d) => d.nome), 'Revisão'];
-
   const STEP_LABELS_STEPPER = STEP_LABELS.map((label) => {
     if (label === 'Informações') return 'Info';
     if (label === 'Gestão, Qualidade e Governança') return 'IGQG';
@@ -532,502 +502,504 @@ export default function NovaAvaliacao() {
   const progressoGlobal = clampProgress((totalRespondidos / Math.max(totalIndicadores, 1)) * 100);
   const progressoEtapa = clampProgress(progrStep);
 
+  const propriedadesFiltradas = propriedades.filter((p) => {
+    if (!buscaPropriedade.trim()) return true;
+    const q = buscaPropriedade.toLowerCase();
+    return (
+      p.nome?.toLowerCase().includes(q) ||
+      p.municipio?.toLowerCase().includes(q) ||
+      p.proprietario?.toLowerCase().includes(q)
+    );
+  });
+
   return (
-    <Box>
-      {/* ── Banner offline ── */}
+    <div className="space-y-6">
+      {/* Banner offline */}
       {!isOnline && (
         <Alert
-          severity="warning"
-          icon={<FiWifiOff />}
-          sx={{ mb: 1.5, fontWeight: 600, borderRadius: 2 }}
+          variant="warning"
+          icon={<FiWifiOff className="h-5 w-5" />}
         >
           <strong>Modo offline</strong> — sem conexão com a internet. Seus dados estão sendo
           salvos automaticamente no dispositivo. Ao reconectar, a sincronização ocorrerá automaticamente.
         </Alert>
       )}
 
-      {/* ── Dialog: rascunho encontrado ── */}
-      <Dialog open={dialogRascunho.open} maxWidth="xs" fullWidth>
-        <DialogTitle fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FiClock color="#F57F17" />
-          Rascunho encontrado
-        </DialogTitle>
-        <DialogContent>
-          <Alert severity="info" sx={{ mb: 1.5 }}>
+      {/* Dialog: rascunho encontrado */}
+      <Dialog
+        open={dialogRascunho.open}
+        onOpenChange={() => {}}
+        title="Rascunho encontrado"
+        className="max-w-md"
+        footer={
+          <div className="flex w-full items-center justify-between gap-3 pt-2">
+            <Button
+              variant="dangerOutline"
+              icon={<FiTrash2 />}
+              onClick={descartarRascunho}
+            >
+              Descartar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => restaurarRascunho(dialogRascunho.draft, propriedades)}
+            >
+              Continuar de onde parou
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <Alert variant="info" className="text-xs">
             Você tem uma avaliação em andamento salva neste dispositivo.
           </Alert>
           {dialogRascunho.draft && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
-              <Typography variant="body2">
-                <strong>Propriedade:</strong>{' '}
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 space-y-1.5 text-xs text-slate-700">
+              <p>
+                <strong className="text-slate-900">Propriedade:</strong>{' '}
                 {dialogRascunho.draft.info?.propriedade?.nome || 'Não selecionada'}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Indicadores respondidos:</strong>{' '}
+              </p>
+              <p>
+                <strong className="text-slate-900">Indicadores respondidos:</strong>{' '}
                 {Object.keys(dialogRascunho.draft.respostas || {}).length}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Último salvamento:</strong>{' '}
+              </p>
+              <p>
+                <strong className="text-slate-900">Último salvamento:</strong>{' '}
                 {formatarDataRascunho(dialogRascunho.draft.timestamp)}
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button
-            startIcon={<FiTrash2 />}
-            onClick={descartarRascunho}
-            color="error"
-          >
-            Descartar
-          </Button>
-          <Button
-            autoFocus
-            variant="contained"
-            onClick={() => restaurarRascunho(dialogRascunho.draft, propriedades)}
-          >
-            Continuar de onde parou
-          </Button>
-        </DialogActions>
+        </div>
       </Dialog>
 
-      {/* ── Cabeçalho ── */}
-      <Box ref={refCabecalho} tabIndex={-1} sx={{ outline: 'none' }}>
-      <PageHeaderCard
-        title="Nova Avaliação ICSR"
-        subtitle="Preencha os indicadores de cada dimensão. Seus dados são salvos automaticamente."
-        actions={(
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">
-              Voltar
-            </Button>
-            <Tooltip title={tutorialAtivo ? 'Fechar o tutorial' : 'Tutorial interativo: explicação campo a campo desta página'}>
+      {/* Cabeçalho */}
+      <div ref={refCabecalho} tabIndex={-1} className="outline-hidden">
+        <PageHeaderCard
+          title="Nova Avaliação ICSR"
+          subtitle="Preencha os indicadores de cada dimensão. Seus dados são salvos automaticamente."
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
               <Button
-                size="small"
-                startIcon={tutorialAtivo ? <FiX size={14} /> : <FiHelpCircle size={14} />}
-                variant={tutorialAtivo ? 'contained' : 'outlined'}
-                color={tutorialAtivo ? 'primary' : 'inherit'}
-                onClick={() => { setTutorialAtivo((a) => !a); setPassoTutorial(0); }}
-                sx={tutorialAtivo ? {} : { color: 'text.secondary', borderColor: 'divider' }}
+                variant="secondary"
+                size="sm"
+                icon={<FiArrowLeft />}
+                onClick={() => navigate(-1)}
               >
-                {tutorialAtivo ? 'Fechar guia' : 'Guia'}
+                Voltar
               </Button>
-            </Tooltip>
-            <Tooltip title="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
-              <span>
+              <Tooltip content={tutorialAtivo ? 'Fechar o tutorial' : 'Tutorial interativo: explicação desta página'}>
                 <Button
-                  variant="outlined"
-                  startIcon={<FiSave />}
-                  onClick={salvarRascunho}
-                  disabled={salvando || !info.propriedade}
-                  size="small"
+                  size="sm"
+                  variant={tutorialAtivo ? 'primary' : 'secondary'}
+                  icon={tutorialAtivo ? <FiX /> : <FiHelpCircle />}
+                  onClick={() => { setTutorialAtivo((a) => !a); setPassoTutorial(0); }}
                 >
-                  {salvando ? <CircularProgress size={16} /> : 'Salvar'}
+                  {tutorialAtivo ? 'Fechar guia' : 'Guia'}
                 </Button>
-              </span>
-            </Tooltip>
-          </Box>
-        )}
-      />
-      </Box>
+              </Tooltip>
+              <Tooltip content="Atalhos: Ctrl+→ próxima etapa · Ctrl+← etapa anterior · Ctrl+S salvar">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<FiSave />}
+                  loading={salvando}
+                  disabled={salvando || !info.propriedade}
+                  onClick={salvarRascunho}
+                >
+                  Salvar
+                </Button>
+              </Tooltip>
+            </div>
+          }
+        />
+      </div>
 
-      {erro && <Alert severity="error" sx={{ mb: 1.5 }}>{erro}</Alert>}
+      {erro && <Alert variant="error">{erro}</Alert>}
 
-      <Card ref={refProgressoCard} tabIndex={-1} sx={{ mb: 1.5, outline: 'none' }}>
-        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-          {/* Progresso global */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75, gap: 1 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={700}>
-              Progresso global da avaliação
-            </Typography>
-            <Typography variant="caption" color="text.secondary" fontWeight={700}>
-              {totalRespondidos}/{totalIndicadores} ({Math.round(progressoGlobal)}%)
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={progressoGlobal}
-            sx={{ height: 6, borderRadius: 3, mb: 2 }}
-            color="primary"
-          />
+      {/* Card de Progresso e Stepper */}
+      <div ref={refProgressoCard} tabIndex={-1} className="outline-hidden">
+        <Card>
+          <CardContent className="p-4 sm:p-5">
+            {/* Progresso global */}
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1.5">
+              <span>Progresso global da avaliação</span>
+              <span>{totalRespondidos}/{totalIndicadores} ({Math.round(progressoGlobal)}%)</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 mb-4">
+              <div
+                className="h-full rounded-full bg-caparao-700 transition-all duration-300"
+                style={{ width: `${progressoGlobal}%` }}
+              />
+            </div>
 
-          {/* Stepper */}
-          {!isMobile ? (
-            <Box sx={{ mb: 2, overflow: 'hidden' }}>
-              <Stepper
-                nonLinear
-                alternativeLabel
-                activeStep={step}
-                sx={{
-                  width: '100%',
-                  '& .MuiStepConnector-alternativeLabel': {
-                    top: isLargeDesktop ? 16 : isCompactStepper ? 13 : 15,
-                    left: isLargeDesktop ? 'calc(-50% + 23px)' : isCompactStepper ? 'calc(-50% + 20px)' : 'calc(-50% + 22px)',
-                    right: isLargeDesktop ? 'calc(50% + 23px)' : isCompactStepper ? 'calc(50% + 20px)' : 'calc(50% + 22px)',
-                  },
-                  '& .MuiStepConnector-root': { zIndex: 0 },
-                  '& .MuiStepLabel-label': {
-                    fontSize: isLargeDesktop ? '0.94rem' : isCompactStepper ? '0.82rem' : '0.9rem',
-                    mt: 0.75,
-                    whiteSpace: 'nowrap',
-                  },
-                  '& .MuiStepButton-root': { px: isLargeDesktop ? 1.05 : isCompactStepper ? 0.5 : 0.8 },
-                  '& .MuiStepConnector-line': { borderTopWidth: 2 },
-                  '& .MuiStepLabel-iconContainer': {
-                    zIndex: 1,
-                    px: 0.5,
-                  },
-                  '& .MuiStepIcon-root': {
-                    fontSize: isLargeDesktop ? '1.95rem' : isCompactStepper ? '1.55rem' : '1.75rem',
-                    position: 'relative',
-                    zIndex: 1,
-                    borderRadius: '50%',
-                  },
-                }}
-              >
-              {STEP_LABELS_STEPPER.map((label, idx) => (
-                <Step key={label} completed={idx < step}>
-                  <StepButton onClick={() => setStep(idx)}>
-                    <Typography
-                      variant="caption"
-                      fontWeight={700}
-                      noWrap
-                      sx={{ fontSize: isLargeDesktop ? '0.92rem' : isCompactStepper ? '0.78rem' : '0.86rem' }}
-                    >
-                      {label}
-                    </Typography>
-                  </StepButton>
-                </Step>
-              ))}
-              </Stepper>
-            </Box>
-          ) : (
-            /* Mobile: indicador de dimensão proeminente */
-            <Box sx={{ mb: 1.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {step >= 1 && step <= dimensoesLista.length && (
-                    <Box sx={{
-                      width: 10, height: 10, borderRadius: '50%',
-                      bgcolor: dimensoesLista[step - 1]?.cor,
-                      flexShrink: 0,
-                    }} />
-                  )}
-                  <Typography variant="body2" fontWeight={800} color={
-                    step >= 1 && step <= dimensoesLista.length
-                      ? dimensoesLista[step - 1]?.cor
-                      : 'primary.dark'
-                  }>
-                    {stepAtualLabel}
-                  </Typography>
-                </Box>
-                <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                  {Math.min(step + 1, STEP_LABELS.length)}/{STEP_LABELS.length}
-                </Typography>
-              </Box>
-              {/* Trilho de dots compacto */}
-              <Box sx={{ display: 'flex', gap: 0.5 }}>
-                {STEP_LABELS.map((_, idx) => {
-                  const dimCor = idx >= 1 && idx <= dimensoesLista.length
-                    ? dimensoesLista[idx - 1]?.cor
-                    : '#2E7D32';
+            {/* Stepper no Desktop */}
+            {!isMobile ? (
+              <div className="mb-4 flex items-center justify-between border-y border-slate-100 py-3">
+                {STEP_LABELS_STEPPER.map((label, idx) => {
+                  const active = idx === step;
+                  const completed = idx < step;
                   return (
-                    <Box
-                      key={idx}
-                      sx={{
-                        height: 4,
-                        borderRadius: 2,
-                        flexGrow: 1,
-                        bgcolor: idx < step ? dimCor : idx === step ? dimCor : '#e0e0e0',
-                        opacity: idx < step ? 0.45 : 1,
-                        transition: 'background-color 0.2s',
-                      }}
-                    />
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setStep(idx)}
+                      className={cn(
+                        'flex flex-1 flex-col items-center gap-1 transition-all focus:outline-hidden text-center group',
+                        active ? 'text-caparao-800 font-bold' : completed ? 'text-slate-700' : 'text-slate-400'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
+                          active
+                            ? 'bg-caparao-700 text-white ring-4 ring-caparao-100'
+                            : completed
+                            ? 'bg-caparao-100 text-caparao-800'
+                            : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+                        )}
+                      >
+                        {completed ? <FiCheck size={14} /> : idx + 1}
+                      </div>
+                      <span className="text-[11px] font-medium leading-tight">{label}</span>
+                    </button>
                   );
                 })}
-              </Box>
-            </Box>
-          )}
+              </div>
+            ) : (
+              /* Mobile Stepper */
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1 text-xs">
+                  <span className="font-bold text-caparao-800">{stepAtualLabel}</span>
+                  <span className="text-slate-500">{Math.min(step + 1, STEP_LABELS.length)}/{STEP_LABELS.length}</span>
+                </div>
+                <div className="flex gap-1">
+                  {STEP_LABELS.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        'h-1 flex-1 rounded-full transition-all',
+                        idx < step ? 'bg-caparao-700 opacity-50' : idx === step ? 'bg-caparao-700' : 'bg-slate-200'
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Progresso do step atual */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>
-              {step >= 1 && step <= dimensoesLista.length
-                ? `${dimensoesLista[step - 1]?.indicadores?.length || 0} indicadores · peso ${Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%`
-                : `Etapa ${Math.min(step + 1, STEP_LABELS.length)} de ${STEP_LABELS.length}`}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" fontWeight={700}>
-              {Math.round(progressoEtapa)}%
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={progressoEtapa}
-            sx={{ height: 4, borderRadius: 2, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: step === 0 ? 'primary.main' : dimensoesLista[step - 1]?.cor } }}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Conteúdo dos steps */}
-      <Box ref={refConteudoStep} tabIndex={-1} sx={{ outline: 'none' }}>
-      {step === 0 && (
-        <Card sx={{ mb: 2.5 }}>
-          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2.5 }}>Informações da Avaliação</Typography>
-            <Grid container spacing={2.5}>
-              <Grid size={12}>
-                <Autocomplete
-                  options={propriedades}
-                  getOptionLabel={formatPropriedadeOption}
-                  value={info.propriedade}
-                  onChange={(_, v) => setInfo((i) => ({ ...i, propriedade: v }))}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Propriedade Rural *" placeholder="Selecione ou busque..." />
-                  )}
-                  noOptionsText="Nenhuma propriedade encontrada"
-                />
-                {propriedades.length === 0 && (
-                  <Alert severity="info" sx={{ mt: 1 }}>
-                    Nenhuma propriedade cadastrada. Cadastre pelo menos uma propriedade rural antes de iniciar uma avaliação.{' '}
-                    <Button size="small" onClick={() => navigate('/propriedades')}>Cadastrar propriedade</Button>
-                  </Alert>
-                )}
-              </Grid>
-              {info.propriedade && (
-                <Grid size={12}>
-                  <Paper sx={{ p: 1.25, bgcolor: '#F1F8E9', borderRadius: 2 }} variant="outlined">
-                    <Typography variant="caption" color="text.secondary">
-                      Proprietário: {info.propriedade.proprietario || 'Não informado'} · Área café: {formatAreaCafe(info.propriedade.area_cafe)}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Técnico Responsável"
-                  fullWidth
-                  value={info.tecnico}
-                  disabled
-                  helperText="Preenchido automaticamente com seu nome de usuário"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="Data da Avaliação"
-                  type="date" fullWidth value={info.data}
-                  onChange={(e) => setInfo((i) => ({ ...i, data: e.target.value }))}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              </Grid>
-              <Grid size={12}>
-                <TextField
-                  label="Observações gerais"
-                  fullWidth multiline rows={2} value={info.observacoes}
-                  onChange={(e) => setInfo((i) => ({ ...i, observacoes: e.target.value }))}
-                />
-              </Grid>
-            </Grid>
+            {/* Progresso do step atual */}
+            <div className="flex justify-between items-center text-xs text-slate-500 font-medium mb-1">
+              <span>
+                {step >= 1 && step <= dimensoesLista.length
+                  ? `${dimensoesLista[step - 1]?.indicadores?.length || 0} indicadores · peso ${Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%`
+                  : `Etapa ${Math.min(step + 1, STEP_LABELS.length)} de ${STEP_LABELS.length}`}
+              </span>
+              <span className="font-bold">{Math.round(progressoEtapa)}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${progressoEtapa}%`,
+                  backgroundColor: step === 0 ? '#1B4D24' : dimensoesLista[step - 1]?.cor || '#1B4D24',
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
-      )}
+      </div>
 
-      {step >= 1 && step <= dimensoesLista.length && (
-        <DimensaoStep
-          dimensao={dimensoesLista[step - 1]}
-          respostas={respostas}
-          observacoes={observacoes}
-          onChange={(codigo, nota, nome, criterio) =>
-            handleRespostaChange(dimensoesLista[step - 1].codigo, codigo, nota, nome, criterio)
-          }
-          onObservacaoChange={handleObservacaoChange}
-        />
-      )}
+      {/* Conteúdo dos steps */}
+      <div ref={refConteudoStep} tabIndex={-1} className="outline-hidden">
+        {step === 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Informações da Avaliação
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Seleção de Propriedade */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">
+                  Propriedade Rural *
+                </label>
+                <div className="relative">
+                  <div
+                    onClick={() => setSeletorPropAberto((v) => !v)}
+                    className="flex min-h-[42px] cursor-pointer items-center justify-between rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-xs hover:border-slate-400"
+                  >
+                    <span>
+                      {info.propriedade
+                        ? `${info.propriedade.nome} — ${formatLocalizacao(info.propriedade)}`
+                        : 'Selecione ou busque uma propriedade...'}
+                    </span>
+                    <FiSearch className="text-slate-400" />
+                  </div>
 
-      {step === STEP_LABELS.length - 1 && (
-        <RevisaoFinal
-          info={info}
-          dimensoesLista={dimensoesLista}
-          respostas={respostas}
-          calcularIndiceDimensao={calcularIndiceDimensao}
-          calcularIGS={calcularIGS}
-          getClassificacao={getClassificacao}
-          totalRespondidos={totalRespondidos}
-          totalIndicadores={totalIndicadores}
-        />
-      )}
-      </Box>
+                  {seletorPropAberto && (
+                    <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+                      <input
+                        type="text"
+                        value={buscaPropriedade}
+                        onChange={(e) => setBuscaPropriedade(e.target.value)}
+                        placeholder="Buscar por nome, município..."
+                        className="w-full rounded-lg border border-slate-200 p-2 text-xs text-slate-800 focus:border-caparao-700 focus:outline-hidden mb-2"
+                        autoFocus
+                      />
+                      <div className="divide-y divide-slate-100">
+                        {propriedadesFiltradas.length === 0 ? (
+                          <div className="p-3 text-center text-xs text-slate-500">
+                            Nenhuma propriedade encontrada
+                          </div>
+                        ) : (
+                          propriedadesFiltradas.map((p) => (
+                            <div
+                              key={p.id}
+                              onClick={() => {
+                                setInfo((i) => ({ ...i, propriedade: p }));
+                                setSeletorPropAberto(false);
+                              }}
+                              className="flex cursor-pointer items-center justify-between p-2.5 rounded-lg text-xs hover:bg-slate-50"
+                            >
+                              <div>
+                                <p className="font-bold text-slate-800">{p.nome}</p>
+                                <p className="text-[11px] text-slate-500">{formatLocalizacao(p)} · {p.proprietario}</p>
+                              </div>
+                              {info.propriedade?.id === p.id && (
+                                <FiCheck className="text-caparao-700" size={16} />
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {propriedades.length === 0 && (
+                  <Alert variant="info" className="text-xs">
+                    Nenhuma propriedade cadastrada.{' '}
+                    <button
+                      type="button"
+                      onClick={() => navigate('/propriedades')}
+                      className="font-bold underline"
+                    >
+                      Cadastrar propriedade
+                    </button>
+                  </Alert>
+                )}
+              </div>
+
+              {info.propriedade && (
+                <div className="rounded-lg border border-caparao-200 bg-caparao-50/50 p-3 text-xs text-caparao-900">
+                  <p>
+                    <strong>Proprietário:</strong> {info.propriedade.proprietario || 'Não informado'} ·{' '}
+                    <strong>Área café:</strong> {formatAreaCafe(info.propriedade.area_cafe)}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Técnico Responsável
+                  </label>
+                  <input
+                    type="text"
+                    value={info.tecnico}
+                    disabled
+                    className="w-full rounded-lg border border-slate-200 bg-slate-100 p-2.5 text-xs text-slate-600 shadow-xs cursor-not-allowed"
+                  />
+                  <span className="block mt-1 text-[11px] text-slate-500">
+                    Preenchido automaticamente com seu nome
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Data da Avaliação
+                  </label>
+                  <input
+                    type="date"
+                    value={info.data}
+                    onChange={(e) => setInfo((i) => ({ ...i, data: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Observações gerais
+                </label>
+                <textarea
+                  rows={3}
+                  value={info.observacoes}
+                  onChange={(e) => setInfo((i) => ({ ...i, observacoes: e.target.value }))}
+                  placeholder="Anotações gerais sobre a visita técnica ou condições climáticas da propriedade..."
+                  className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step >= 1 && step <= dimensoesLista.length && (
+          <DimensaoStep
+            dimensao={dimensoesLista[step - 1]}
+            respostas={respostas}
+            observacoes={observacoes}
+            onChange={(codigo, nota, nome, criterio) =>
+              handleRespostaChange(dimensoesLista[step - 1].codigo, codigo, nota, nome, criterio)
+            }
+            onObservacaoChange={handleObservacaoChange}
+          />
+        )}
+
+        {step === STEP_LABELS.length - 1 && (
+          <RevisaoFinal
+            info={info}
+            dimensoesLista={dimensoesLista}
+            respostas={respostas}
+            calcularIndiceDimensao={calcularIndiceDimensao}
+            calcularIGS={calcularIGS}
+            getClassificacao={getClassificacao}
+            totalRespondidos={totalRespondidos}
+            totalIndicadores={totalIndicadores}
+          />
+        )}
+      </div>
 
       {/* Botões de navegação */}
-      <Card ref={refNavegacao} tabIndex={-1} sx={{ mt: 3.5, outline: 'none' }}>
-        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-            <Button
-              startIcon={<FiArrowLeft />}
-              onClick={() => setStep((s) => s - 1)}
-              disabled={step === 0}
-              variant="outlined"
-              fullWidth={isMobile}
-              size="large"
-              sx={{ minWidth: isMobile ? 'auto' : 140 }}
-            >
-              Anterior
-            </Button>
-
-            {step < STEP_LABELS.length - 1 ? (
+      <div ref={refNavegacao} tabIndex={-1} className="outline-hidden">
+        <Card>
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-3">
               <Button
-                endIcon={<FiArrowRight />}
-                onClick={() => {
-                  if (step === 0 && !info.propriedade) {
-                    notify('Selecione uma propriedade', 'warning'); return;
-                  }
-                  setStep((s) => s + 1);
-                }}
-                variant="contained"
-                fullWidth={isMobile}
-                size="large"
-                sx={{ minWidth: isMobile ? 'auto' : 140 }}
+                variant="secondary"
+                size="lg"
+                icon={<FiArrowLeft />}
+                disabled={step === 0}
+                onClick={() => setStep((s) => s - 1)}
+                className={isMobile ? 'flex-1' : 'min-w-[140px]'}
               >
-                Próximo
+                Anterior
               </Button>
-            ) : (
-              <Tooltip title={!isOnline ? 'Conecte-se à internet para concluir. Os dados estão salvos localmente.' : ''}>
-                <span style={{ flex: 1 }}>
-                  <Button
-                    startIcon={<FiCheck />}
-                    onClick={concluir}
-                    variant="contained"
-                    color="success"
-                    disabled={salvando || !isOnline}
-                    size="large"
-                    fullWidth={isMobile}
-                    sx={{ minWidth: isMobile ? 'auto' : 180 }}
-                  >
-                    {salvando ? <CircularProgress size={20} /> : !isOnline ? 'Aguardando conexão…' : 'Concluir Avaliação'}
-                  </Button>
-                </span>
-              </Tooltip>
-            )}
-          </Box>
-        </CardContent>
-      </Card>
 
-      {/* ── Painel de Tutorial ── */}
+              {step < STEP_LABELS.length - 1 ? (
+                <Button
+                  variant="primary"
+                  size="lg"
+                  icon={<FiArrowRight />}
+                  onClick={() => {
+                    if (step === 0 && !info.propriedade) {
+                      notify('Selecione uma propriedade primeiro', 'warning');
+                      return;
+                    }
+                    setStep((s) => s + 1);
+                  }}
+                  className={isMobile ? 'flex-1' : 'min-w-[140px]'}
+                >
+                  Próximo
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  size="lg"
+                  icon={<FiCheck />}
+                  loading={salvando}
+                  disabled={salvando || !isOnline}
+                  onClick={concluir}
+                  className={isMobile ? 'flex-1' : 'min-w-[180px]'}
+                >
+                  {salvando ? 'Salvando...' : !isOnline ? 'Aguardando conexão…' : 'Concluir Avaliação'}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Painel de Tutorial */}
       {tutorialAtivo && (() => {
         const tutorialSteps = getTutorialSteps();
         const passo = Math.min(passoTutorial, tutorialSteps.length - 1);
         const atual = tutorialSteps[passo];
         return (
-          <Paper
-            elevation={12}
-            sx={{
-              position: 'fixed',
-              bottom: isMobile ? 64 : 20,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: { xs: 'calc(100% - 32px)', sm: 480 },
-              zIndex: 1400,
-              borderRadius: 3,
-              p: 2.5,
-              border: '2px solid',
-              borderColor: 'primary.main',
-              bgcolor: 'background.paper',
-            }}
-          >
-            {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-              <Box>
-                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+          <div className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-32px)] sm:w-[480px] rounded-2xl border-2 border-caparao-700 bg-white p-5 shadow-2xl">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <span className="text-xs font-semibold text-slate-500">
                   Tutorial · Passo {passo + 1} de {tutorialSteps.length}
-                </Typography>
-                <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ mt: 0.25 }}>
-                  {atual.titulo}
-                </Typography>
-              </Box>
-              <Tooltip title="Fechar tutorial">
-                <span>
-                  <Button
-                    size="small"
-                    onClick={() => setTutorialAtivo(false)}
-                    sx={{ minWidth: 0, p: 0.5, color: 'text.secondary' }}
-                  >
-                    <FiX size={16} />
-                  </Button>
                 </span>
-              </Tooltip>
-            </Box>
+                <h4 className="text-sm font-bold text-caparao-800">{atual.titulo}</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTutorialAtivo(false)}
+                className="rounded-md p-1 text-slate-400 hover:text-slate-700"
+              >
+                <FiX size={16} />
+              </button>
+            </div>
 
-            {/* Conteúdo */}
-            <Typography
-              variant="body2"
-              sx={{ mb: 2, lineHeight: 1.7, whiteSpace: 'pre-line', color: 'text.primary' }}
-            >
+            <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mb-4">
               {atual.descricao}
-            </Typography>
+            </p>
 
             {/* Dots */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, mb: 1.5 }}>
+            <div className="flex justify-center gap-1 mb-4">
               {tutorialSteps.map((_, idx) => (
-                <Box
+                <div
                   key={idx}
                   onClick={() => setPassoTutorial(idx)}
-                  sx={{
-                    width: idx === passo ? 20 : 8,
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: idx === passo ? 'primary.main' : '#ddd',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
+                  className={cn(
+                    'h-1.5 rounded-full cursor-pointer transition-all',
+                    idx === passo ? 'w-5 bg-caparao-700' : 'w-2 bg-slate-200'
+                  )}
                 />
               ))}
-            </Box>
+            </div>
 
-            {/* Navegação */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+            <div className="flex justify-between gap-2">
               <Button
-                size="small"
-                startIcon={<FiArrowLeft />}
-                onClick={() => setPassoTutorial((p) => p - 1)}
+                variant="secondary"
+                size="sm"
+                icon={<FiArrowLeft />}
                 disabled={passo === 0}
-                variant="outlined"
+                onClick={() => setPassoTutorial((p) => p - 1)}
               >
                 Anterior
               </Button>
               {passo < tutorialSteps.length - 1 ? (
                 <Button
-                  size="small"
-                  variant="contained"
-                  endIcon={<FiArrowRight />}
+                  variant="primary"
+                  size="sm"
+                  icon={<FiArrowRight />}
                   onClick={() => setPassoTutorial((p) => p + 1)}
                 >
                   Próximo
                 </Button>
               ) : (
                 <Button
-                  size="small"
-                  variant="contained"
-                  color="success"
-                  startIcon={<FiCheck />}
+                  variant="primary"
+                  size="sm"
+                  icon={<FiCheck />}
                   onClick={() => setTutorialAtivo(false)}
                 >
                   Entendi!
                 </Button>
               )}
-            </Box>
-          </Paper>
+            </div>
+          </div>
         );
       })()}
 
-      {/* Anuncia o passo atual do tutorial para leitores de tela (o card flutuante é só
-          visual) — texto setado via ref (não state) para não disparar re-render a cada passo */}
-      <Box
+      <div
         ref={refAnuncioTutorial}
         aria-live="polite"
         role="status"
-        sx={{
-          position: 'absolute', width: '1px', height: '1px', margin: '-1px',
-          padding: 0, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0,
-        }}
+        className="sr-only"
       />
 
       <ConfirmDialog
@@ -1040,7 +1012,7 @@ export default function NovaAvaliacao() {
         onCancel={() => setConfirmConcluirPendente(false)}
         loading={salvando}
       />
-    </Box>
+    </div>
   );
 }
 
@@ -1049,71 +1021,100 @@ function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao,
   const classificacao = getClassificacao(igs);
 
   return (
-    <Box>
-      <Card sx={{ mb: 1.5 }}>
-        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-          <Typography variant="h6" fontWeight={700} gutterBottom>Resumo da Avaliação</Typography>
-          <Grid container spacing={1}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="caption" color="text.secondary">Propriedade</Typography>
-              <Typography variant="body2" fontWeight={600}>{info.propriedade?.nome || '—'}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="caption" color="text.secondary">Município/UF</Typography>
-              <Typography variant="body2" fontWeight={600}>{formatLocalizacao(info.propriedade)}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="caption" color="text.secondary">Técnico</Typography>
-              <Typography variant="body2">{info.tecnico || 'Não informado'}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="caption" color="text.secondary">Data</Typography>
-              <Typography variant="body2">{formatarData(info.data)}</Typography>
-            </Grid>
-          </Grid>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-bold text-slate-900">
+            Resumo da Avaliação
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <span className="block text-slate-500">Propriedade</span>
+              <span className="block text-sm font-bold text-slate-900">{info.propriedade?.nome || '—'}</span>
+            </div>
+            <div>
+              <span className="block text-slate-500">Município/UF</span>
+              <span className="block text-sm font-semibold text-slate-800">{formatLocalizacao(info.propriedade)}</span>
+            </div>
+            <div>
+              <span className="block text-slate-500">Técnico</span>
+              <span className="block text-sm font-semibold text-slate-800">{info.tecnico || 'Não informado'}</span>
+            </div>
+            <div>
+              <span className="block text-slate-500">Data</span>
+              <span className="block text-sm font-semibold text-slate-800">{formatarData(info.data)}</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* IGS calculado */}
-      <Card sx={{ mb: 1.5, border: `2px solid ${COR_CLASSIFICACAO[classificacao]}` }}>
-        <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 2.5 } }}>
-          <MdOutlineEco size={36} color={COR_CLASSIFICACAO[classificacao]} />
-          <Typography variant="h4" fontWeight={800} color={COR_CLASSIFICACAO[classificacao]} sx={{ mt: 0.75 }}>
+      {/* ICSR calculado */}
+      <Card
+        className="text-center border-2"
+        style={{ borderColor: COR_CLASSIFICACAO[classificacao] || '#9E9E9E' }}
+      >
+        <CardContent className="p-6">
+          <MdOutlineEco
+            size={40}
+            className="mx-auto"
+            style={{ color: COR_CLASSIFICACAO[classificacao] || '#9E9E9E' }}
+          />
+          <div
+            className="mt-2 text-3xl font-black tabular-nums tracking-tight"
+            style={{ color: COR_CLASSIFICACAO[classificacao] || '#9E9E9E' }}
+          >
             ICSR: {(igs * 100).toFixed(1)}%
-          </Typography>
-          <Typography variant="h6" fontWeight={700} color={COR_CLASSIFICACAO[classificacao]}>
+          </div>
+          <h3
+            className="text-base font-bold"
+            style={{ color: COR_CLASSIFICACAO[classificacao] || '#9E9E9E' }}
+          >
             {classificacao} Sustentabilidade
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
+          </h3>
+          <p className="mt-1 text-xs text-slate-500">
             {totalRespondidos}/{totalIndicadores} indicadores avaliados
-          </Typography>
+          </p>
         </CardContent>
       </Card>
 
       {/* Índices por dimensão */}
       <Card>
-        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-          <Typography variant="subtitle1" fontWeight={700} gutterBottom>Índices por Dimensão</Typography>
-          <Grid container spacing={1.25}>
+        <CardHeader>
+          <CardTitle className="text-base font-bold text-slate-900">
+            Índices por Dimensão
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {dimensoesLista.map((d) => {
               const idx = calcularIndiceDimensao(d.codigo);
               return (
-                <Grid size={{ xs: 12, sm: 6 }} key={d.codigo}>
-                  <Box sx={{ p: 1.25, borderRadius: 2, bgcolor: `${d.cor}11`, border: `1px solid ${d.cor}33` }}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600}>{d.nome}</Typography>
-                    <Typography variant="h5" fontWeight={800} color={d.cor}>
-                      {idx !== null ? `${(idx * 100).toFixed(1)}%` : '—'}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      peso {Math.round(d.peso * 100)}%
-                    </Typography>
-                  </Box>
-                </Grid>
+                <div
+                  key={d.codigo}
+                  className="rounded-xl border p-4"
+                  style={{
+                    backgroundColor: `${d.cor}0A`,
+                    borderColor: `${d.cor}33`,
+                  }}
+                >
+                  <span className="block text-xs font-semibold text-slate-600">{d.nome}</span>
+                  <span
+                    className="block text-2xl font-black tabular-nums mt-0.5"
+                    style={{ color: d.cor }}
+                  >
+                    {idx !== null ? `${(idx * 100).toFixed(1)}%` : '—'}
+                  </span>
+                  <span className="block text-[11px] text-slate-500 mt-0.5">
+                    peso {Math.round(d.peso * 100)}%
+                  </span>
+                </div>
               );
             })}
-          </Grid>
+          </div>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }

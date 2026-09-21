@@ -1,32 +1,38 @@
-import {
-  Box, Typography, Card, CardContent, Grid, Chip,
-  Accordion, AccordionSummary, AccordionDetails,
-  Table, TableBody, TableCell, TableHead, TableRow, Paper,
-  Divider, LinearProgress,
-} from '@mui/material';
 import { FiChevronDown, FiInfo } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 import { COR_CLASSIFICACAO } from '../utils/coresICSR';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Progress from '../components/ui/Progress';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
 
 const DIMENSOES = [
   {
-    nome: 'Econômica', cor: '#2196F3', peso: 30,
+    nome: 'Econômica',
+    cor: '#2196F3',
+    peso: 30,
     descricao: 'Avalia a viabilidade financeira, produtividade, diversidade de renda e planejamento econômico da propriedade.',
     indicadores: ['Produtividade', 'Eficiência de Comercialização', 'Diversidade de Renda', 'Custo de Produção', 'Evolução Patrimonial', 'Qualidade do Café', 'Planejamento Financeiro'],
   },
   {
-    nome: 'Ambiental', cor: '#4CAF50', peso: 35,
+    nome: 'Ambiental',
+    cor: '#4CAF50',
+    peso: 35,
     descricao: 'Analisa as práticas de conservação, manejo ambiental e conformidade legal da propriedade rural.',
     indicadores: ['Conservação do Solo', 'Manejo da Água', 'APP e Reserva Legal', 'Gestão de Resíduos', 'Uso Racional de Defensivos', 'Manejo Integrado de Pragas', 'Irrigação Eficiente', 'Proteção de Nascentes', 'Cobertura Vegetal'],
   },
   {
-    nome: 'Social', cor: '#FF9800', peso: 20,
+    nome: 'Social',
+    cor: '#FF9800',
+    peso: 20,
     descricao: 'Verifica as condições de trabalho, qualidade de vida, capacitação e organização social dos agricultores.',
     indicadores: ['Capacitação Técnica', 'Segurança do Trabalho', 'Sucessão Familiar', 'Qualidade de Vida', 'Organização Produtiva', 'Infraestrutura Sanitária', 'Assistência Técnica'],
   },
   {
-    nome: 'Gestão, Qualidade e Governança', cor: '#9C27B0', peso: 15,
+    nome: 'Gestão, Qualidade e Governança',
+    cor: '#9C27B0',
+    peso: 15,
     descricao: 'Avalia rastreabilidade, gestão operacional, certificações, conformidade e governança (transparência, due diligence de cadeia e participação de stakeholders). Inclui indicadores de compliance com CSDDD/UE, GRI e Pacto Global ONU.',
     indicadores: ['Rastreabilidade', 'Pós-Colheita', 'Armazenamento', 'Planejamento Produtivo', 'Registros Técnicos', 'Conformidade Ambiental', 'Certificações', 'Transparência e Due Diligence', 'Participação de Stakeholders'],
   },
@@ -42,258 +48,276 @@ const ESCALA = [
 
 export default function Metodologia() {
   return (
-    <Box>
+    <div className="space-y-6">
       <PageHeaderCard
         title="Metodologia"
         subtitle="Análise comparativa referência metodológica regional — Sistema Integrado de Sustentabilidade Rural"
       />
 
       {/* Apresentação */}
-      <Card
-        sx={{
-          mb: 2.5,
-          bgcolor: '#143519',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-          color: '#FFFFFF',
-        }}
-      >
-        <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 2,
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                color: '#81C784',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <MdOutlineEco size={28} />
-            </Box>
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  letterSpacing: '-0.02em',
-                  fontSize: '1.15rem',
-                }}
-              >
-                Sistema Integrado de Avaliação de Sustentabilidade
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.82)',
-                  mt: 0.75,
-                  lineHeight: 1.6,
-                  fontSize: '0.88rem',
-                }}
-              >
-                Proposta baseada na análise comparativa entre a <strong>metodologia de referência</strong> (Minas Gerais)
-                e a <strong>instituição regional</strong> (Espírito Santo).
-                Combina a robustez metodológica quantitativa com a aplicabilidade prática e o foco
-                na cafeicultura sustentável do Caparaó.
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+      <div className="rounded-xl bg-[#143519] border border-white/10 p-6 text-white shadow-xs">
+        <div className="flex gap-4 items-start">
+          <div className="w-11 h-11 rounded-lg bg-white/10 text-emerald-300 flex items-center justify-center shrink-0">
+            <MdOutlineEco size={28} />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white tracking-tight">
+              Sistema Integrado de Avaliação de Sustentabilidade
+            </h2>
+            <p className="mt-1.5 text-sm text-white/85 leading-relaxed">
+              Proposta baseada na análise comparativa entre a <strong className="font-semibold text-white">metodologia de referência</strong> (Minas Gerais)
+              e a <strong className="font-semibold text-white">instituição regional</strong> (Espírito Santo).
+              Combina a robustez metodológica quantitativa com a aplicabilidade prática e o foco
+              na cafeicultura sustentável do Caparaó.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Instrumentos base */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '100%', borderTop: '3px solid #1565C0' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} color="#1565C0">ISA – EPAMIG</Typography>
-              <Typography variant="caption" color="text.secondary">Minas Gerais · Índice de Sustentabilidade em Agroecossistemas</Typography>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Abordagem ampla e multidimensional. Forte uso de ponderações, indicadores compostos e análise quantitativa.
-                Ênfase na evolução patrimonial, análise histórica e sustentabilidade sistêmica.
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {['Quantitativa', 'Multiculturas', 'Patrimonial', 'Alta precisão'].map((t) => (
-                  <Chip key={t} label={t} size="small" sx={{ bgcolor: '#1565C022', color: '#1565C0', fontWeight: 600 }} />
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '100%', borderTop: '3px solid #2E7D32' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} color="#2E7D32">instituição regional</Typography>
-              <Typography variant="caption" color="text.secondary">Espírito Santo · Sistema de Indicadores da Cafeicultura Sustentável</Typography>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Enfoque setorial voltado à cafeicultura. Avaliação qualitativa com escalas ordinais, forte aderência
-                às Boas Práticas Agrícolas (BPA) e alta aplicabilidade extensionista.
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {['Qualitativa', 'Cafeicultura', 'BPA', 'Extensionista'].map((t) => (
-                  <Chip key={t} label={t} size="small" sx={{ bgcolor: '#2E7D3222', color: '#2E7D32', fontWeight: 600 }} />
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="border-t-4 border-t-[#1565C0]">
+          <CardContent className="p-5">
+            <h3 className="text-base font-bold text-[#1565C0]">ISA – EPAMIG</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Minas Gerais · Índice de Sustentabilidade em Agroecossistemas</p>
+            <div className="my-3 border-t border-slate-100" />
+            <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+              Abordagem ampla e multidimensional. Forte uso de ponderações, indicadores compostos e análise quantitativa.
+              Ênfase na evolução patrimonial, análise histórica e sustentabilidade sistêmica.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {['Quantitativa', 'Multiculturas', 'Patrimonial', 'Alta precisão'].map((t) => (
+                <Badge key={t} size="sm" className="bg-blue-50 text-blue-700 border-blue-200 font-semibold">
+                  {t}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-t-4 border-t-[#2E7D32]">
+          <CardContent className="p-5">
+            <h3 className="text-base font-bold text-[#2E7D32]">Instituição Regional</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Espírito Santo · Sistema de Indicadores da Cafeicultura Sustentável</p>
+            <div className="my-3 border-t border-slate-100" />
+            <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+              Enfoque setorial voltado à cafeicultura. Avaliação qualitativa com escalas ordinais, forte aderência
+              às Boas Práticas Agrícolas (BPA) e alta aplicabilidade extensionista.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {['Qualitativa', 'Cafeicultura', 'BPA', 'Extensionista'].map((t) => (
+                <Badge key={t} size="sm" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                  {t}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Fórmula IGS */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            Fórmula do ICSR — Versão Revisada com Médias Ponderadas
-          </Typography>
-          <Paper
-            sx={{
-              p: 2.5, bgcolor: '#F1F8E9', border: '1px solid #A5D6A7',
-              borderRadius: 2, textAlign: 'center', mb: 2,
-            }}
-          >
-            <Typography variant="h5" fontWeight={800} color="primary.dark" fontFamily="monospace">
+      <Card>
+        <CardHeader>
+          <CardTitle>Fórmula do ICSR — Versão Revisada com Médias Ponderadas</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-0">
+          <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl text-center">
+            <p className="text-lg md:text-xl font-black text-emerald-950 font-mono tracking-tight">
               ICSR = (IA × 0,35) + (IE × 0,30) + (IS × 0,20) + (IGQG × 0,15)
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            </p>
+            <p className="text-xs text-slate-600 mt-1.5">
               Cada subíndice é calculado por média ponderada dos seus indicadores internos.
-            </Typography>
-          </Paper>
-          <Grid container spacing={2}>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {DIMENSOES.map((d) => (
-              <Grid size={{ xs: 6, md: 3 }} key={d.nome}>
-                <Box sx={{ textAlign: 'center', p: 1.5, borderRadius: 2, bgcolor: `${d.cor}11`, border: `1px solid ${d.cor}33` }}>
-                  <Typography variant="h4" fontWeight={900} color={d.cor}>{d.peso}%</Typography>
-                  <Typography variant="caption" fontWeight={700} color={d.cor}>{d.nome}</Typography>
-                </Box>
-              </Grid>
+              <div
+                key={d.nome}
+                className="text-center p-3 rounded-xl border"
+                style={{
+                  backgroundColor: `${d.cor}10`,
+                  borderColor: `${d.cor}33`,
+                }}
+              >
+                <div className="text-2xl font-black" style={{ color: d.cor }}>
+                  {d.peso}%
+                </div>
+                <div className="text-xs font-bold mt-0.5" style={{ color: d.cor }}>
+                  {d.nome}
+                </div>
+              </div>
             ))}
-          </Grid>
+          </div>
         </CardContent>
       </Card>
 
       {/* Escala de classificação */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>Escala de Classificação</Typography>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'primary.main' }}>
-                <TableCell sx={{ color: 'white', fontWeight: 700 }}>Faixa do IGS</TableCell>
-                <TableCell sx={{ color: 'white', fontWeight: 700 }}>Classificação</TableCell>
-                <TableCell sx={{ color: 'white', fontWeight: 700 }}>Descrição</TableCell>
-                <TableCell sx={{ color: 'white', fontWeight: 700 }}>Nível</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {ESCALA.map((e) => (
-                <TableRow key={e.classificacao} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
-                  <TableCell><Typography variant="body2" fontFamily="monospace" fontWeight={700}>{e.faixa}</Typography></TableCell>
-                  <TableCell>
-                    <Chip label={e.classificacao} size="small" sx={{ bgcolor: e.cor, color: '#fff', fontWeight: 700 }} />
-                  </TableCell>
-                  <TableCell><Typography variant="body2">{e.descricao}</Typography></TableCell>
-                  <TableCell sx={{ width: 100 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min(ESCALA.indexOf(e) * 25 + 15, 100)}
-                      sx={{ height: 8, borderRadius: 4, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: e.cor } }}
-                    />
-                  </TableCell>
+      <Card>
+        <CardHeader>
+          <CardTitle>Escala de Classificação</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-[#143519] hover:bg-[#143519]">
+                  <TableHead className="text-white font-bold">Faixa do IGS</TableHead>
+                  <TableHead className="text-white font-bold">Classificação</TableHead>
+                  <TableHead className="text-white font-bold">Descrição</TableHead>
+                  <TableHead className="text-white font-bold">Nível</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {ESCALA.map((e, idx) => (
+                  <TableRow key={e.classificacao} className="hover:bg-slate-50/80">
+                    <TableCell className="font-mono font-bold text-slate-800">{e.faixa}</TableCell>
+                    <TableCell>
+                      <span
+                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold text-white shadow-2xs"
+                        style={{ backgroundColor: e.cor }}
+                      >
+                        {e.classificacao}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-slate-700">{e.descricao}</TableCell>
+                    <TableCell className="w-28">
+                      <Progress
+                        value={Math.min(idx * 25 + 15, 100)}
+                        indicatorColor={e.cor}
+                        className="h-2 bg-slate-100"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
       {/* Dimensões - Accordions */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>Dimensões e Indicadores</Typography>
-      {DIMENSOES.map((d) => (
-        <Accordion key={d.nome} sx={{ mb: 1, borderRadius: '8px !important', border: `1px solid ${d.cor}44`, '&:before': { display: 'none' } }}>
-          <AccordionSummary expandIcon={<FiChevronDown />}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', pr: 2 }}>
-              <Box>
-                <Typography fontWeight={700} color={d.cor}>{d.nome}</Typography>
-                <Typography variant="caption" color="text.secondary">{d.indicadores.length} indicadores · peso {d.peso}%</Typography>
-              </Box>
-              <Box sx={{ flexGrow: 1 }} />
-              <Chip label={`${d.peso}%`} size="small" sx={{ bgcolor: d.cor, color: '#fff', fontWeight: 700 }} />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{d.descricao}</Typography>
-            <Grid container spacing={1}>
-              {d.indicadores.map((ind, i) => (
-                <Grid size={{ xs: 12, sm: 6 }} key={ind}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, bgcolor: `${d.cor}09`, borderRadius: 1 }}>
-                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: d.cor, flexShrink: 0 }} />
-                    <Typography variant="body2">{ind}</Typography>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+      <div>
+        <h3 className="text-base font-bold text-slate-900 mb-3">Dimensões e Indicadores</h3>
+        <div className="space-y-3">
+          {DIMENSOES.map((d) => (
+            <details
+              key={d.nome}
+              className="group rounded-xl border bg-white shadow-2xs overflow-hidden transition-all duration-200"
+              style={{ borderColor: `${d.cor}55` }}
+            >
+              <summary className="flex items-center justify-between p-4 cursor-pointer select-none hover:bg-slate-50/60 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: d.cor }}
+                  />
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900">{d.nome}</h4>
+                    <p className="text-xs text-slate-500">
+                      {d.indicadores.length} indicadores · peso {d.peso}%
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span
+                    className="px-2 py-0.5 rounded-md text-xs font-bold text-white"
+                    style={{ backgroundColor: d.cor }}
+                  >
+                    {d.peso}%
+                  </span>
+                  <FiChevronDown
+                    className="text-slate-400 group-open:rotate-180 transition-transform duration-200"
+                    size={18}
+                  />
+                </div>
+              </summary>
+
+              <div className="p-4 pt-2 border-t border-slate-100 space-y-3">
+                <p className="text-xs text-slate-600 leading-relaxed">{d.descricao}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {d.indicadores.map((ind) => (
+                    <div
+                      key={ind}
+                      className="flex items-center gap-2 p-2 rounded-lg text-xs font-medium text-slate-800"
+                      style={{ backgroundColor: `${d.cor}12` }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: d.cor }}
+                      />
+                      <span>{ind}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
 
       {/* Escala de notas */}
-      <Card sx={{ mt: 2 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            <FiInfo style={{ verticalAlign: 'middle', marginRight: 8 }} />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FiInfo className="text-slate-500" size={18} />
             Escala Padronizada de Notas
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-4">
+          <p className="text-xs text-slate-600">
             Cada indicador é avaliado em uma escala padronizada de 0 a 1 com cinco níveis de desempenho:
-          </Typography>
-          <Grid container spacing={1}>
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
             {[
-              { nota: '0,00', desc: 'Condição inexistente ou inadequada', cor: '#f44336' },
-              { nota: '0,25', desc: 'Baixo desempenho', cor: '#FF9800' },
-              { nota: '0,50', desc: 'Desempenho moderado', cor: '#FFC107' },
-              { nota: '0,75', desc: 'Bom desempenho', cor: '#8BC34A' },
-              { nota: '1,00', desc: 'Excelente desempenho', cor: '#4CAF50' },
+              { nota: '0,00', desc: 'Condição inexistente ou inadequada', cor: '#dc2626' },
+              { nota: '0,25', desc: 'Baixo desempenho', cor: '#f97316' },
+              { nota: '0,50', desc: 'Desempenho moderado', cor: '#eab308' },
+              { nota: '0,75', desc: 'Bom desempenho', cor: '#84cc16' },
+              { nota: '1,00', desc: 'Excelente desempenho', cor: '#16a34a' },
             ].map((n) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }} key={n.nota}>
-                <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: `${n.cor}11`, border: `1px solid ${n.cor}44`, textAlign: 'center' }}>
-                  <Typography variant="h6" fontWeight={800} color={n.cor} fontFamily="monospace">{n.nota}</Typography>
-                  <Typography variant="caption" color="text.secondary">{n.desc}</Typography>
-                </Box>
-              </Grid>
+              <div
+                key={n.nota}
+                className="p-3 rounded-xl border text-center"
+                style={{
+                  backgroundColor: `${n.cor}10`,
+                  borderColor: `${n.cor}33`,
+                }}
+              >
+                <div className="text-xl font-black font-mono" style={{ color: n.cor }}>
+                  {n.nota}
+                </div>
+                <div className="text-[11px] text-slate-600 mt-1 leading-tight">{n.desc}</div>
+              </div>
             ))}
-          </Grid>
+          </div>
         </CardContent>
       </Card>
 
       {/* Tabela de Referência Rápida */}
-      <Card sx={{ mt: 2 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            Tabela de Referência Rápida — Critérios de Pontuação
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Tabela de Referência Rápida — Critérios de Pontuação</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-4">
+          <p className="text-xs text-slate-600">
             Exemplos de critérios por dimensão para apoiar a calibração da nota em campo.
-          </Typography>
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small" sx={{ minWidth: 760 }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'primary.main' }}>
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <Table className="min-w-[760px]">
+              <TableHeader>
+                <TableRow className="bg-[#143519] hover:bg-[#143519]">
                   {['Nota', 'Interpretação Geral', 'Ambiental', 'Econômica', 'Social', 'Gestão & Qualidade'].map((h) => (
-                    <TableCell key={h} sx={{ color: '#fff', fontWeight: 700 }}>{h}</TableCell>
+                    <TableHead key={h} className="text-white font-bold">
+                      {h}
+                    </TableHead>
                   ))}
                 </TableRow>
-              </TableHead>
+              </TableHeader>
               <TableBody>
                 {[
                   {
-                    nota: '0,00', cor: '#f44336',
+                    nota: '0,00', cor: '#dc2626',
                     geral: 'Inexistente ou inadequado',
                     amb: 'Erosão visível, solo exposto, sem práticas',
                     eco: 'Prejuízo, produtividade < 50% da média',
@@ -301,7 +325,7 @@ export default function Metodologia() {
                     gq: 'Sem registros, irregular',
                   },
                   {
-                    nota: '0,25', cor: '#FF9800',
+                    nota: '0,25', cor: '#f97316',
                     geral: 'Baixo desempenho',
                     amb: 'Práticas insuficientes (<50%)',
                     eco: 'Margem baixa, controle informal',
@@ -309,7 +333,7 @@ export default function Metodologia() {
                     gq: 'Registros incompletos',
                   },
                   {
-                    nota: '0,50', cor: '#FFC107',
+                    nota: '0,50', cor: '#eab308',
                     geral: 'Desempenho moderado',
                     amb: 'Conservação parcial (~50%)',
                     eco: 'Equilíbrio financeiro, média regional',
@@ -317,7 +341,7 @@ export default function Metodologia() {
                     gq: 'Planejamento parcial',
                   },
                   {
-                    nota: '0,75', cor: '#8BC34A',
+                    nota: '0,75', cor: '#84cc16',
                     geral: 'Bom desempenho',
                     amb: 'Boas práticas (>60%), monitoramento',
                     eco: 'Boa relação custo-benefício, diversificação',
@@ -325,7 +349,7 @@ export default function Metodologia() {
                     gq: 'Sistema organizado, planejamento anual',
                   },
                   {
-                    nota: '1,00', cor: '#4CAF50',
+                    nota: '1,00', cor: '#16a34a',
                     geral: 'Excelente desempenho',
                     amb: '3+ práticas integradas, excelência',
                     eco: 'Alta eficiência, mercado premium',
@@ -333,34 +357,40 @@ export default function Metodologia() {
                     gq: 'Digital + certificações múltiplas',
                   },
                 ].map((r) => (
-                  <TableRow key={r.nota} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
+                  <TableRow key={r.nota} className="hover:bg-slate-50/80">
                     <TableCell>
-                      <Chip label={r.nota} size="small" sx={{ bgcolor: r.cor, color: '#fff', fontWeight: 800, fontFamily: 'monospace' }} />
+                      <span
+                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold text-white font-mono shadow-2xs"
+                        style={{ backgroundColor: r.cor }}
+                      >
+                        {r.nota}
+                      </span>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{r.geral}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.amb}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.eco}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.soc}</TableCell>
-                    <TableCell sx={{ fontSize: '0.8rem' }}>{r.gq}</TableCell>
+                    <TableCell className="font-semibold text-xs text-slate-900">{r.geral}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{r.amb}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{r.eco}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{r.soc}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{r.gq}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </Box>
-          <Box sx={{ mt: 2, p: 1.5, borderRadius: 2, bgcolor: '#FFF8E1', border: '1px solid #EF6C0055' }}>
-            <Typography variant="caption" fontWeight={700} color="#EF6C00" display="block">
+          </div>
+
+          <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200">
+            <h5 className="text-xs font-bold text-amber-900 tracking-tight mb-1.5">
               Notas importantes sobre pontuação
-            </Typography>
-            <Box component="ul" sx={{ pl: 2.5, my: 0.5, '& li': { fontSize: '0.78rem', color: 'text.secondary' } }}>
+            </h5>
+            <ul className="list-disc pl-4 space-y-1 text-xs text-amber-900/90 leading-relaxed">
               <li>Valores intermediários (ex: 0,35; 0,60; 0,85) são permitidos quando o desempenho está entre dois critérios.</li>
               <li>Sempre registre a justificativa para notas extremas (&lt; 0,25 ou &gt; 0,75) no campo de observação.</li>
               <li>Em caso de dúvida entre duas notas, opte pela mais conservadora (menor valor).</li>
               <li>A nota 0,50 representa o padrão mínimo aceitável para sustentabilidade moderada.</li>
               <li>Reavalie anualmente — o ICSR é sensível às mudanças de curto e médio prazo.</li>
-            </Box>
-          </Box>
+            </ul>
+          </div>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }

@@ -1,22 +1,27 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import SystemStatusBanner from './SystemStatusBanner';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useGlobalKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 const DRAWER_WIDTH = 260;
 
 export default function MainLayout() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const toggle = () => setSidebarOpen((v) => !v);
-  const close = () => setSidebarOpen(false);
+  const handleMenuClick = () => {
+    if (isMobile) {
+      setMobileMenuOpen((v) => !v);
+    } else {
+      setSidebarOpen((v) => !v);
+    }
+  };
 
   useGlobalKeyboardShortcuts({
     onNewEvaluation: () => navigate('/avaliacao/nova'),
@@ -26,41 +31,28 @@ export default function MainLayout() {
   });
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <Navbar onMenuClick={toggle} isMobile={isMobile} />
-      {!isMobile && (
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 antialiased">
+      <Navbar onMenuClick={handleMenuClick} isMobile={isMobile} />
+
+      <div className="flex flex-1 pt-15">
+        {/* Sidebar no Desktop ou Gaveta no Mobile */}
         <Sidebar
-          open={sidebarOpen}
-          onClose={close}
+          open={isMobile ? mobileMenuOpen : sidebarOpen}
+          onClose={() => setMobileMenuOpen(false)}
           width={DRAWER_WIDTH}
           isMobile={isMobile}
         />
-      )}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          pt: { xs: 8, sm: 9 },
-          pb: { xs: 12, md: 6 },
-          overflow: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <Box
-          sx={{
-            px: { xs: 2, sm: 4, md: 6 },
-            py: 0,
-            width: '100%',
-            maxWidth: '1400px',
-            mx: 'auto',
-          }}
-        >
-          <SystemStatusBanner />
-          <Outlet />
-        </Box>
-      </Box>
+
+        {/* Conteúdo Principal */}
+        <main className="flex-1 overflow-x-hidden px-4 sm:px-6 md:px-8 py-6 pb-20 md:pb-12">
+          <div className="mx-auto max-w-7xl">
+            <SystemStatusBanner />
+            <Outlet />
+          </div>
+        </main>
+      </div>
+
       {isMobile && <BottomNav />}
-    </Box>
+    </div>
   );
 }

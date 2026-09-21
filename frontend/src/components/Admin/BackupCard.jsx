@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
-import {
-  Card, CardContent, Typography, Button, Box, Alert, Divider, Chip,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress,
-} from '@mui/material';
 import { FiDownload, FiUpload, FiDatabase, FiAlertTriangle } from 'react-icons/fi';
 import { backupAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { friendlyError } from '../../utils/errorMessages';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import Button from '../ui/Button';
+import Alert from '../ui/Alert';
+import Badge from '../ui/Badge';
+import Dialog from '../ui/Dialog';
 
 const PALAVRA_CONFIRMACAO = 'RESTAURAR';
 
@@ -19,7 +20,6 @@ const ROTULOS = {
   respostas_indicadores: 'respostas de indicadores',
 };
 
-// Só as tabelas com registros — listar meia dúzia de zeros só polui a mensagem.
 const resumo = (totais = {}) => {
   const partes = Object.entries(totais)
     .filter(([, n]) => n > 0)
@@ -27,7 +27,6 @@ const resumo = (totais = {}) => {
   return partes.length ? partes.join(' · ') : 'nenhum registro';
 };
 
-// Timestamp local no nome do arquivo (ex.: backup-sustentacafe-2026-07-29_1432.json)
 function nomeArquivo() {
   const d = new Date();
   const p = (n) => String(n).padStart(2, '0');
@@ -40,7 +39,7 @@ export default function BackupCard({ onRestaurado }) {
 
   const [exportando, setExportando] = useState(false);
   const [restaurando, setRestaurando] = useState(false);
-  const [dialogo, setDialogo] = useState(null); // { arquivo, conteudo }
+  const [dialogo, setDialogo] = useState(null);
   const [confirmacao, setConfirmacao] = useState('');
   const [erroArquivo, setErroArquivo] = useState('');
 
@@ -67,7 +66,7 @@ export default function BackupCard({ onRestaurado }) {
 
   const selecionarArquivo = async (e) => {
     const arquivo = e.target.files?.[0];
-    e.target.value = ''; // permite reselecionar o mesmo arquivo depois
+    e.target.value = '';
     if (!arquivo) return;
 
     setErroArquivo('');
@@ -91,8 +90,6 @@ export default function BackupCard({ onRestaurado }) {
       setDialogo(null);
       notify(`Backup restaurado: ${resumo(data.totais)}. Faça login novamente.`);
       onRestaurado?.();
-      // Os usuários do banco foram substituídos: a sessão atual pode não
-      // existir mais, então volta pro login em vez de falhar tela a tela.
       setTimeout(logout, 1500);
     } catch (err) {
       notify(friendlyError(err), 'error');
@@ -105,89 +102,125 @@ export default function BackupCard({ onRestaurado }) {
 
   return (
     <>
-      <Card sx={{ mt: 2 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <FiDatabase size={18} />
-            <Typography variant="subtitle1" fontWeight={700}>Backup e restauração</Typography>
-            <Chip label="Somente admin" size="small" sx={{ bgcolor: '#FFEBEE', color: '#C62828', fontWeight: 700 }} />
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Baixe um arquivo com todos os dados do sistema (usuários, propriedades, grãos,
-            avaliações e respostas) ou restaure o sistema a partir de um backup anterior.
-          </Typography>
+      <Card className="mt-4">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FiDatabase className="h-5 w-5 text-caparao-700" />
+            <CardTitle className="text-base font-bold text-slate-900">
+              Backup e restauração
+            </CardTitle>
+            <Badge variant="danger" size="sm">
+              Somente admin
+            </Badge>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Baixe um arquivo com todos os dados do sistema ou restaure o sistema a partir de um backup anterior.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {erroArquivo && (
+            <Alert variant="error">
+              {erroArquivo}
+            </Alert>
+          )}
 
-          {erroArquivo && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setErroArquivo('')}>{erroArquivo}</Alert>}
-
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-3">
             <Button
-              variant="contained" startIcon={<FiDownload />}
-              onClick={exportar} disabled={exportando}
+              variant="primary"
+              icon={<FiDownload />}
+              loading={exportando}
+              onClick={exportar}
             >
-              {exportando ? 'Gerando backup...' : 'Baixar backup completo'}
+              Baixar backup completo
             </Button>
             <Button
-              variant="outlined" color="warning" startIcon={<FiUpload />}
-              onClick={() => inputRef.current?.click()} disabled={restaurando}
+              variant="secondary"
+              icon={<FiUpload />}
+              disabled={restaurando}
+              onClick={() => inputRef.current?.click()}
             >
               Restaurar de um arquivo
             </Button>
             <input
-              ref={inputRef} type="file" accept="application/json,.json"
-              onChange={selecionarArquivo} hidden
+              ref={inputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={selecionarArquivo}
+              hidden
               aria-label="Selecionar arquivo de backup para restaurar"
             />
-          </Box>
+          </div>
 
-          <Divider sx={{ my: 2 }} />
-          <Alert severity="warning" icon={<FiAlertTriangle />}>
-            A restauração <strong>apaga todos os dados atuais</strong> e os substitui pelos do
-            arquivo. Gere um backup do estado atual antes de restaurar.
-          </Alert>
+          <div className="border-t border-slate-100 pt-4">
+            <Alert variant="warning" icon={<FiAlertTriangle className="h-4 w-4" />}>
+              A restauração <strong>apaga todos os dados atuais</strong> e os substitui pelos do arquivo.
+              Gere um backup do estado atual antes de restaurar.
+            </Alert>
+          </div>
         </CardContent>
       </Card>
 
-      {/* ========= Confirmação de restauração ========= */}
-      <Dialog open={Boolean(dialogo)} onClose={() => !restaurando && setDialogo(null)} fullWidth maxWidth="sm">
-        <DialogTitle fontWeight={700} color="error">Restaurar backup</DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Arquivo: <strong>{dialogo?.arquivo?.name}</strong>
-          </Typography>
+      {/* Confirmação de restauração */}
+      <Dialog
+        open={Boolean(dialogo)}
+        onOpenChange={(open) => !open && !restaurando && setDialogo(null)}
+        title="Restaurar backup"
+        className="max-w-md"
+        footer={
+          <div className="flex w-full items-center justify-end gap-3 pt-2">
+            <Button
+              variant="secondary"
+              onClick={() => setDialogo(null)}
+              disabled={restaurando}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="danger"
+              onClick={restaurar}
+              loading={restaurando}
+              disabled={restaurando || confirmacao.trim().toUpperCase() !== PALAVRA_CONFIRMACAO}
+            >
+              Restaurar agora
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3 py-1 text-xs">
+          <p className="text-slate-700">
+            Arquivo: <strong className="text-slate-900">{dialogo?.arquivo?.name}</strong>
+          </p>
           {dialogo?.conteudo?.gerado_em && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <p className="text-slate-500">
               Gerado em {new Date(dialogo.conteudo.gerado_em).toLocaleString('pt-BR')}
               {dialogo.conteudo.gerado_por ? ` por ${dialogo.conteudo.gerado_por}` : ''}
-            </Typography>
+            </p>
           )}
           {totaisArquivo && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <p className="text-slate-500">
               Conteúdo: {resumo(totaisArquivo)}.
-            </Typography>
+            </p>
           )}
 
-          <Alert severity="error" sx={{ mb: 2 }}>
-            Todos os dados atuais do sistema serão apagados e substituídos. Esta ação
-            não pode ser desfeita.
+          <Alert variant="error">
+            Todos os dados atuais do sistema serão apagados e substituídos. Esta ação não pode ser desfeita.
           </Alert>
 
-          <TextField
-            fullWidth autoFocus
-            label={`Digite ${PALAVRA_CONFIRMACAO} para confirmar`}
-            value={confirmacao}
-            onChange={(e) => setConfirmacao(e.target.value)}
-            disabled={restaurando}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={() => setDialogo(null)} disabled={restaurando}>Cancelar</Button>
-          <Button
-            variant="contained" color="error" onClick={restaurar}
-            disabled={restaurando || confirmacao.trim().toUpperCase() !== PALAVRA_CONFIRMACAO}
-          >
-            {restaurando ? <CircularProgress size={20} /> : 'Restaurar agora'}
-          </Button>
-        </DialogActions>
+          <div>
+            <label className="block text-slate-700 font-bold mb-1">
+              Digite {PALAVRA_CONFIRMACAO} para confirmar:
+            </label>
+            <input
+              type="text"
+              value={confirmacao}
+              onChange={(e) => setConfirmacao(e.target.value)}
+              disabled={restaurando}
+              placeholder={PALAVRA_CONFIRMACAO}
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs font-mono uppercase focus:border-red-600 focus:outline-hidden"
+              autoFocus
+            />
+          </div>
+        </div>
       </Dialog>
     </>
   );

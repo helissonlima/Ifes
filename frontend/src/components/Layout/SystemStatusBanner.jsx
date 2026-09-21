@@ -1,6 +1,7 @@
-import { Alert, Box, Chip, Typography } from '@mui/material';
 import { FiCloudOff, FiCloudRain, FiWifi, FiWifiOff } from 'react-icons/fi';
 import { useApp } from '../../context/AppContext';
+import Alert from '../ui/Alert';
+import Badge from '../ui/Badge';
 
 export default function SystemStatusBanner() {
   const { isOnline, networkRecoveredAt } = useApp();
@@ -8,19 +9,22 @@ export default function SystemStatusBanner() {
   if (!isOnline) {
     return (
       <Alert
-        severity="warning"
-        icon={<FiWifiOff />}
-        sx={{ mb: 2, borderRadius: 2, alignItems: 'center' }}
+        variant="warning"
+        icon={<FiWifiOff className="h-5 w-5" />}
+        className="mb-4"
       >
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" fontWeight={700}>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold text-amber-900">
             Sem conexão com o servidor.
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          </span>
+          <span className="text-amber-800">
             Leituras recentes podem ser servidas do cache local, alterações que dependem do servidor podem falhar.
-          </Typography>
-          <Chip size="small" icon={<FiCloudOff size={13} />} label="Modo resiliente" variant="outlined" />
-        </Box>
+          </span>
+          <Badge variant="warning" size="sm" className="inline-flex items-center gap-1">
+            <FiCloudOff size={12} />
+            Modo resiliente
+          </Badge>
+        </div>
       </Alert>
     );
   }
@@ -29,19 +33,22 @@ export default function SystemStatusBanner() {
 
   return (
     <Alert
-      severity="success"
-      icon={<FiWifi />}
-      sx={{ mb: 2, borderRadius: 2, alignItems: 'center' }}
+      variant="success"
+      icon={<FiWifi className="h-5 w-5" />}
+      className="mb-4"
     >
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
-        <Typography variant="body2" fontWeight={700}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-semibold text-emerald-900">
           Conexão restabelecida.
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+        </span>
+        <span className="text-emerald-800">
           O sistema voltou a operar online e as próximas leituras virão do servidor quando disponíveis.
-        </Typography>
-        <Chip size="small" icon={<FiCloudRain size={13} />} label="Online" color="success" variant="outlined" />
-      </Box>
+        </span>
+        <Badge variant="success" size="sm" className="inline-flex items-center gap-1">
+          <FiCloudRain size={12} />
+          Online
+        </Badge>
+      </div>
     </Alert>
   );
 }

@@ -1,81 +1,28 @@
-import { Card, CardContent, Box, Typography, Avatar } from '@mui/material';
-
-export default function StatCard({ title, value, subtitle, icon, color = 'primary.main', trend }) {
+export default function StatCard({ title, value, subtitle, icon, trend }) {
   return (
-    <Card
-      sx={{
-        height: '100%',
-        bgcolor: '#FFFFFF',
-        border: '1px solid rgba(15, 23, 42, 0.08)',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-        transition: 'border-color 150ms ease, box-shadow 150ms ease',
-        '&:hover': {
-          borderColor: 'rgba(27, 77, 36, 0.2)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-        },
-      }}
-    >
-      <CardContent sx={{ p: 2.25, '&:last-child': { pb: 2.25 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-          <Typography
-            variant="caption"
-            sx={{
-              fontWeight: 700,
-              color: '#64748B',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              fontSize: '0.72rem',
-            }}
-          >
+    <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-150 hover:border-caparao-700/30 hover:shadow-md">
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
             {title}
-          </Typography>
+          </span>
           {icon && (
-            <Box
-              sx={{
-                width: 30,
-                height: 30,
-                borderRadius: 1.5,
-                bgcolor: 'rgba(15, 23, 42, 0.04)',
-                color: color,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1rem',
-              }}
-            >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-caparao-700">
               {icon}
-            </Box>
+            </div>
           )}
-        </Box>
+        </div>
 
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 800,
-            color: '#0F172A',
-            letterSpacing: '-0.03em',
-            fontVariantNumeric: 'tabular-nums',
-            lineHeight: 1.1,
-            mb: 0.5,
-          }}
-        >
+        <div className="text-3xl font-extrabold tracking-tight text-slate-900 tabular-nums leading-none mb-1.5">
           {value ?? '—'}
-        </Typography>
+        </div>
+      </div>
 
-        {subtitle && (
-          <Typography
-            variant="caption"
-            sx={{
-              color: '#64748B',
-              display: 'block',
-              fontSize: '0.75rem',
-              lineHeight: 1.3,
-            }}
-          >
-            {subtitle}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
+      {subtitle && (
+        <p className="text-xs text-slate-500 leading-snug">
+          {subtitle}
+        </p>
+      )}
+    </div>
   );
 }

@@ -1,12 +1,9 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  Drawer, List, ListItemButton, ListItemIcon, ListItemText,
-  Divider, Box, Typography,
-} from '@mui/material';
-import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiUsers, FiHelpCircle, FiShield } from 'react-icons/fi';
+import { FiHome, FiMap, FiClipboard, FiBook, FiList, FiShield, FiHelpCircle, FiX } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
 import { useGeolocation } from '../../hooks/useGeolocation';
+import { cn } from '../../utils/cn';
 
 const MENU_SECTIONS = [
   {
@@ -42,12 +39,27 @@ function SidebarContent({ onClose, isMobile }) {
 
   const handleNav = (path) => {
     navigate(path);
-    if (isMobile) onClose();
+    if (isMobile && onClose) onClose();
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#FFFFFF' }}>
-      <Box sx={{ px: 2, pt: 2, pb: 1, flexGrow: 1, overflowY: 'auto' }}>
+    <div className="flex h-full flex-col justify-between bg-white text-slate-800">
+      {/* Lista de Navegação */}
+      <div className="flex-1 overflow-y-auto px-3 py-4">
+        {isMobile && (
+          <div className="mb-4 flex items-center justify-between px-2 pb-2 border-b border-slate-100">
+            <span className="text-sm font-bold text-slate-800">Navegação</span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"
+              aria-label="Fechar menu"
+            >
+              <FiX size={20} />
+            </button>
+          </div>
+        )}
+
         {MENU_SECTIONS.map((section) => {
           const visibleItems = section.items.filter((item) =>
             item.adminOnly ? user?.role === 'admin' : hasPermission(item.permission)
@@ -56,185 +68,95 @@ function SidebarContent({ onClose, isMobile }) {
           if (visibleItems.length === 0) return null;
 
           return (
-            <Box key={section.title} sx={{ mb: 2 }}>
-              <Typography
-                variant="caption"
-                sx={{
-                  px: 1.5,
-                  mb: 0.75,
-                  display: 'block',
-                  color: '#94A3B8',
-                  fontWeight: 700,
-                  fontSize: '0.68rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                }}
-              >
+            <div key={section.title} className="mb-5">
+              <span className="block px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 {section.title}
-              </Typography>
-              <List disablePadding>
+              </span>
+              <ul className="space-y-1">
                 {visibleItems.map((item) => {
                   const active =
                     location.pathname === item.path ||
                     (item.path !== '/' && location.pathname.startsWith(item.path));
+
                   return (
-                    <ListItemButton
-                      key={item.path}
-                      onClick={() => handleNav(item.path)}
-                      selected={active}
-                      sx={{
-                        borderRadius: 1.5,
-                        mb: 0.4,
-                        py: 0.9,
-                        px: 1.5,
-                        transition: 'all 150ms ease',
-                        position: 'relative',
-                        color: active ? '#1B4D24' : '#475569',
-                        bgcolor: active ? 'rgba(27, 77, 36, 0.08)' : 'transparent',
-                        '&:hover': {
-                          bgcolor: active ? 'rgba(27, 77, 36, 0.12)' : 'rgba(15, 23, 42, 0.04)',
-                          color: active ? '#143B1B' : '#0F172A',
-                        },
-                        '&.Mui-selected': {
-                          bgcolor: 'rgba(27, 77, 36, 0.08)',
-                          '&:hover': {
-                            bgcolor: 'rgba(27, 77, 36, 0.12)',
-                          },
-                        },
-                      }}
-                    >
-                      {active && (
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            left: 0,
-                            top: '18%',
-                            bottom: '18%',
-                            width: 3,
-                            borderRadius: '0 3px 3px 0',
-                            bgcolor: '#1B4D24',
-                          }}
-                        />
-                      )}
-                      <ListItemIcon
-                        sx={{
-                          minWidth: 32,
-                          color: active ? '#1B4D24' : '#64748B',
-                          transition: 'color 150ms ease',
-                        }}
+                    <li key={item.path}>
+                      <button
+                        type="button"
+                        onClick={() => handleNav(item.path)}
+                        className={cn(
+                          'relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all text-left',
+                          active
+                            ? 'bg-caparao-50 text-caparao-800 font-semibold shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        )}
                       >
-                        {item.icon}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={item.label}
-                        slotProps={{
-                          primary: {
-                            style: {
-                              fontWeight: active ? 700 : 500,
-                              fontSize: '0.85rem',
-                              letterSpacing: active ? '-0.01em' : 'normal',
-                            },
-                          },
-                        }}
-                      />
-                    </ListItemButton>
+                        {active && (
+                          <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-caparao-700" />
+                        )}
+                        <span className={cn('shrink-0 transition-colors', active ? 'text-caparao-700' : 'text-slate-400')}>
+                          {item.icon}
+                        </span>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    </li>
                   );
                 })}
-              </List>
-            </Box>
+              </ul>
+            </div>
           );
         })}
-      </Box>
+      </div>
 
-      <Divider sx={{ borderColor: 'rgba(15, 23, 42, 0.06)' }} />
-
-      <Box sx={{ p: 2, bgcolor: '#FAFCFA' }}>
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            fontWeight: 700,
-            color: '#1B4D24',
-            fontSize: '0.72rem',
-            lineHeight: 1.2,
-          }}
-        >
+      {/* Rodapé da Barra Lateral */}
+      <div className="border-t border-slate-100 bg-slate-50/70 p-4">
+        <p className="text-xs font-bold text-caparao-800 leading-tight">
           IFES · Campus Itapina
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            color: '#64748B',
-            fontSize: '0.68rem',
-            mt: 0.25,
-            lineHeight: 1.2,
-          }}
-        >
+        </p>
+        <p className="mt-0.5 text-[11px] text-slate-500 leading-tight">
           ICSR Caparaó (MG × ES)
-        </Typography>
+        </p>
         {localidade && (
-          <Box
-            sx={{
-              mt: 1,
-              px: 1,
-              py: 0.4,
-              borderRadius: 1,
-              bgcolor: 'rgba(27, 77, 36, 0.06)',
-              border: '1px solid rgba(27, 77, 36, 0.1)',
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: '0.66rem',
-                color: '#1B4D24',
-                fontWeight: 600,
-                display: 'block',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              📍 {localidade}
-            </Typography>
-          </Box>
+          <div className="mt-2.5 rounded-md border border-caparao-200/60 bg-caparao-50/50 px-2.5 py-1 text-[11px] font-medium text-caparao-800 truncate">
+            📍 {localidade}
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
-export default function Sidebar({ open, onClose, width, isMobile }) {
-  return isMobile ? (
-    <Drawer
-      variant="temporary"
-      open={open}
-      onClose={onClose}
-      ModalProps={{ keepMounted: true }}
-      sx={{ '& .MuiDrawer-paper': { width, boxSizing: 'border-box' } }}
+export default function Sidebar({ open, onClose, width = 260, isMobile }) {
+  if (isMobile) {
+    if (!open) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex">
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+        {/* Painel móvel */}
+        <div
+          className="relative flex w-64 max-w-[80vw] flex-1 flex-col bg-white shadow-2xl z-10"
+          style={{ width }}
+        >
+          <SidebarContent onClose={onClose} isMobile={true} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <aside
+      className={cn(
+        'sticky top-15 h-[calc(100vh-3.75rem)] shrink-0 border-r border-slate-200/80 bg-white transition-all duration-200 ease-in-out z-30',
+        open ? 'w-65' : 'w-0 overflow-hidden border-none'
+      )}
     >
-      <SidebarContent onClose={onClose} isMobile={true} />
-    </Drawer>
-  ) : (
-    <Drawer
-      variant="persistent"
-      open={open}
-      sx={{
-        width: open ? width : 0,
-        flexShrink: 0,
-        transition: 'width 180ms ease-out',
-        overflow: 'hidden',
-        '& .MuiDrawer-paper': {
-          width,
-          boxSizing: 'border-box',
-          borderRight: '1px solid rgba(0,0,0,0.08)',
-          top: 64,
-          height: 'calc(100% - 64px)',
-        },
-      }}
-    >
-      <SidebarContent onClose={onClose} isMobile={false} />
-    </Drawer>
+      <div className="h-full w-65">
+        <SidebarContent onClose={onClose} isMobile={false} />
+      </div>
+    </aside>
   );
 }

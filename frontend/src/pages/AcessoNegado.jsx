@@ -1,6 +1,7 @@
-import { Box, Button, Card, CardContent, Stack, Typography } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiShield } from 'react-icons/fi';
+import { Button } from '../components/ui/Button';
+import { Card, CardContent } from '../components/ui/Card';
 
 const MENSAGENS = {
   permission: {
@@ -20,28 +21,41 @@ export default function AcessoNegado() {
   const mensagem = MENSAGENS[motivo] || MENSAGENS.permission;
 
   return (
-    <Box sx={{ minHeight: '100%', display: 'grid', placeItems: 'center', py: 4 }}>
-      <Card sx={{ maxWidth: 560, width: '100%' }}>
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Stack spacing={2} sx={{ alignItems: 'flex-start' }}>
-            <Box sx={{ width: 52, height: 52, borderRadius: 3, display: 'grid', placeItems: 'center', bgcolor: 'warning.50', color: 'warning.dark' }}>
-              <FiShield size={24} />
-            </Box>
-            <Typography variant="h5" fontWeight={800} color="text.primary">
+    <div className="min-h-[80vh] flex items-center justify-center p-4">
+      <Card className="max-w-lg w-full">
+        <CardContent className="p-6 sm:p-8 space-y-6">
+          <div className="w-13 h-13 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200/80 flex items-center justify-center">
+            <FiShield size={26} />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {mensagem.titulo}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
+            </h1>
+            <p className="text-sm text-slate-600 leading-relaxed">
               {mensagem.descricao}
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ width: '100%' }}>
-              <Button variant="contained" onClick={() => navigate('/')}>Ir para o início</Button>
-              <Button variant="outlined" startIcon={<FiArrowLeft />} onClick={() => navigate(-1)}>
-                Voltar
-              </Button>
-            </Stack>
-          </Stack>
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button
+              variant="primary"
+              onClick={() => navigate('/')}
+              className="flex-1"
+            >
+              Ir para o início
+            </Button>
+            <Button
+              variant="outline"
+              startIcon={<FiArrowLeft size={16} />}
+              onClick={() => navigate(-1)}
+              className="flex-1"
+            >
+              Voltar
+            </Button>
+          </div>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }

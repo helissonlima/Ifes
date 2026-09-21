@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Snackbar, Alert } from '@mui/material';
+import { FiCheckCircle, FiAlertTriangle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi';
 import { authAPI, setAuthToken, onUnauthorized, TOKEN_KEY } from '../services/api';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 
@@ -63,9 +63,6 @@ export function AppProvider({ children }) {
     } catch (err) {
       const cache = err?.isOffline ? lerUsuarioCache() : null;
       if (cache) {
-        // Sem conexão pra confirmar o token agora: mantém a sessão com o
-        // último cargo/permissões conhecidos em vez de deslogar o técnico
-        // só por falta de sinal — telas com cache continuam acessíveis.
         setUser(cache);
       } else {
         localStorage.removeItem(TOKEN_KEY);
@@ -80,6 +77,18 @@ export function AppProvider({ children }) {
   const notify = useCallback((message, severity = 'success') => {
     setNotification({ open: true, message, severity });
   }, []);
+
+  const closeNotification = useCallback(() => {
+    setNotification((n) => ({ ...n, open: false }));
+  }, []);
+
+  useEffect(() => {
+    if (!notification.open) return;
+    const timer = setTimeout(() => {
+      closeNotification();
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [notification.open, closeNotification]);
 
   // O interceptor axios (fora do React) já limpou o token; aqui só limpamos o
   // usuário da sessão — o RequireAuth em App.jsx cuida do redirect para /login.
@@ -99,8 +108,6 @@ export function AppProvider({ children }) {
     }
     setNetworkRecoveredAt(null);
   }, [isOnline]);
-
-  const closeNotification = () => setNotification((n) => ({ ...n, open: false }));
 
   const login = useCallback(async (email, senha) => {
     const response = await authAPI.login(email, senha);
@@ -125,6 +132,20 @@ export function AppProvider({ children }) {
     return Boolean(user.permissions?.[key]);
   }, [user]);
 
+  const toastIcons = {
+    success: <FiCheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />,
+    warning: <FiAlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />,
+    error: <FiAlertCircle className="h-5 w-5 text-red-600 shrink-0" />,
+    info: <FiInfo className="h-5 w-5 text-sky-600 shrink-0" />,
+  };
+
+  const toastStyles = {
+    success: 'bg-white border-emerald-200 text-slate-800 shadow-lg',
+    warning: 'bg-white border-amber-200 text-slate-800 shadow-lg',
+    error: 'bg-white border-red-200 text-slate-800 shadow-lg',
+    info: 'bg-white border-sky-200 text-slate-800 shadow-lg',
+  };
+
   return (
     <AppContext.Provider value={{
       notify,
@@ -139,16 +160,30 @@ export function AppProvider({ children }) {
       networkRecoveredAt,
     }}>
       {children}
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={4000}
-        onClose={closeNotification}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={closeNotification} severity={notification.severity} variant="filled" sx={{ width: '100%' }}>
-          {notification.message}
-        </Alert>
-      </Snackbar>
+
+      {/* Toast Notification */}
+      {notification.open && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl border px-4 py-3 shadow-xl transition-all"
+        >
+          <div className={`flex items-center gap-3 rounded-lg px-1 ${toastStyles[notification.severity] || toastStyles.info}`}>
+            {toastIcons[notification.severity] || toastIcons.info}
+            <span className="text-sm font-medium text-slate-800">
+              {notification.message}
+            </span>
+            <button
+              type="button"
+              onClick={closeNotification}
+              className="ml-2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-hidden"
+              aria-label="Fechar notificação"
+            >
+              <FiX className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </AppContext.Provider>
   );
 }

@@ -1,11 +1,10 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material';
-import theme from './theme';
 import { AppProvider, useApp } from './context/AppContext';
 import MainLayout from './components/Layout/MainLayout';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import UpdatePrompt from './components/Common/UpdatePrompt';
+import { Spinner } from './components/ui/Spinner';
 
 const AcessoNegado = lazy(() => import('./pages/AcessoNegado'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -22,19 +21,19 @@ const Graos = lazy(() => import('./pages/Graos'));
 
 function CenterLoading({ title = 'Carregando sistema', description = 'Preparando sessão, permissões e dados iniciais.' }) {
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', px: 3 }}>
-      <Box sx={{ display: 'grid', justifyItems: 'center', gap: 2, textAlign: 'center', maxWidth: 420 }}>
-        <CircularProgress />
-        <Box>
-          <Box component="h1" sx={{ fontSize: '1.2rem', fontWeight: 800, color: 'text.primary', mb: 0.75 }}>
+    <div className="min-h-screen grid place-items-center px-4 bg-slate-50/50">
+      <div className="flex flex-col items-center text-center max-w-sm gap-3">
+        <Spinner size={32} className="text-[#1B4D24]" />
+        <div>
+          <h1 className="text-base font-black text-slate-900 mb-1">
             {title}
-          </Box>
-          <Box component="p" sx={{ color: 'text.secondary', lineHeight: 1.5 }}>
+          </h1>
+          <p className="text-xs text-slate-500 leading-relaxed">
             {description}
-          </Box>
-        </Box>
-      </Box>
-    </Box>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -103,14 +102,11 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppProvider>
-        <ErrorBoundary>
-          <AppRoutes />
-        </ErrorBoundary>
-        <UpdatePrompt />
-      </AppProvider>
-    </ThemeProvider>
+    <AppProvider>
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
+      <UpdatePrompt />
+    </AppProvider>
   );
 }

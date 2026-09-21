@@ -1,4 +1,4 @@
-import { Alert } from '@mui/material';
+import Alert from '../ui/Alert';
 
 /**
  * Aviso padrão de "dados exibidos a partir do cache local" — mesma
@@ -6,10 +6,10 @@ import { Alert } from '@mui/material';
  */
 export default function CachedDataBanner({
   mensagem = 'Dados exibidos a partir do cache local. Atualize novamente quando a conexão estabilizar.',
-  sx,
+  className,
 }) {
   return (
-    <Alert severity="info" sx={{ mb: 2, ...sx }}>
+    <Alert variant="info" className={`mb-4 ${className || ''}`}>
       {mensagem}
     </Alert>
   );

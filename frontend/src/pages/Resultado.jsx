@@ -1,10 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, Grid, Button, Divider,
-  Alert, Chip, LinearProgress, Table, Skeleton,
-  TableBody, TableCell, TableRow, Paper, Tabs, Tab, TableHead, Tooltip,
-} from '@mui/material';
 import { FiArrowLeft, FiClipboard, FiPrinter, FiTrendingUp, FiAlertTriangle, FiCheckCircle, FiTarget, FiEdit3 } from 'react-icons/fi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer,
@@ -19,9 +14,15 @@ import CachedDataBanner from '../components/Common/CachedDataBanner';
 import IGSGauge from '../components/Dashboard/IGSGauge';
 import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Badge from '../components/ui/Badge';
+import Skeleton from '../components/ui/Skeleton';
+import Tooltip from '../components/ui/Tooltip';
+import { cn } from '../utils/cn';
 
 // Nome do campo de índice de cada dimensão na resposta de GET /avaliacoes/:id
-// (convenção própria dessa API — por isso não faz parte de utils/metodologia.js).
 const CAMPO_POR_DIMENSAO = {
   ambiental: 'indice_ambiental',
   economica: 'indice_economico',
@@ -72,28 +73,41 @@ export default function Resultado() {
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  if (loading || carregandoMetodologia) return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Skeleton width={70} height={32} />
-        <Box sx={{ flexGrow: 1 }}><Skeleton width={220} height={28} /><Skeleton width={160} height={20} sx={{ mt: 0.5 }} /></Box>
-      </Box>
-      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2, mb: 2 }} />
-      <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 12, md: 7 }}><Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} /></Grid>
-        <Grid size={{ xs: 12, md: 5 }}><Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} /></Grid>
-      </Grid>
-    </Box>
-  );
-  if (erro) return (
-    <Alert
-      severity="error"
-      action={<Button color="inherit" size="small" onClick={carregar}>Tentar novamente</Button>}
-    >
-      {erro}
-    </Alert>
-  );
+  if (loading || carregandoMetodologia) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-20" />
+          <div className="space-y-1">
+            <Skeleton className="h-7 w-60" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+        </div>
+        <Skeleton className="h-44 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div className="md:col-span-7"><Skeleton className="h-72 w-full rounded-xl" /></div>
+          <div className="md:col-span-5"><Skeleton className="h-72 w-full rounded-xl" /></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <Alert
+        variant="error"
+        action={
+          <Button variant="secondary" size="sm" onClick={carregar}>
+            Tentar novamente
+          </Button>
+        }
+      >
+        {erro}
+      </Alert>
+    );
+  }
+
   if (!avaliacao) return null;
 
   const respostasPorDimensao = (avaliacao.respostas || []).reduce((acc, r) => {
@@ -117,189 +131,195 @@ export default function Resultado() {
     Social: Math.round((Number(t.indice_social) || 0) * 100),
     'IGQG': Math.round((Number(t.indice_gestao_qualidade) || 0) * 100),
   }));
+
   const dimensaoCritica = getDimensaoCritica(avaliacao, DIM_INFO);
   const prioridadePrincipal = diagnostico?.plano_acao_top5?.[0] || null;
 
   return (
-    <Box className="print-resultado">
-      {/* Header */}
-      <Box className="no-print" sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Button
-          startIcon={<FiArrowLeft />}
-          onClick={() => navigate(-1)}
-          size="small"
-          variant="outlined"
-          sx={{ borderColor: 'rgba(15, 23, 42, 0.15)', color: '#475569' }}
-        >
-          Voltar
-        </Button>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
-            Laudo da Avaliação
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B' }}>
-            {avaliacao.propriedade_nome} · {avaliacao.municipio}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+    <div className="space-y-6 print-resultado">
+      {/* Barra de Ações Superior */}
+      <div className="no-print flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <Button
-            startIcon={<FiClipboard />}
-            variant="outlined"
-            size="small"
+            variant="secondary"
+            size="sm"
+            icon={<FiArrowLeft />}
+            onClick={() => navigate(-1)}
+          >
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              Laudo da Avaliação
+            </h1>
+            <p className="text-xs text-slate-500">
+              {avaliacao.propriedade_nome} · {avaliacao.municipio}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<FiClipboard />}
             onClick={() => navigate(`/avaliacao/nova?propriedade=${avaliacao.propriedade_id}`)}
           >
             Nova Avaliação
           </Button>
           <Button
-            startIcon={<FiPrinter />}
-            variant="contained"
-            size="small"
+            variant="primary"
+            size="sm"
+            icon={<FiPrinter />}
             onClick={() => window.print()}
           >
             Imprimir / PDF
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {dadosEmCache && (
         <CachedDataBanner mensagem="Este resultado está sendo exibido com apoio do cache local. Confirme os dados novamente quando a conexão estabilizar." />
       )}
 
-      {/* ICSR Principal — card com acabamento sóbrio */}
+      {/* ICSR Principal */}
       <Card
-        sx={{
-          mb: 2.5,
-          bgcolor: '#FFFFFF',
-          border: '1px solid rgba(15, 23, 42, 0.08)',
-          borderTop: `4px solid ${COR_CLASSIFICACAO[avaliacao.classificacao] || '#9E9E9E'}`,
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-        }}
+        className="overflow-hidden border-slate-200/80 shadow-xs"
+        style={{ borderTop: `4px solid ${COR_CLASSIFICACAO[avaliacao.classificacao] || '#9E9E9E'}` }}
       >
-        <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
-          <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-            <Grid size={{ xs: 12, sm: 3 }} sx={{ textAlign: 'center' }}>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-12">
+            <div className="sm:col-span-4 lg:col-span-3 text-center">
               <IGSGauge igs={avaliacao.igs || 0} classificacao={avaliacao.classificacao} size={160} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 9 }}>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-                <Box>
-                  <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.7rem' }}>
+            </div>
+            <div className="sm:col-span-8 lg:col-span-9">
+              <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+                <div>
+                  <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     ICSR — Índice Consolidado de Sustentabilidade Rural
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      fontWeight: 900,
-                      lineHeight: 1.1,
-                      color: '#0F172A',
-                      letterSpacing: '-0.03em',
-                      fontVariantNumeric: 'tabular-nums',
-                      mt: 0.25,
-                    }}
-                  >
+                  </span>
+                  <div className="text-4xl font-black tracking-tight text-slate-900 tabular-nums leading-tight mt-0.5">
                     {avaliacao.igs ? `${(avaliacao.igs * 100).toFixed(1)}%` : '—'}
-                  </Typography>
-                </Box>
+                  </div>
+                </div>
                 <IGSBadge classificacao={avaliacao.classificacao} size="medium" />
-              </Box>
-              <Divider sx={{ my: 1.5 }} />
-              <Grid container spacing={1}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="caption" color="text.secondary">Propriedade</Typography>
-                  <Typography variant="body2" fontWeight={700}>{avaliacao.propriedade_nome}</Typography>
-                </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary">Técnico</Typography>
-                  <Typography variant="body2" fontWeight={600}>{avaliacao.tecnico_responsavel || '—'}</Typography>
-                </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary">Data</Typography>
-                  <Typography variant="body2" fontWeight={600}>{formatarData(avaliacao.data_avaliacao)}</Typography>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3 sm:grid-cols-4">
+                <div>
+                  <span className="block text-[11px] text-slate-500">Propriedade</span>
+                  <span className="block text-sm font-bold text-slate-800">{avaliacao.propriedade_nome}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-slate-500">Município</span>
+                  <span className="block text-sm font-semibold text-slate-800">{avaliacao.municipio}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-slate-500">Técnico</span>
+                  <span className="block text-sm font-semibold text-slate-800">{avaliacao.tecnico_responsavel || '—'}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] text-slate-500">Data</span>
+                  <span className="block text-sm font-semibold text-slate-800">{formatarData(avaliacao.data_avaliacao)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      <Card sx={{ mb: 2.5, bgcolor: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.08)', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)' }}>
-        <CardContent>
-          <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>
+      {/* Leitura para a Próxima Conversa */}
+      <Card className="border-slate-200/80 shadow-xs">
+        <CardContent className="p-5 sm:p-6">
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-12">
+            <div className="md:col-span-8">
+              <span className="block text-xs font-bold uppercase tracking-wider text-caparao-700 mb-1">
                 Leitura para a próxima conversa
-              </Typography>
-              <Typography variant="h6" fontWeight={800} sx={{ mt: 0.5, mb: 1 }}>
+              </span>
+              <h2 className="text-lg font-bold text-slate-900 mb-2">
                 {prioridadePrincipal
                   ? `Comece por ${prioridadePrincipal.indicador_nome}`
                   : 'Use os índices por dimensão para orientar a próxima conversa em campo'}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
                 {prioridadePrincipal
                   ? `Este indicador está na dimensão ${prioridadePrincipal.dimensao_nome} e oferece o maior ganho potencial imediato no ICSR. Foque evidências concretas, alinhamento de prazo e ação verificável para a próxima visita.`
                   : 'O resultado já mostra a situação geral da propriedade. Selecione a dimensão mais baixa e conduza a conversa a partir dela, não a partir do número final isolado.'}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12, md: 5 }}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {dimensaoCritica && (
-                  <Chip label={`Dimensão mais frágil: ${dimensaoCritica.nome}`} variant="outlined" sx={{ fontWeight: 700 }} />
-                )}
-                {prioridadePrincipal && (
-                  <Chip label={`Prazo sugerido: ${prioridadePrincipal.prazo_sugerido}`} color="warning" variant="outlined" sx={{ fontWeight: 700 }} />
-                )}
-                <Chip label={`Classificação: ${avaliacao.classificacao}`} color="success" variant="outlined" sx={{ fontWeight: 700 }} />
-              </Box>
-            </Grid>
-          </Grid>
+              </p>
+            </div>
+            <div className="md:col-span-4 flex flex-wrap gap-2 pt-2">
+              {dimensaoCritica && (
+                <Badge variant="outline" className="text-slate-800">
+                  Dimensão mais frágil: {dimensaoCritica.nome}
+                </Badge>
+              )}
+              {prioridadePrincipal && (
+                <Badge variant="warning">
+                  Prazo sugerido: {prioridadePrincipal.prazo_sugerido}
+                </Badge>
+              )}
+              <Badge variant="success">
+                Classificação: {avaliacao.classificacao}
+              </Badge>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {/* Índices por Dimensão + Radar */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>Índices por Dimensão</Typography>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        <div className="md:col-span-7">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Índices por Dimensão
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               {Object.entries(DIM_INFO).map(([cod, info]) => {
                 const valor = avaliacao[info.campo] || 0;
                 return (
-                  <Box key={cod} sx={{ mb: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                      <Box>
-                        <Typography variant="body2" fontWeight={700}>{info.nome}</Typography>
-                        <Typography variant="caption" color="text.secondary">Peso: {info.peso}% · Contribuição: {((valor * info.peso) / 100 * 100).toFixed(1)}%</Typography>
-                      </Box>
-                      <Typography variant="h6" fontWeight={800} color={info.cor}>
+                  <div key={cod}>
+                    <div className="flex justify-between items-center text-xs mb-1">
+                      <div>
+                        <span className="font-bold text-slate-800 text-sm">{info.nome}</span>
+                        <span className="block text-[11px] text-slate-500">
+                          Peso: {info.peso}% · Contribuição: {((valor * info.peso) / 100 * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <span className="text-base font-extrabold tabular-nums" style={{ color: info.cor }}>
                         {(valor * 100).toFixed(1)}%
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min(valor * 100, 100)}
-                      sx={{
-                        height: 10, borderRadius: 5,
-                        bgcolor: `${info.cor}22`,
-                        '& .MuiLinearProgress-bar': { bgcolor: info.cor, borderRadius: 5 },
-                      }}
-                    />
-                  </Box>
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(valor * 100, 100)}%`,
+                          backgroundColor: info.cor,
+                        }}
+                      />
+                    </div>
+                  </div>
                 );
               })}
-              <Divider sx={{ my: 1.5 }} />
-              <Box sx={{ p: 1.5, bgcolor: '#F1F8E9', borderRadius: 2, textAlign: 'center' }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <div className="mt-4 rounded-lg bg-caparao-50/50 p-3 text-center border border-caparao-100">
+                <p className="text-[11px] font-medium text-caparao-800">
                   ICSR = (Amb. × 35%) + (Econ. × 30%) + (Soc. × 20%) + (IGQG × 15%) — Médias ponderadas
-                </Typography>
-              </Box>
+                </p>
+              </div>
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Card sx={{ height: '100%' }}>
+        <div className="md:col-span-5">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-slate-900">
+                Perfil de Sustentabilidade
+              </CardTitle>
+            </CardHeader>
             <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>Perfil de Sustentabilidade</Typography>
               <DimensaoChart
                 economica={avaliacao.indice_economico}
                 ambiental={avaliacao.indice_ambiental}
@@ -308,261 +328,332 @@ export default function Resultado() {
               />
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
-      {/* Gráfico de barras */}
-      <Card sx={{ mb: 2 }}>
+      {/* Gráfico de barras comparativo */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-bold text-slate-900">
+            Comparativo por Dimensão
+          </CardTitle>
+        </CardHeader>
         <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>Comparativo por Dimensão</Typography>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={dadosBarChart} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="nome" tick={{ fontSize: 12 }} />
-              <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 12 }} />
-              <RTooltip formatter={(v) => [`${v}%`, 'Índice']} />
-              <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
-                {dadosBarChart.map((entry) => <Cell key={entry.nome} fill={entry.cor} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dadosBarChart} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="nome" tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 12, fill: '#64748b' }} />
+                <RTooltip formatter={(v) => [`${v}%`, 'Índice']} />
+                <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
+                  {dadosBarChart.map((entry) => <Cell key={entry.nome} fill={entry.cor} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
-      {/* DIAGNÓSTICO AUTOMÁTICO */}
+      {/* Diagnóstico Automático */}
       {diagnostico && (
-        <Card sx={{ mb: 2, borderTop: '4px solid #2E7D32' }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-              <FiTarget size={22} color="#2E7D32" />
-              <Typography variant="h6" fontWeight={800}>Diagnóstico Automático</Typography>
-            </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Card className="border-t-4 border-t-caparao-700">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <FiTarget className="h-5 w-5 text-caparao-700" />
+              <CardTitle className="text-base font-bold text-slate-900">
+                Diagnóstico Automático
+              </CardTitle>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
               Análise de fortalezas, fragilidades e recomendações priorizadas por impacto no ICSR.
-            </Typography>
-
-            {/* Plano de ação top-5 */}
-            <Paper variant="outlined" sx={{ p: 1.5, mb: 2, borderColor: '#2E7D3266', bgcolor: '#F1F8E9' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <FiTrendingUp size={16} color="#2E7D32" />
-                <Typography variant="subtitle2" fontWeight={800} color="#1B5E20">
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Plano de Ação Top-5 */}
+            <div className="rounded-xl border border-caparao-200 bg-caparao-50/40 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <FiTrendingUp className="h-4 w-4 text-caparao-700" />
+                <span className="text-sm font-bold text-caparao-900">
                   Plano de Ação Prioritário — Top 5 indicadores
-                </Typography>
-              </Box>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'rgba(46,125,50,0.08)' }}>
-                    <TableCell sx={{ fontWeight: 700, width: 40 }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Indicador</TableCell>
-                    <TableCell sx={{ fontWeight: 700, width: 80 }}>Nota</TableCell>
-                    <TableCell sx={{ fontWeight: 700, width: 110 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700, width: 110, display: { xs: 'none', md: 'table-cell' } }}>Impacto ICSR</TableCell>
-                    <TableCell sx={{ fontWeight: 700, display: { xs: 'none', sm: 'table-cell' } }}>Prazo sugerido</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {diagnostico.plano_acao_top5.map((it, i) => (
-                    <TableRow key={it.indicador_codigo} hover>
-                      <TableCell sx={{ fontWeight: 800, color: '#2E7D32' }}>{i + 1}</TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={700}>{it.indicador_nome}</Typography>
-                        <Typography variant="caption" color="text.secondary">{it.dimensao_nome}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={(it.nota * 100).toFixed(0) + '%'}
-                          size="small"
-                          sx={{ bgcolor: COR_NOTA[it.nota] || '#9E9E9E', color: COR_NOTA_TEXTO[it.nota] || '#616161', fontWeight: 700 }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          icon={STATUS_ICON[it.status]}
-                          label={it.status}
-                          size="small"
-                          sx={{ bgcolor: it.status_cor + '22', color: it.status_cor, fontWeight: 700, fontSize: '0.7rem' }}
-                        />
-                      </TableCell>
-                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                        <Typography variant="body2" fontWeight={700}>+{(it.impacto_igs * 100).toFixed(2)}%</Typography>
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '0.78rem', color: 'text.secondary', display: { xs: 'none', sm: 'table-cell' } }}>
-                        {it.prazo_sugerido}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-caparao-100/60 text-slate-700 font-semibold border-b border-caparao-200">
+                    <tr>
+                      <th className="py-2 px-3 w-10">#</th>
+                      <th className="py-2 px-3">Indicador</th>
+                      <th className="py-2 px-3 w-20">Nota</th>
+                      <th className="py-2 px-3 w-28">Status</th>
+                      <th className="py-2 px-3 hidden md:table-cell w-28">Impacto ICSR</th>
+                      <th className="py-2 px-3 hidden sm:table-cell">Prazo sugerido</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-caparao-100">
+                    {diagnostico.plano_acao_top5.map((it, i) => (
+                      <tr key={it.indicador_codigo} className="hover:bg-white/60">
+                        <td className="py-2.5 px-3 font-bold text-caparao-800">{i + 1}</td>
+                        <td className="py-2.5 px-3">
+                          <p className="font-semibold text-slate-800">{it.indicador_nome}</p>
+                          <p className="text-[11px] text-slate-500">{it.dimensao_nome}</p>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span
+                            className="inline-flex rounded-md px-2 py-0.5 text-xs font-bold"
+                            style={{
+                              backgroundColor: COR_NOTA[it.nota] || '#9E9E9E',
+                              color: COR_NOTA_TEXTO[it.nota] || '#616161',
+                            }}
+                          >
+                            {(it.nota * 100).toFixed(0)}%
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
+                            style={{
+                              backgroundColor: `${it.status_cor}22`,
+                              color: it.status_cor,
+                            }}
+                          >
+                            {STATUS_ICON[it.status]}
+                            {it.status}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-slate-800 hidden md:table-cell">
+                          +{(it.impacto_igs * 100).toFixed(2)}%
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-600 hidden sm:table-cell">
+                          {it.prazo_sugerido}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-2 text-[11px] text-slate-500">
                 * Impacto ICSR = potencial de ganho no índice consolidado se este indicador atingir nota 1,00.
-              </Typography>
-            </Paper>
+              </p>
+            </div>
 
-            {/* Diagnóstico por dimensão */}
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom>Detalhamento por Dimensão</Typography>
-            <Tabs value={tabDiag} onChange={(_, v) => setTabDiag(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 1.5 }}>
-              {diagnostico.diagnostico_por_dimensao.map((d) => (
-                <Tab key={d.dimensao} label={d.nome} sx={{ fontWeight: 600, minWidth: 100 }} />
-              ))}
-            </Tabs>
-            {diagnostico.diagnostico_por_dimensao.map((d, i) => (
-              tabDiag === i && (
-                <Box key={d.dimensao}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'action.hover' }}>
-                        <TableCell sx={{ fontWeight: 700 }}>Indicador</TableCell>
-                        <TableCell sx={{ fontWeight: 700, width: 80 }}>Nota</TableCell>
-                        <TableCell sx={{ fontWeight: 700, width: 110 }}>Status</TableCell>
-                        <TableCell sx={{ fontWeight: 700, display: { xs: 'none', md: 'table-cell' } }}>Recomendação</TableCell>
-                        <TableCell sx={{ fontWeight: 700, width: 110, display: { xs: 'none', sm: 'table-cell' } }}>Prazo</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {d.itens.map((it) => (
-                        <TableRow key={it.indicador_codigo} hover>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight={700}>{it.indicador_nome}</Typography>
+            {/* Detalhamento por dimensão (Tabs) */}
+            <div>
+              <h3 className="text-sm font-bold text-slate-800 mb-2">
+                Detalhamento por Dimensão
+              </h3>
+              <div className="flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 mb-4">
+                {diagnostico.diagnostico_por_dimensao.map((d, i) => (
+                  <button
+                    key={d.dimensao}
+                    type="button"
+                    onClick={() => setTabDiag(i)}
+                    className={cn(
+                      'rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors',
+                      tabDiag === i
+                        ? 'bg-caparao-700 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    )}
+                  >
+                    {d.nome}
+                  </button>
+                ))}
+              </div>
+
+              {diagnostico.diagnostico_por_dimensao[tabDiag] && (
+                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                      <tr>
+                        <th className="py-2.5 px-3">Indicador</th>
+                        <th className="py-2.5 px-3 w-20">Nota</th>
+                        <th className="py-2.5 px-3 w-28">Status</th>
+                        <th className="py-2.5 px-3 hidden md:table-cell">Recomendação</th>
+                        <th className="py-2.5 px-3 hidden sm:table-cell w-28">Prazo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {diagnostico.diagnostico_por_dimensao[tabDiag].itens.map((it) => (
+                        <tr key={it.indicador_codigo} className="hover:bg-slate-50/70">
+                          <td className="py-2.5 px-3">
+                            <p className="font-semibold text-slate-800">{it.indicador_nome}</p>
                             {it.evidencia_esperada && (
-                              <Typography variant="caption" color="text.secondary" display="block">
+                              <p className="text-[11px] text-slate-500 mt-0.5">
                                 Evidência: {it.evidencia_esperada}
-                              </Typography>
+                              </p>
                             )}
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight={800} sx={{ color: COR_NOTA_TEXTO[it.nota] || '#616161' }}>
-                              {(it.nota * 100).toFixed(0)}%
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              icon={STATUS_ICON[it.status]}
-                              label={it.status}
-                              size="small"
-                              sx={{ bgcolor: it.status_cor + '22', color: it.status_cor, fontWeight: 700, fontSize: '0.7rem' }}
-                            />
-                          </TableCell>
-                          <TableCell sx={{ fontSize: '0.8rem', display: { xs: 'none', md: 'table-cell' } }}>
+                          </td>
+                          <td className="py-2.5 px-3 font-bold" style={{ color: COR_NOTA_TEXTO[it.nota] || '#616161' }}>
+                            {(it.nota * 100).toFixed(0)}%
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
+                              style={{
+                                backgroundColor: `${it.status_cor}22`,
+                                color: it.status_cor,
+                              }}
+                            >
+                              {STATUS_ICON[it.status]}
+                              {it.status}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600 hidden md:table-cell">
                             {it.recomendacao}
-                          </TableCell>
-                          <TableCell sx={{ fontSize: '0.78rem', color: 'text.secondary', display: { xs: 'none', sm: 'table-cell' } }}>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-500 hidden sm:table-cell">
                             {it.prazo_sugerido}
-                          </TableCell>
-                        </TableRow>
+                          </td>
+                        </tr>
                       ))}
-                    </TableBody>
-                  </Table>
-                </Box>
-              )
-            ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* EVOLUÇÃO TEMPORAL */}
+      {/* Evolução Temporal */}
       {timelineData.length > 1 && (
-        <Card sx={{ mb: 2 }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <FiTrendingUp size={20} color="#1B5E20" />
-              <Typography variant="h6" fontWeight={700}>Evolução da Sustentabilidade</Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <FiTrendingUp className="h-5 w-5 text-caparao-700" />
+              <CardTitle className="text-base font-bold text-slate-900">
+                Evolução da Sustentabilidade
+              </CardTitle>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
               {timelineData.length} avaliações concluídas desta propriedade.
-            </Typography>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={timelineData} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                <XAxis dataKey="data" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-                <RTooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="ICSR" stroke="#1B5E20" strokeWidth={3} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="Econômica" stroke="#2196F3" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="Social" stroke="#FF9800" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="IGQG" stroke="#9C27B0" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={timelineData} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="data" tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <RTooltip />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line type="monotone" dataKey="ICSR" stroke="#1B4D24" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Econômica" stroke="#0284C7" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="Social" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="IGQG" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Detalhamento por indicador */}
+      {/* Detalhamento por Indicador */}
       <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <FiClipboard size={18} color="#2E7D32" />
-            <Typography variant="h6" fontWeight={700}>Notas por Indicador</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FiClipboard className="h-5 w-5 text-caparao-700" />
+            <CardTitle className="text-base font-bold text-slate-900">
+              Notas por Indicador
+            </CardTitle>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
             Selecione uma dimensão para ver as notas individuais e critérios selecionados.
-          </Typography>
-          <Tabs value={tabAtiva} onChange={(_, v) => setTabAtiva(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2 }}>
-            {Object.entries(DIM_INFO).map(([cod, info]) => (
-              <Tab key={cod} label={info.nome} sx={{ fontWeight: 600, minWidth: 100 }} />
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 mb-4">
+            {Object.entries(DIM_INFO).map(([cod, info], i) => (
+              <button
+                key={cod}
+                type="button"
+                onClick={() => setTabAtiva(i)}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors',
+                  tabAtiva === i
+                    ? 'bg-caparao-700 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                )}
+              >
+                {info.nome}
+              </button>
             ))}
-          </Tabs>
+          </div>
 
           {Object.entries(DIM_INFO).map(([cod, info], i) => (
             tabAtiva === i && (
-              <Box key={cod}>
+              <div key={cod}>
                 {(respostasPorDimensao[cod] || []).length === 0 ? (
-                  <Alert severity="info">Nenhum indicador avaliado nesta dimensão.</Alert>
+                  <Alert variant="info">Nenhum indicador avaliado nesta dimensão.</Alert>
                 ) : (
-                  <Table size="small">
-                    <TableBody>
-                      {(respostasPorDimensao[cod] || []).map((r) => (
-                        <TableRow key={r.id} sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
-                          <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                            {r.indicador_nome}
-                            {r.observacao && (
-                              <Tooltip title={r.observacao} placement="top" arrow>
-                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25, fontStyle: 'italic', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <FiEdit3 size={10} style={{ flexShrink: 0 }} /> {r.observacao}
-                                </Typography>
-                              </Tooltip>
-                            )}
-                          </TableCell>
-                          <TableCell sx={{ width: 200 }}>
-                            <LinearProgress
-                              variant="determinate"
-                              value={r.nota * 100}
-                              sx={{
-                                height: 8, borderRadius: 4,
-                                bgcolor: '#eee',
-                                '& .MuiLinearProgress-bar': { bgcolor: COR_NOTA[r.nota] || info.cor },
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell sx={{ width: 60, fontWeight: 800, color: COR_NOTA[r.nota] }}>
-                            {(r.nota * 100).toFixed(0)}%
-                          </TableCell>
-                          <TableCell sx={{ fontSize: '0.75rem', color: 'text.secondary', display: { xs: 'none', md: 'table-cell' } }}>
-                            {r.criterio_selecionado || '—'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <div className="overflow-x-auto rounded-lg border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <tbody className="divide-y divide-slate-100">
+                        {(respostasPorDimensao[cod] || []).map((r) => (
+                          <tr key={r.id} className="hover:bg-slate-50">
+                            <td className="py-3 px-3">
+                              <p className="font-semibold text-slate-800 text-sm">
+                                {r.indicador_nome}
+                              </p>
+                              {r.observacao && (
+                                <Tooltip content={r.observacao}>
+                                  <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-slate-500 italic max-w-sm truncate">
+                                    <FiEdit3 size={11} className="shrink-0" />
+                                    {r.observacao}
+                                  </span>
+                                </Tooltip>
+                              )}
+                            </td>
+                            <td className="py-3 px-3 w-48">
+                              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                <div
+                                  className="h-full rounded-full transition-all duration-300"
+                                  style={{
+                                    width: `${r.nota * 100}%`,
+                                    backgroundColor: COR_NOTA[r.nota] || info.cor,
+                                  }}
+                                />
+                              </div>
+                            </td>
+                            <td
+                              className="py-3 px-3 w-16 text-right font-extrabold tabular-nums"
+                              style={{ color: COR_NOTA[r.nota] }}
+                            >
+                              {(r.nota * 100).toFixed(0)}%
+                            </td>
+                            <td className="py-3 px-3 text-slate-500 hidden md:table-cell text-[11px]">
+                              {r.criterio_selecionado || '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
-              </Box>
+              </div>
             )
           ))}
         </CardContent>
       </Card>
 
-      {/* Observações gerais */}
+      {/* Observações Gerais */}
       {avaliacao.observacoes && (
-        <Card sx={{ mt: 2 }}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-bold text-slate-900">
+              Observações Gerais
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom>Observações Gerais</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>{avaliacao.observacoes}</Typography>
+            <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">
+              {avaliacao.observacoes}
+            </p>
           </CardContent>
         </Card>
       )}
-    </Box>
+    </div>
   );
 }
 

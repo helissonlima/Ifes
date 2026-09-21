@@ -1,19 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import {
-  Box, Typography, Button, ButtonGroup, CircularProgress,
-  Chip, Tooltip, IconButton,
-} from '@mui/material';
 import { FiNavigation, FiMap, FiMaximize2, FiCrosshair } from 'react-icons/fi';
 import { MdSatellite } from 'react-icons/md';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import Tooltip from '../ui/Tooltip';
+import Button from '../ui/Button';
 
-// Corrige os ícones padrão do Leaflet no Vite (URLs das imagens ficam quebradas
-// sem isso). Usa os arquivos locais do pacote (não o CDN unpkg) para o mapa
-// continuar funcionando offline com o cache do service worker.
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -34,10 +29,9 @@ const TILES = {
   },
 };
 
-const DEFAULT_CENTER = [-20.3155, -40.3128]; // Vitória/ES
-const DEFAULT_ZOOM   = 8;
+const DEFAULT_CENTER = [-20.3155, -40.3128];
+const DEFAULT_ZOOM = 8;
 
-// Componente interno: captura cliques no mapa para mover o marcador
 function ClickHandler({ onChange }) {
   useMapEvents({
     click(e) {
@@ -47,7 +41,6 @@ function ClickHandler({ onChange }) {
   return null;
 }
 
-// Componente interno: movimenta o mapa para coordenadas externas
 function MapMover({ lat, lng, shouldFly }) {
   const map = useMap();
   const prevRef = useRef(null);
@@ -63,16 +56,6 @@ function MapMover({ lat, lng, shouldFly }) {
   return null;
 }
 
-/**
- * MapPicker — componente reutilizável de mapa.
- *
- * Props:
- *   lat, lng          — coordenadas atuais (número ou string)
- *   onChange(lat,lng) — callback ao mover o marcador
- *   addressQuery      — string de endereço para geocodificação automática
- *   readOnly          — apenas visualização (sem marcador arrastável, sem clique)
- *   height            — altura do mapa (default: 320)
- */
 export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly = false, height = 320 }) {
   const [camada, setCamada] = useState('mapa');
   const [geocodando, setGeocodando] = useState(false);
@@ -85,10 +68,8 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
   const parsedLng = hasPos ? parseFloat(lng) : null;
 
   const center = hasPos ? [parsedLat, parsedLng] : DEFAULT_CENTER;
-  const zoom   = hasPos ? 15 : DEFAULT_ZOOM;
+  const zoom = hasPos ? 15 : DEFAULT_ZOOM;
 
-  // Throttle simples (≥1s entre chamadas) para respeitar a política de uso
-  // do Nominatim (serviço público gratuito, sem chave de API).
   const ultimaBuscaRef = useRef(0);
   const GEOCODAR_INTERVALO_MIN_MS = 1000;
 
@@ -107,7 +88,7 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
       const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
       if (!res.ok) {
         setErroGeo(res.status === 429
-          ? 'Muitas buscas em pouco tempo. Aguarde alguns segundos e tente novamente.'
+          ? 'Muitas buscas em pouco tempo. Aguarde alguns segundos.'
           : 'Falha ao buscar endereço. Tente novamente.');
         return;
       }
@@ -126,8 +107,6 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
     }
   }, [onChange]);
 
-  const handleGeocodar = () => geocodar(addressQuery);
-
   const handleMarkerDrag = useCallback((e) => {
     const { lat: mLat, lng: mLng } = e.target.getLatLng();
     setShouldFly(false);
@@ -141,68 +120,65 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
   }, [onChange, readOnly]);
 
   return (
-    <Box>
+    <div>
       {/* Barra de controles */}
       {!readOnly && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap items-center gap-2 mb-2">
           <Button
-            variant="outlined"
-            size="small"
-            startIcon={geocodando ? <CircularProgress size={14} /> : <FiNavigation size={14} />}
-            onClick={handleGeocodar}
+            variant="secondary"
+            size="sm"
+            icon={<FiNavigation size={13} />}
+            loading={geocodando}
             disabled={geocodando || !addressQuery?.trim()}
-            title={addressQuery ? `Localizar: "${addressQuery}"` : 'Preencha o município e UF primeiro'}
+            onClick={() => geocodar(addressQuery)}
           >
             {geocodando ? 'Localizando…' : 'Localizar pelo endereço'}
           </Button>
 
-          <ButtonGroup size="small" variant="outlined">
-            <Tooltip title="Mapa de ruas">
-              <Button
-                onClick={() => setCamada('mapa')}
-                variant={camada === 'mapa' ? 'contained' : 'outlined'}
-                startIcon={<FiMap size={13} />}
-              >
-                Mapa
-              </Button>
-            </Tooltip>
-            <Tooltip title="Imagem de satélite">
-              <Button
-                onClick={() => setCamada('satelite')}
-                variant={camada === 'satelite' ? 'contained' : 'outlined'}
-                startIcon={<MdSatellite size={15} />}
-              >
-                Satélite
-              </Button>
-            </Tooltip>
-          </ButtonGroup>
+          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+            <button
+              type="button"
+              onClick={() => setCamada('mapa')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                camada === 'mapa' ? 'bg-white text-caparao-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <FiMap size={13} />
+              Mapa
+            </button>
+            <button
+              type="button"
+              onClick={() => setCamada('satelite')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                camada === 'satelite' ? 'bg-white text-caparao-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <MdSatellite size={14} />
+              Satélite
+            </button>
+          </div>
 
           {hasPos && (
-            <Chip
-              icon={<FiCrosshair size={12} />}
-              label={`${parsedLat.toFixed(5)}, ${parsedLng.toFixed(5)}`}
-              size="small"
-              variant="outlined"
-              color="primary"
-              onDelete={() => { onChange(null, null); }}
-              deleteIcon={<span style={{ fontSize: 14, paddingRight: 4 }}>✕</span>}
-            />
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-caparao-200 bg-caparao-50 px-2.5 py-1 text-xs font-semibold text-caparao-800">
+              <FiCrosshair size={12} />
+              <span>{parsedLat.toFixed(5)}, {parsedLng.toFixed(5)}</span>
+              <button
+                type="button"
+                onClick={() => onChange(null, null)}
+                className="ml-1 text-slate-400 hover:text-slate-700"
+                aria-label="Limpar coordenadas"
+              >
+                ✕
+              </button>
+            </span>
           )}
-        </Box>
+        </div>
       )}
 
-      {/* Mapa */}
-      <Box
-        sx={{
-          height,
-          borderRadius: 2,
-          overflow: 'hidden',
-          border: '1px solid',
-          borderColor: 'divider',
-          position: 'relative',
-          cursor: readOnly ? 'default' : 'crosshair',
-          '& .leaflet-container': { height: '100%', width: '100%', borderRadius: 'inherit' },
-        }}
+      {/* Container do Mapa */}
+      <div
+        className="relative overflow-hidden rounded-xl border border-slate-200 shadow-xs"
+        style={{ height, cursor: readOnly ? 'default' : 'crosshair' }}
       >
         <MapContainer
           center={center}
@@ -230,53 +206,38 @@ export default function MapPicker({ lat, lng, onChange, addressQuery, readOnly =
           )}
         </MapContainer>
 
-        {/* Link para o Google Maps */}
         {hasPos && (
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 8,
-              right: 8,
-              zIndex: 1000,
-            }}
-          >
-            <Tooltip title="Abrir no Google Maps">
-              <IconButton
-                size="small"
-                component="a"
+          <div className="absolute bottom-3 right-3 z-1000">
+            <Tooltip content="Abrir no Google Maps">
+              <a
                 href={`https://www.google.com/maps?q=${parsedLat},${parsedLng}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Abrir localização no Google Maps"
-                sx={{
-                  bgcolor: 'white',
-                  boxShadow: 2,
-                  '&:hover': { bgcolor: '#f5f5f5' },
-                }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-700 shadow-md hover:bg-slate-50 transition-colors"
               >
                 <FiMaximize2 size={14} />
-              </IconButton>
+              </a>
             </Tooltip>
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
-      {/* Mensagens de ajuda e erro */}
       {!readOnly && !hasPos && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+        <p className="mt-1 text-xs text-slate-500">
           Clique no mapa para marcar a localização ou use "Localizar pelo endereço".
-        </Typography>
+        </p>
       )}
       {erroGeo && (
-        <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>
+        <p className="mt-1 text-xs text-red-600 font-medium">
           {erroGeo}
-        </Typography>
+        </p>
       )}
       {readOnly && hasPos && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+        <p className="mt-1 text-xs text-slate-500">
           Coordenadas: {parsedLat.toFixed(6)}, {parsedLng.toFixed(6)}
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   );
 }

@@ -1,20 +1,19 @@
 import {
-  Box, Typography, Card, CardContent, Grid, Stepper, Step, StepLabel, StepContent,
-  Paper, Chip, List, ListItem, ListItemIcon, ListItemText, Divider, Alert,
-  Table, TableBody, TableCell, TableHead, TableRow,
-} from '@mui/material';
-import {
   FiCalendar, FiUser, FiSearch, FiEdit3, FiMessageCircle, FiInfo, FiClock,
   FiCheckCircle, FiAlertTriangle,
 } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Alert from '../components/ui/Alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
 
 const ETAPAS = [
   {
     titulo: 'Preparação',
     cor: '#1565C0',
-    icon: <FiCalendar />,
+    icon: FiCalendar,
     tempo: '30 minutos (escritório)',
     itens: [
       'Agende a visita com o produtor com antecedência mínima de 3 dias.',
@@ -26,7 +25,7 @@ const ETAPAS = [
   {
     titulo: 'Entrevista Inicial',
     cor: '#2E7D32',
-    icon: <FiUser />,
+    icon: FiUser,
     tempo: '1-2 horas',
     itens: [
       'Preencha os dados da propriedade na etapa “Informações” da Nova Avaliação.',
@@ -37,7 +36,7 @@ const ETAPAS = [
   {
     titulo: 'Inspeção de Campo',
     cor: '#EF6C00',
-    icon: <FiSearch />,
+    icon: FiSearch,
     tempo: '2-3 horas',
     itens: [
       'Percorra toda a propriedade: áreas produtivas, nascentes, APPs, armazenamento, moradia.',
@@ -49,7 +48,7 @@ const ETAPAS = [
   {
     titulo: 'Pontuação',
     cor: '#6A1B9A',
-    icon: <FiEdit3 />,
+    icon: FiEdit3,
     tempo: '1 hora',
     itens: [
       'Para cada indicador, atribua nota de 0,00 a 1,00 conforme os critérios descritivos.',
@@ -61,7 +60,7 @@ const ETAPAS = [
   {
     titulo: 'Feedback',
     cor: '#00695C',
-    icon: <FiMessageCircle />,
+    icon: FiMessageCircle,
     tempo: '30-45 minutos',
     itens: [
       'Apresente os resultados ao produtor de forma didática usando a classificação por cores.',
@@ -92,167 +91,194 @@ const DICAS = [
 
 export default function Guia() {
   return (
-    <Box>
+    <div className="space-y-6">
       <PageHeaderCard
         title="Guia de Aplicação"
-        subtitle="Passo a passo para aplicar o ICSR em uma propriedade rural — adaptado da metodologia referência metodológica regional."
+        subtitle="Passo a passo para aplicar o ICSR em uma propriedade rural — adaptado da metodologia referência regional."
       />
 
       {/* Apresentação */}
-      <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', color: 'white' }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-            <MdOutlineEco size={42} color="rgba(255,255,255,0.9)" />
-            <Box>
-              <Typography variant="h6" fontWeight={800}>Como aplicar o ICSR em campo</Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', mt: 0.5 }}>
-                A avaliação completa leva entre <strong>4 e 6 horas</strong> e pode ser dividida em duas visitas.
-                Siga as cinco etapas abaixo para garantir uma avaliação consistente, transparente e útil
-                ao produtor.
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+      <div className="rounded-xl bg-gradient-to-br from-[#1B5E20] to-[#2E7D32] p-6 text-white shadow-xs border border-emerald-900/30">
+        <div className="flex gap-4 items-start">
+          <div className="p-2.5 rounded-xl bg-white/10 text-emerald-200 shrink-0">
+            <MdOutlineEco size={36} />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white tracking-tight">
+              Como aplicar o ICSR em campo
+            </h2>
+            <p className="mt-1.5 text-sm text-white/90 leading-relaxed">
+              A avaliação completa leva entre <strong className="text-white font-semibold">4 e 6 horas</strong> e pode ser dividida em duas visitas.
+              Siga as cinco etapas abaixo para garantir uma avaliação consistente, transparente e útil
+              ao produtor.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Etapas */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>Etapas da Aplicação</Typography>
-          <Stepper orientation="vertical" activeStep={-1} sx={{ '& .MuiStepConnector-line': { minHeight: 16 } }}>
-            {ETAPAS.map((e, i) => (
-              <Step key={e.titulo} expanded>
-                <StepLabel
-                  slots={{
-                    stepIcon: () => (
-                      <Box
-                        sx={{
-                          width: 32, height: 32, borderRadius: '50%',
-                          bgcolor: e.cor, color: '#fff',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontWeight: 800,
+      <Card>
+        <CardHeader>
+          <CardTitle>Etapas da Aplicação</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="relative pl-6 md:pl-8 space-y-8 before:absolute before:left-3 md:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
+            {ETAPAS.map((e, i) => {
+              const IconComp = e.icon;
+              return (
+                <div key={e.titulo} className="relative">
+                  {/* Marcador de etapa */}
+                  <div
+                    className="absolute -left-6 md:-left-8 top-0 w-6 h-6 md:w-8 md:h-8 rounded-full text-white font-bold text-xs md:text-sm flex items-center justify-center shadow-xs ring-4 ring-white"
+                    style={{ backgroundColor: e.cor }}
+                  >
+                    {i + 1}
+                  </div>
+
+                  {/* Conteúdo da etapa */}
+                  <div className="pl-3 md:pl-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <IconComp size={18} style={{ color: e.cor }} />
+                        <h4 className="text-sm md:text-base font-bold" style={{ color: e.cor }}>
+                          {e.titulo}
+                        </h4>
+                      </div>
+                      <Badge
+                        size="sm"
+                        className="font-bold flex items-center gap-1.5"
+                        style={{
+                          backgroundColor: `${e.cor}15`,
+                          color: e.cor,
+                          borderColor: `${e.cor}30`,
                         }}
                       >
-                        {i + 1}
-                      </Box>
-                    ),
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-                    <Typography fontWeight={700} color={e.cor}>{e.titulo}</Typography>
-                    <Chip
-                      icon={<FiClock size={12} />}
-                      label={e.tempo}
-                      size="small"
-                      sx={{ bgcolor: `${e.cor}22`, color: e.cor, fontWeight: 700 }}
-                    />
-                  </Box>
-                </StepLabel>
-                <StepContent>
-                  <List dense disablePadding>
-                    {e.itens.map((t) => (
-                      <ListItem key={t} disableGutters sx={{ alignItems: 'flex-start' }}>
-                        <ListItemIcon sx={{ minWidth: 26, mt: 0.5, color: e.cor }}>
-                          <FiCheckCircle size={14} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={t}
-                          slotProps={{ primary: { variant: 'body2' } }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
+                        <FiClock size={12} />
+                        {e.tempo}
+                      </Badge>
+                    </div>
+
+                    <ul className="space-y-1.5">
+                      {e.itens.map((item) => (
+                        <li key={item} className="flex items-start gap-2 text-xs md:text-sm text-slate-700">
+                          <FiCheckCircle
+                            size={14}
+                            className="mt-1 shrink-0"
+                            style={{ color: e.cor }}
+                          />
+                          <span className="leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 
-      <Grid container spacing={2} sx={{ mb: 2 }}>
+      {/* Grid: Tempo e Materiais */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Tempo total */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>Tempo Estimado</Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'primary.main' }}>
-                    <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Etapa</TableCell>
-                    <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Duração</TableCell>
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Tempo Estimado</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 flex-1">
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-[#143519] hover:bg-[#143519]">
+                    <TableHead className="text-white font-bold">Etapa</TableHead>
+                    <TableHead className="text-white font-bold">Duração</TableHead>
                   </TableRow>
-                </TableHead>
+                </TableHeader>
                 <TableBody>
-                  {TEMPO_TOTAL.map(([etapa, tempo], i) => (
-                    <TableRow key={etapa} sx={{ bgcolor: i === TEMPO_TOTAL.length - 1 ? 'primary.50' : 'inherit' }}>
-                      <TableCell sx={{ fontWeight: i === TEMPO_TOTAL.length - 1 ? 700 : 500 }}>{etapa}</TableCell>
-                      <TableCell sx={{ fontWeight: i === TEMPO_TOTAL.length - 1 ? 700 : 500 }}>{tempo}</TableCell>
-                    </TableRow>
-                  ))}
+                  {TEMPO_TOTAL.map(([etapa, tempo], i) => {
+                    const isTotal = i === TEMPO_TOTAL.length - 1;
+                    return (
+                      <TableRow
+                        key={etapa}
+                        className={isTotal ? 'bg-emerald-50/70 hover:bg-emerald-50' : 'hover:bg-slate-50/80'}
+                      >
+                        <TableCell className={isTotal ? 'font-bold text-emerald-950' : 'font-medium text-slate-800'}>
+                          {etapa}
+                        </TableCell>
+                        <TableCell className={isTotal ? 'font-bold text-emerald-950' : 'font-medium text-slate-700'}>
+                          {tempo}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </Grid>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Materiais */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>Materiais Necessários</Typography>
-              <List dense>
-                {[
-                  'Questionário padronizado (este sistema)',
-                  'Câmera fotográfica',
-                  'GPS ou aplicativo de georreferenciamento',
-                  'Tabela de médias regionais (produtividade, preços)',
-                  'Planilha impressa como backup',
-                  'Documentação do produtor: CAR, notas fiscais, certificados',
-                ].map((m) => (
-                  <ListItem key={m} disableGutters>
-                    <ListItemIcon sx={{ minWidth: 26, color: 'primary.main' }}>
-                      <FiCheckCircle size={14} />
-                    </ListItemIcon>
-                    <ListItemText primary={m} slotProps={{ primary: { variant: 'body2' } }} />
-                  </ListItem>
-                ))}
-              </List>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Materiais Necessários</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 flex-1 flex flex-col justify-between space-y-4">
+            <ul className="space-y-2">
+              {[
+                'Questionário padronizado (este sistema)',
+                'Câmera fotográfica',
+                'GPS ou aplicativo de georreferenciamento',
+                'Tabela de médias regionais (produtividade, preços)',
+                'Planilha impressa como backup',
+                'Documentação do produtor: CAR, notas fiscais, certificados',
+              ].map((m) => (
+                <li key={m} className="flex items-start gap-2.5 text-xs md:text-sm text-slate-700">
+                  <FiCheckCircle size={15} className="mt-0.5 text-[#1B4D24] shrink-0" />
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="pt-4 border-t border-slate-100 space-y-1">
+              <p className="text-xs font-bold text-slate-800">
                 Perfil do aplicador
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
+              </p>
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Técnico agrícola, engenheiro agrônomo ou assistente social com formação em desenvolvimento
                 rural. Treinamento mínimo de 8-16 horas no instrumento ICSR.
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Dicas */}
       <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <FiAlertTriangle size={18} color="#EF6C00" />
-            <Typography variant="h6" fontWeight={700}>Dicas Importantes</Typography>
-          </Box>
-          <Grid container spacing={1.5}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FiAlertTriangle className="text-amber-600" size={18} />
+            Dicas Importantes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {DICAS.map((d, i) => (
-              <Grid size={{ xs: 12, md: 6 }} key={i}>
-                <Paper variant="outlined" sx={{ p: 1.25, borderColor: '#FFE0B2', bgcolor: '#FFF8E1', display: 'flex', gap: 1 }}>
-                  <FiInfo color="#EF6C00" size={14} style={{ marginTop: 4, flexShrink: 0 }} />
-                  <Typography variant="body2">{d}</Typography>
-                </Paper>
-              </Grid>
+              <div
+                key={i}
+                className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/60 flex items-start gap-2.5 text-xs text-amber-950 leading-relaxed"
+              >
+                <FiInfo className="text-amber-600 shrink-0 mt-0.5" size={15} />
+                <span>{d}</span>
+              </div>
             ))}
-          </Grid>
-          <Alert severity="success" sx={{ mt: 2 }}>
+          </div>
+
+          <Alert variant="success" className="mt-2">
             A boa aplicação do ICSR depende de evidências objetivas. Sempre fotografe, anote e documente
-            as situações observadas no campo de <strong>observação</strong> de cada indicador.
+            as situações observadas no campo de <strong className="font-semibold">observação</strong> de cada indicador.
           </Alert>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }

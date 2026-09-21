@@ -1,4 +1,3 @@
-import { Box, Typography } from '@mui/material';
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 import { COR_CLASSIFICACAO, COR_CLASSIFICACAO_TEXTO } from '../../utils/coresICSR';
 
@@ -9,14 +8,17 @@ export default function IGSGauge({ igs, classificacao, size = 200 }) {
   const data = [{ value: pct }];
 
   return (
-    <Box sx={{ position: 'relative', width: size, height: size, mx: 'auto' }}>
+    <div className="relative mx-auto flex items-center justify-center" style={{ width: size, height: size }}>
       <ResponsiveContainer width={size} height={size}>
         <RadialBarChart
-          cx="50%" cy="50%"
-          innerRadius="60%" outerRadius="90%"
+          cx="50%"
+          cy="50%"
+          innerRadius="60%"
+          outerRadius="90%"
           barSize={18}
           data={data}
-          startAngle={225} endAngle={-45}
+          startAngle={225}
+          endAngle={-45}
         >
           <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
           <RadialBar
@@ -28,40 +30,17 @@ export default function IGSGauge({ igs, classificacao, size = 200 }) {
           />
         </RadialBarChart>
       </ResponsiveContainer>
-      <Box
-        sx={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 800,
-            lineHeight: 1,
-            color: corTexto,
-            letterSpacing: '-0.03em',
-            fontVariantNumeric: 'tabular-nums',
-          }}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center select-none pointer-events-none">
+        <span
+          className="block text-3xl sm:text-4xl font-black tracking-tight tabular-nums leading-none"
+          style={{ color: corTexto }}
         >
           {pct}%
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 700,
-            color: '#64748B',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            fontSize: '0.68rem',
-            mt: 0.5,
-            display: 'block',
-          }}
-        >
+        </span>
+        <span className="mt-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
           {classificacao || 'N/D'}
-        </Typography>
-      </Box>
-    </Box>
+        </span>
+      </div>
+    </div>
   );
 }

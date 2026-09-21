@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Grid, Card, CardContent, Typography, Box, Button,
-  Divider, Alert, LinearProgress, Tooltip, Skeleton, Chip,
-} from '@mui/material';
 import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiTrendingUp, FiWifiOff } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
@@ -17,6 +13,13 @@ import DimensaoChart from '../components/Dashboard/DimensaoChart';
 import IGSBadge from '../components/Common/IGSBadge';
 import PageHeaderCard from '../components/Common/PageHeaderCard';
 import CachedDataBanner from '../components/Common/CachedDataBanner';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Badge from '../components/ui/Badge';
+import Progress from '../components/ui/Progress';
+import Skeleton from '../components/ui/Skeleton';
+import Tooltip from '../components/ui/Tooltip';
 
 // Nome do campo de cada dimensão na resposta de GET /avaliacoes/estatisticas
 // (médias agregadas — convenção própria dessa API).
@@ -60,91 +63,98 @@ export default function Dashboard() {
 
   useEffect(() => { carregarDados(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading || (!DIMENSOES && !erroMetodologia)) return (
-    <Box>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box><Skeleton width={160} height={32} /><Skeleton width={280} height={20} sx={{ mt: 0.5 }} /></Box>
-        <Skeleton width={120} height={38} sx={{ borderRadius: 2 }} />
-      </Box>
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        {[0,1,2,3].map((i) => (
-          <Grid size={{ xs: 6, md: 3 }} key={i}>
-            <Card><CardContent sx={{ p: 2 }}>
-              <Skeleton width="60%" height={18} />
-              <Skeleton width="40%" height={40} sx={{ mt: 0.5 }} />
-              <Skeleton width="80%" height={16} sx={{ mt: 0.5 }} />
-            </CardContent></Card>
-          </Grid>
-        ))}
-      </Grid>
-      <Grid container spacing={2}>
-        {[0,1,2].map((i) => (
-          <Grid size={{ xs: 12, md: i === 0 ? 5 : i === 1 ? 4 : 3 }} key={i}>
-            <Card sx={{ height: 280 }}><CardContent>
-              <Skeleton width="50%" height={24} />
-              <Skeleton variant="rectangular" height={220} sx={{ mt: 1, borderRadius: 1 }} />
-            </CardContent></Card>
-          </Grid>
-        ))}
-        <Grid size={12}>
-          <Card><CardContent>
-            <Skeleton width="30%" height={24} sx={{ mb: 1 }} />
-            {[0,1,2].map((i) => <Skeleton key={i} height={48} sx={{ mb: 0.5 }} />)}
-          </CardContent></Card>
-        </Grid>
-      </Grid>
-    </Box>
-  );
+  if (loading || (!DIMENSOES && !erroMetodologia)) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-44" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-10 w-36 rounded-lg" />
+        </div>
 
-  // Sem a metodologia (pesos/escala) não dá pra montar o painel — em vez de
-  // ficar preso no skeleton pra sempre (ex.: 1º acesso offline, sem cache
-  // ainda salvo), mostra um estado claro com opção de tentar de novo.
-  if (!DIMENSOES) return (
-    <Box>
-      <PageHeaderCard
-        title="Visão Geral"
-        subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · referência metodológica regional"
-      />
-      <Card>
-        <CardContent>
-          <EmptyState
-            icon={<FiWifiOff size={40} />}
-            title="Não foi possível carregar o painel"
-            description={friendlyError(erroMetodologia)}
-            actionLabel="Tentar novamente"
-            onAction={() => { recarregarMetodologia(); carregarDados(); }}
-          />
-        </CardContent>
-      </Card>
-    </Box>
-  );
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Card key={i} className="p-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="mt-3 h-8 w-16" />
+              <Skeleton className="mt-2 h-3 w-32" />
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+          <div className="md:col-span-5">
+            <Card className="h-72 p-4">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="mt-4 h-48 w-full rounded-lg" />
+            </Card>
+          </div>
+          <div className="md:col-span-4">
+            <Card className="h-72 p-4">
+              <Skeleton className="h-5 w-36" />
+              <Skeleton className="mt-4 h-48 w-full rounded-lg" />
+            </Card>
+          </div>
+          <div className="md:col-span-3">
+            <Card className="h-72 p-4">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="mt-4 h-48 w-full rounded-lg" />
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Sem a metodologia (pesos/escala) não dá pra montar o painel
+  if (!DIMENSOES) {
+    return (
+      <div>
+        <PageHeaderCard
+          title="Visão Geral"
+          subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · referência metodológica regional"
+        />
+        <Card>
+          <CardContent>
+            <EmptyState
+              icon={<FiWifiOff size={40} />}
+              title="Não foi possível carregar o painel"
+              description={friendlyError(erroMetodologia)}
+              actionLabel="Tentar novamente"
+              onAction={() => { recarregarMetodologia(); carregarDados(); }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const classificacaoMedia = getClassificacao(stats?.media_igs, metodologia?.escala);
   const dimensaoPrioritaria = getDimensaoPrioritaria(stats, DIMENSOES);
 
   return (
-    <Box>
+    <div className="space-y-6">
       <PageHeaderCard
         title="Visão Geral"
         subtitle="ICSR — Índice Consolidado de Sustentabilidade Rural · referência metodológica regional"
-        actions={(
+        actions={
           <Button
-            variant="contained"
-            startIcon={<FiPlus />}
+            variant="primary"
+            icon={<FiPlus />}
             onClick={() => navigate('/avaliacao/nova')}
-            sx={{ borderRadius: 2 }}
           >
             Nova Avaliação
           </Button>
-        )}
+        }
       />
 
       {erro && (
         <Alert
-          severity="error"
-          sx={{ mb: 2 }}
+          variant="error"
           action={
-            <Button color="inherit" size="small" onClick={carregarDados}>
+            <Button variant="secondary" size="sm" onClick={carregarDados}>
               Tentar novamente
             </Button>
           }
@@ -157,174 +167,107 @@ export default function Dashboard() {
         <CachedDataBanner mensagem="Painel carregado do cache local. Use este resumo como referência rápida e atualize novamente quando a conexão estabilizar." />
       )}
 
-      <Card
-        sx={{
-          mb: 3,
-          bgcolor: '#FFFFFF',
-          border: '1px solid rgba(15, 23, 42, 0.08)',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-        }}
-      >
-        <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-          <Grid container spacing={3} alignItems="center">
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#1B4D24',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    fontSize: '0.72rem',
-                  }}
-                >
-                  Diagnóstico Operacional do Território
-                </Typography>
-              </Box>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 800,
-                  color: '#0F172A',
-                  letterSpacing: '-0.02em',
-                  mb: 1.25,
-                }}
-              >
+      {/* Banner Diagnóstico Operacional */}
+      <Card className="border-slate-200/80 shadow-xs">
+        <CardContent className="p-5 sm:p-6">
+          <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-12">
+            <div className="md:col-span-8">
+              <span className="block text-xs font-bold uppercase tracking-wider text-caparao-700">
+                Diagnóstico Operacional do Território
+              </span>
+              <h2 className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-slate-900">
                 {classificacaoMedia ? `ICSR médio consolidado em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#475569',
-                  lineHeight: 1.6,
-                  mb: 2.5,
-                  fontSize: '0.92rem',
-                }}
-              >
+              </h2>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                 {dimensaoPrioritaria
                   ? `A dimensão com menor desempenho relativo é ${dimensaoPrioritaria.label}. Recomenda-se priorizar as ações de assistência técnica nos indicadores dessa dimensão nas próximas visitas de campo.`
                   : 'Cadastre e conclua avaliações de propriedades rurais para transformar este painel em uma leitura estratégica do território.'}
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {classificacaoMedia && <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />}
-                {dimensaoPrioritaria && (
-                  <Chip
-                    icon={<FiTarget size={13} />}
-                    label={`Foco prioritário: ${dimensaoPrioritaria.label}`}
-                    variant="outlined"
-                    sx={{
-                      borderColor: 'rgba(15, 23, 42, 0.18)',
-                      fontWeight: 600,
-                      color: '#334155',
-                      fontSize: '0.78rem',
-                    }}
-                  />
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {classificacaoMedia && (
+                  <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />
                 )}
-                <Chip
-                  icon={<FiTrendingUp size={13} />}
-                  label={`${stats?.avaliacoes_concluidas ?? 0} avaliações concluídas`}
-                  variant="outlined"
-                  sx={{
-                    borderColor: 'rgba(27, 77, 36, 0.25)',
-                    bgcolor: 'rgba(27, 77, 36, 0.04)',
-                    fontWeight: 600,
-                    color: '#1B4D24',
-                    fontSize: '0.78rem',
-                  }}
-                />
-              </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Box
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  bgcolor: 'rgba(27, 77, 36, 0.03)',
-                  border: '1px solid rgba(27, 77, 36, 0.08)',
-                  textAlign: 'center',
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#64748B',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    fontSize: '0.7rem',
-                    display: 'block',
-                    mb: 1,
-                  }}
-                >
+                {dimensaoPrioritaria && (
+                  <Badge variant="outline" className="gap-1 text-slate-700">
+                    <FiTarget size={13} />
+                    Foco prioritário: {dimensaoPrioritaria.label}
+                  </Badge>
+                )}
+                <Badge variant="primary" className="gap-1">
+                  <FiTrendingUp size={13} />
+                  {stats?.avaliacoes_concluidas ?? 0} avaliações concluídas
+                </Badge>
+              </div>
+            </div>
+
+            <div className="md:col-span-4">
+              <div className="rounded-xl border border-caparao-100 bg-caparao-50/40 p-4 text-center">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Índice Médio Consolidado
-                </Typography>
+                </span>
                 <IGSGauge
                   igs={stats?.media_igs ?? 0}
                   classificacao={classificacaoMedia}
                   size={160}
                 />
-              </Box>
-            </Grid>
-          </Grid>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {/* Cards de estatísticas */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <StatCard
-            title="Propriedades"
-            value={stats?.total_propriedades ?? '—'}
-            subtitle="cadastradas no sistema"
-            icon={<FiMap size={18} />}
-            color="primary.main"
-          />
-        </Grid>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <StatCard
-            title="Avaliações"
-            value={stats?.total_avaliacoes ?? '—'}
-            subtitle={`${stats?.avaliacoes_concluidas ?? 0} concluídas em campo`}
-            icon={<FiClipboard size={18} />}
-            color="info.main"
-          />
-        </Grid>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <StatCard
-            title="ICSR Médio"
-            value={stats?.media_igs ? `${(stats.media_igs * 100).toFixed(1)}%` : '—'}
-            subtitle="desempenho territorial"
-            icon={<MdOutlineEco size={18} />}
-            color="success.main"
-          />
-        </Grid>
-        <Grid size={{ xs: 6, md: 3 }}>
-          <StatCard
-            title="Indicadores"
-            value="32"
-            subtitle="em 4 dimensões científicas"
-            icon={<FiBarChart2 size={18} />}
-            color="secondary.main"
-          />
-        </Grid>
-      </Grid>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <StatCard
+          title="Propriedades"
+          value={stats?.total_propriedades ?? '—'}
+          subtitle="cadastradas no sistema"
+          icon={<FiMap size={18} />}
+        />
+        <StatCard
+          title="Avaliações"
+          value={stats?.total_avaliacoes ?? '—'}
+          subtitle={`${stats?.avaliacoes_concluidas ?? 0} concluídas em campo`}
+          icon={<FiClipboard size={18} />}
+        />
+        <StatCard
+          title="ICSR Médio"
+          value={stats?.media_igs ? `${(stats.media_igs * 100).toFixed(1)}%` : '—'}
+          subtitle="desempenho territorial"
+          icon={<MdOutlineEco size={18} />}
+        />
+        <StatCard
+          title="Indicadores"
+          value="32"
+          subtitle="em 4 dimensões científicas"
+          icon={<FiBarChart2 size={18} />}
+        />
+      </div>
 
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <Card sx={{ height: '100%' }}>
+      {/* Seção Principal de Conteúdo */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Avaliações Recentes */}
+        <div className="lg:col-span-6">
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-base font-bold text-slate-900">
+                  Avaliações Recentes
+                </CardTitle>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Retome rapidamente a última conversa registrada em campo.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<FiArrowRight />}
+                onClick={() => navigate('/historico')}
+              >
+                Ver todas
+              </Button>
+            </CardHeader>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>Avaliações Recentes</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Use este bloco para retomar rapidamente a última conversa registrada em campo.
-                  </Typography>
-                </Box>
-                <Button size="small" endIcon={<FiArrowRight />} onClick={() => navigate('/historico')}>
-                  Ver todas
-                </Button>
-              </Box>
               {recentes.length === 0 ? (
                 <EmptyState
                   icon={<FiClipboard size={28} />}
@@ -333,91 +276,91 @@ export default function Dashboard() {
                   small
                 />
               ) : (
-                recentes.map((av, i) => (
-                  <Box key={av.id}>
-                    {i > 0 && <Divider sx={{ my: 1 }} />}
-                    <Box
-                      sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer', py: 1.25, borderRadius: 1, px: 1, '&:hover': { bgcolor: 'action.hover' } }}
+                <div className="divide-y divide-slate-100">
+                  {recentes.map((av) => (
+                    <div
+                      key={av.id}
                       onClick={() => navigate(`/avaliacao/${av.id}`)}
+                      className="flex items-center justify-between gap-4 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
                     >
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
-                        <Typography variant="caption" color="text.secondary">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-slate-800 truncate">
+                          {av.propriedade_nome}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">
                           {av.municipio} · {formatarData(av.data_avaliacao)} · {av.tecnico_responsavel || 'Técnico'}
-                        </Typography>
-                      </Box>
+                        </p>
+                      </div>
                       <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
-                    </Box>
-                  </Box>
-                ))
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-          <Card sx={{ height: '100%', bgcolor: '#FFFFFF' }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1rem', mb: 2 }}>
+        {/* Desempenho por Dimensão */}
+        <div className="lg:col-span-3">
+          <Card className="h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-bold text-slate-900">
                 Desempenho por Dimensão
-              </Typography>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-1">
               {DIMENSOES.map((d) => (
-                <Box key={d.key} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.6 }}>
-                    <Typography variant="caption" fontWeight={700} sx={{ color: '#334155' }}>
-                      {d.label}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', fontVariantNumeric: 'tabular-nums' }}>
-                      {stats?.[d.key] ? `${(stats[d.key] * 100).toFixed(1)}%` : '—'} <Box component="span" sx={{ color: '#94A3B8' }}>(peso {d.peso})</Box>
-                    </Typography>
-                  </Box>
-                  <Tooltip title={`${d.label}: peso ${d.peso} no ICSR consolidado`}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={stats?.[d.key] ? Math.min(stats[d.key] * 100, 100) : 0}
-                      sx={{
-                        height: 7,
-                        borderRadius: 3.5,
-                        bgcolor: 'rgba(15, 23, 42, 0.06)',
-                        '& .MuiLinearProgress-bar': { bgcolor: d.cor, borderRadius: 3.5 },
-                      }}
-                    />
+                <div key={d.key}>
+                  <div className="flex justify-between items-center text-xs mb-1">
+                    <span className="font-semibold text-slate-700">{d.label}</span>
+                    <span className="text-slate-500 tabular-nums">
+                      {stats?.[d.key] ? `${(stats[d.key] * 100).toFixed(1)}%` : '—'}{' '}
+                      <span className="text-slate-400">({d.peso})</span>
+                    </span>
+                  </div>
+                  <Tooltip content={`${d.label}: peso ${d.peso} no ICSR consolidado`}>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${stats?.[d.key] ? Math.min(stats[d.key] * 100, 100) : 0}%`,
+                          backgroundColor: d.cor,
+                        }}
+                      />
+                    </div>
                   </Tooltip>
-                </Box>
+                </div>
               ))}
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-          <Card sx={{ height: '100%', bgcolor: '#FFFFFF' }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1rem', mb: 2 }}>
+        {/* Distribuição das Avaliações */}
+        <div className="lg:col-span-3">
+          <Card className="h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-bold text-slate-900">
                 Distribuição das Avaliações
-              </Typography>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-1">
               {stats?.distribuicao_classificacao?.length > 0 ? (
-                stats.distribuicao_classificacao.map((item) => (
-                  <Box
-                    key={item.classificacao}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      py: 1,
-                      borderBottom: '1px solid rgba(15, 23, 42, 0.05)',
-                      '&:last-child': { borderBottom: 'none' },
-                    }}
-                  >
-                    <IGSBadge classificacao={item.classificacao} size="small" />
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      sx={{ color: '#0F172A', fontVariantNumeric: 'tabular-nums' }}
+                <div className="divide-y divide-slate-100">
+                  {stats.distribuicao_classificacao.map((item) => (
+                    <div
+                      key={item.classificacao}
+                      className="flex items-center justify-between py-2.5"
                     >
-                      {item.quantidade} <Box component="span" sx={{ fontWeight: 400, color: '#64748B', fontSize: '0.78rem' }}>propriedades</Box>
-                    </Typography>
-                  </Box>
-                ))
+                      <IGSBadge classificacao={item.classificacao} size="small" />
+                      <span className="text-sm font-bold text-slate-800 tabular-nums">
+                        {item.quantidade}{' '}
+                        <span className="font-normal text-xs text-slate-500">
+                          {item.quantidade === 1 ? 'propriedade' : 'propriedades'}
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <EmptyState
                   icon={<MdOutlineEco size={32} />}
@@ -428,14 +371,17 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>
+        {/* Perfil de Sustentabilidade Geral */}
+        <div className="lg:col-span-12">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-slate-900">
                 Perfil de Sustentabilidade
-              </Typography>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <DimensaoChart
                 economica={stats?.media_economica}
                 ambiental={stats?.media_ambiental}
@@ -444,9 +390,9 @@ export default function Dashboard() {
               />
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 

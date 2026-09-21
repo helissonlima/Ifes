@@ -1,9 +1,9 @@
-import { AppBar, Toolbar, IconButton, Typography, Box, Avatar, Button, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { FiMenu, FiLogOut, FiUploadCloud } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
 import { useRascunhoPendente } from '../../hooks/useRascunhoPendente';
+import Tooltip from '../ui/Tooltip';
 
 export default function Navbar({ onMenuClick, isMobile }) {
   const { user, logout, isOnline } = useApp();
@@ -11,217 +11,104 @@ export default function Navbar({ onMenuClick, isMobile }) {
   const rascunhoPendente = useRascunhoPendente();
 
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-        bgcolor: '#122A16',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-      }}
-    >
-      <Toolbar sx={{ gap: 1, minHeight: { xs: 58, sm: 62 }, px: { xs: 2, sm: 3 } }}>
-        {!isMobile && (
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={onMenuClick}
-            size="medium"
-            aria-label="Alternar navegação lateral"
-            sx={{
-              color: 'rgba(255, 255, 255, 0.85)',
-              '&:hover': { color: '#FFFFFF', bgcolor: 'rgba(255, 255, 255, 0.08)' },
-            }}
-          >
-            <FiMenu size={20} />
-          </IconButton>
-        )}
-
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.2,
-            flexGrow: 1,
-            cursor: 'pointer',
-          }}
-          onClick={() => navigate('/')}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 32,
-              height: 32,
-              borderRadius: 1.5,
-              bgcolor: 'rgba(76, 175, 80, 0.16)',
-              color: '#81C784',
-            }}
-          >
-            <MdOutlineEco size={20} />
-          </Box>
-          <Box>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 800,
-                color: '#FFFFFF',
-                letterSpacing: '-0.02em',
-                lineHeight: 1.15,
-                fontSize: { xs: '1rem', sm: '1.05rem' },
-              }}
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#122A16] text-white border-b border-white/10 shadow-xs">
+      <div className="flex h-15 items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={onMenuClick}
+              aria-label="Alternar navegação lateral"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white/85 hover:bg-white/10 hover:text-white transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              SustentaCafé
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'rgba(255, 255, 255, 0.65)',
-                display: { xs: 'none', sm: 'block' },
-                fontSize: '0.68rem',
-                letterSpacing: '0.01em',
-                lineHeight: 1,
-              }}
-            >
-              Sistema de Avaliação ICSR · IFES
-            </Typography>
-          </Box>
-        </Box>
+              <FiMenu size={20} />
+            </button>
+          )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+          <div
+            className="flex items-center gap-2.5 cursor-pointer select-none"
+            onClick={() => navigate('/')}
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+              <MdOutlineEco size={20} />
+            </div>
+            <div>
+              <span className="block text-base font-extrabold tracking-tight text-white leading-tight">
+                SustentaCafé
+              </span>
+              <span className="hidden sm:block text-[10px] text-white/60 tracking-wider leading-none">
+                Sistema de Avaliação ICSR · IFES
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3">
           {rascunhoPendente && (
-            <Tooltip title="Você possui uma avaliação em rascunho com dados pendentes de sincronização. Toque para retomar.">
-              <Button
+            <Tooltip content="Você possui uma avaliação em rascunho com dados pendentes de sincronização. Toque para retomar.">
+              <button
+                type="button"
                 onClick={() => navigate('/avaliacao/nova')}
                 aria-label="1 avaliação pendente de sincronização — clique para continuar"
-                size="small"
-                startIcon={<FiUploadCloud size={14} />}
-                variant="outlined"
-                sx={{
-                  minWidth: 0,
-                  color: '#FEF08A',
-                  borderColor: 'rgba(254, 240, 138, 0.35)',
-                  bgcolor: 'rgba(254, 240, 138, 0.08)',
-                  px: { xs: 1, sm: 1.25 },
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  '&:hover': {
-                    bgcolor: 'rgba(254, 240, 138, 0.16)',
-                    borderColor: 'rgba(254, 240, 138, 0.6)',
-                  },
-                }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-200 hover:bg-amber-400/20 transition-colors"
               >
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-                  1 pendente
-                </Box>
-              </Button>
+                <FiUploadCloud size={14} />
+                <span className="hidden sm:inline">1 pendente</span>
+              </button>
             </Tooltip>
           )}
 
           {/* Indicador de Conexão */}
-          <Box
-            sx={{
-              display: { xs: 'none', sm: 'flex' },
-              alignItems: 'center',
-              gap: 0.8,
-              px: 1.2,
-              py: 0.4,
-              borderRadius: 999,
-              bgcolor: isOnline ? 'rgba(46, 125, 50, 0.2)' : 'rgba(234, 88, 12, 0.2)',
-              border: `1px solid ${isOnline ? 'rgba(74, 222, 128, 0.25)' : 'rgba(251, 146, 60, 0.3)'}`,
-            }}
+          <div
+            className={`hidden sm:flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+              isOnline
+                ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
+                : 'border-amber-500/30 bg-amber-500/15 text-amber-300'
+            }`}
           >
-            <Box
-              sx={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                bgcolor: isOnline ? '#4ADE80' : '#FB923C',
-              }}
+            <span
+              className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}
             />
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 600,
-                color: isOnline ? '#DCFCE7' : '#FFEDD5',
-                fontSize: '0.72rem',
-                letterSpacing: '0.01em',
-              }}
-            >
+            <span className="text-[11px] font-semibold">
               {isOnline ? 'Online' : 'Sem rede'}
-            </Typography>
-          </Box>
+            </span>
+          </div>
 
           {/* Usuário logado */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar
-              src={user?.foto_url || ''}
-              alt={user?.nome || 'Usuário'}
-              sx={{
-                width: 32,
-                height: 32,
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                bgcolor: 'rgba(255, 255, 255, 0.12)',
-                color: '#FFFFFF',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              {user?.nome?.[0]?.toUpperCase() || 'U'}
-            </Avatar>
-            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                  color: 'rgba(255, 255, 255, 0.95)',
-                  lineHeight: 1.1,
-                  fontSize: '0.82rem',
-                }}
-              >
+          <div className="flex items-center gap-2">
+            {user?.foto_url ? (
+              <img
+                src={user.foto_url}
+                alt={user.nome || 'Usuário'}
+                className="h-8 w-8 rounded-full border border-white/20 object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-bold text-white">
+                {user?.nome?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
+            <div className="hidden md:block text-left">
+              <p className="text-xs font-semibold text-white/95 leading-tight">
                 {user?.nome || 'Técnico'}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  lineHeight: 1,
-                  fontSize: '0.68rem',
-                  display: 'block',
-                }}
-              >
+              </p>
+              <p className="text-[10px] text-white/60 leading-tight">
                 {user?.role === 'admin' ? 'Administrador' : 'Extensão Rural'}
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
 
           {/* Botão Sair */}
-          <Button
+          <button
+            type="button"
             onClick={logout}
-            color="inherit"
-            size="small"
-            startIcon={<FiLogOut size={13} />}
-            sx={{
-              minWidth: 0,
-              px: { xs: 1, sm: 1.25 },
-              py: 0.5,
-              fontSize: '0.78rem',
-              color: 'rgba(255, 255, 255, 0.85)',
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-              '&:hover': {
-                bgcolor: 'rgba(255, 255, 255, 0.08)',
-                borderColor: 'rgba(255, 255, 255, 0.4)',
-                color: '#FFFFFF',
-              },
-            }}
-            variant="outlined"
+            aria-label="Sair da conta"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-2.5 py-1 text-xs font-medium text-white/85 hover:bg-white/10 hover:text-white transition-colors"
           >
-            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-              Sair
-            </Box>
-          </Button>
-        </Box>
-      </Toolbar>
-    </AppBar>
+            <FiLogOut size={13} />
+            <span className="hidden sm:inline">Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
   );
 }

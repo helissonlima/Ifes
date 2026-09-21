@@ -1,13 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, Grid, TextField, InputAdornment,
-  Select, MenuItem, FormControl, InputLabel, Button, CircularProgress,
-  Alert, Chip, IconButton, Divider, useMediaQuery, useTheme, LinearProgress, Skeleton,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination,
-  Checkbox, Tooltip,
-} from '@mui/material';
-import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus, FiWifiOff, FiGitPullRequest, FiX } from 'react-icons/fi';
+import { FiSearch, FiEye, FiTrash2, FiFilter, FiPlus, FiWifiOff, FiGitPullRequest, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -19,22 +12,25 @@ import PageHeaderCard from '../components/Common/PageHeaderCard';
 import ConfirmDialog from '../components/Common/ConfirmDialog';
 import CachedDataBanner from '../components/Common/CachedDataBanner';
 import ComparativoAvaliacoesDialog from '../components/Evaluation/ComparativoAvaliacoesDialog';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { Card, CardContent } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Badge from '../components/ui/Badge';
+import Skeleton from '../components/ui/Skeleton';
+import Tooltip from '../components/ui/Tooltip';
+import { cn } from '../utils/cn';
 
 const COR_DIMS = {
-  economico: '#2196F3', ambiental: '#4CAF50', social: '#FF9800', gestao: '#9C27B0',
+  economico: '#0284C7', ambiental: '#16A34A', social: '#D97706', gestao: '#7C3AED',
 };
 
-// Paginado no servidor (M10.5) — antes buscava sempre limit:100 e truncava
-// silenciosamente qualquer avaliação além da centésima, sem forma de ver o
-// resto. Os filtros de técnico/localização/busca continuam client-side,
-// dentro da página carregada (ver PLANO_MELHORIAS.md M10.5).
 const ITENS_POR_PAGINA = 20;
 
 export default function Historico() {
   const navigate = useNavigate();
   const { notify } = useApp();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [total, setTotal] = useState(0);
@@ -47,17 +43,17 @@ export default function Historico() {
   const [filtroLocalizacao, setFiltroLocalizacao] = useState('');
   const [search, setSearch] = useState('');
   const [excluindo, setExcluindo] = useState(null);
-  const [confirmExcluir, setConfirmExcluir] = useState(null); // { id, nome } | null
+  const [confirmExcluir, setConfirmExcluir] = useState(null);
 
-  // Comparativo entre 2 avaliações (M10.1)
+  // Comparativo entre 2 avaliações
   const [modoComparar, setModoComparar] = useState(false);
-  const [selecionadas, setSelecionadas] = useState([]); // até 2: [{ id, nome }]
+  const [selecionadas, setSelecionadas] = useState([]);
   const [comparativoAberto, setComparativoAberto] = useState(false);
 
   const alternarSelecao = (av) => {
     setSelecionadas((atual) => {
       if (atual.some((s) => s.id === av.id)) return atual.filter((s) => s.id !== av.id);
-      if (atual.length >= 2) return atual; // já tem 2 — ignora até desmarcar uma
+      if (atual.length >= 2) return atual;
       return [...atual, { id: av.id, nome: av.propriedade_nome }];
     });
   };
@@ -67,8 +63,6 @@ export default function Historico() {
     setSelecionadas([]);
   };
 
-  // Muda o filtro de status (server-side): volta pra 1ª página, senão a
-  // página atual pode simplesmente não existir mais no resultado filtrado.
   const mudarFiltroStatus = (valor) => {
     setFiltroStatus(valor);
     setPagina(1);
@@ -90,26 +84,22 @@ export default function Historico() {
   useEffect(() => { carregar(); }, [carregar]);
 
   const filtradas = avaliacoes.filter((a) => {
-    // Filtro de status
     if (filtroStatus && a.status !== filtroStatus) return false;
-    // Filtro de técnico
     if (filtroTecnico && a.tecnico_responsavel !== filtroTecnico) return false;
-    // Filtro de localização (município/estado)
     if (filtroLocalizacao) {
       const [munic, estado] = filtroLocalizacao.split('/');
       if (a.municipio !== munic || a.estado !== estado) return false;
     }
-    // Busca genérica
     if (!search) return true;
+    const q = search.toLowerCase();
     return (
-      a.propriedade_nome?.toLowerCase().includes(search.toLowerCase()) ||
-      a.municipio?.toLowerCase().includes(search.toLowerCase()) ||
-      a.proprietario?.toLowerCase().includes(search.toLowerCase()) ||
-      a.tecnico_responsavel?.toLowerCase().includes(search.toLowerCase())
+      a.propriedade_nome?.toLowerCase().includes(q) ||
+      a.municipio?.toLowerCase().includes(q) ||
+      a.proprietario?.toLowerCase().includes(q) ||
+      a.tecnico_responsavel?.toLowerCase().includes(q)
     );
   });
 
-  // Extrai listas únicas para filtros
   const tecnicos = [...new Set(avaliacoes.map((a) => a.tecnico_responsavel).filter(Boolean))].sort();
   const localizacoes = [...new Set(avaliacoes.map((a) => `${a.municipio}/${a.estado}`).filter(Boolean))].sort();
 
@@ -127,43 +117,52 @@ export default function Historico() {
     finally { setExcluindo(null); }
   };
 
+  const totalPaginas = Math.ceil(total / ITENS_POR_PAGINA);
+
   return (
-    <Box>
+    <div className="space-y-6">
       <PageHeaderCard
         title="Histórico de Avaliações"
         subtitle={`${total} avaliação(ões) registrada(s)`}
-        actions={(
-          <Box sx={{ display: 'flex', gap: 1 }}>
+        actions={
+          <div className="flex items-center gap-2">
             <Button
-              variant={modoComparar ? 'contained' : 'outlined'}
-              color={modoComparar ? 'secondary' : 'primary'}
-              startIcon={modoComparar ? <FiX /> : <FiGitPullRequest />}
+              variant={modoComparar ? 'secondary' : 'outline'}
+              icon={modoComparar ? <FiX /> : <FiGitPullRequest />}
               onClick={() => (modoComparar ? sairDoModoComparar() : setModoComparar(true))}
             >
               {modoComparar ? 'Cancelar comparação' : 'Comparar'}
             </Button>
-            <Button variant="contained" startIcon={<FiPlus />} onClick={() => navigate('/avaliacao/nova')}>
+            <Button
+              variant="primary"
+              icon={<FiPlus />}
+              onClick={() => navigate('/avaliacao/nova')}
+            >
               Nova Avaliação
             </Button>
-          </Box>
-        )}
+          </div>
+        }
       />
 
-      {erro && avaliacoes.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{erro}</Alert>}
+      {erro && avaliacoes.length > 0 && <Alert variant="error">{erro}</Alert>}
       {dadosEmCache && !erro && (
         <CachedDataBanner mensagem="Histórico exibido a partir do cache local. Os registros podem não refletir alterações mais recentes do servidor." />
       )}
 
       {modoComparar && (
         <Alert
-          severity="info"
-          variant="outlined"
-          sx={{ mb: 2 }}
-          action={selecionadas.length === 2 && (
-            <Button color="inherit" size="small" variant="outlined" onClick={() => setComparativoAberto(true)}>
-              Comparar selecionadas
-            </Button>
-          )}
+          variant="info"
+          action={
+            selecionadas.length === 2 && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setComparativoAberto(true)}
+              >
+                Comparar selecionadas
+              </Button>
+            )
+          }
         >
           {selecionadas.length === 0 && 'Selecione 2 avaliações concluídas para comparar.'}
           {selecionadas.length === 1 && `"${selecionadas[0].nome}" selecionada — escolha mais uma.`}
@@ -172,66 +171,76 @@ export default function Historico() {
       )}
 
       {/* Filtros */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent sx={{ pb: '12px !important' }}>
-          <Grid container spacing={1.5} sx={{ alignItems: 'center' }}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth size="small"
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-center">
+            <div className="sm:col-span-2 md:col-span-6 relative">
+              <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+              <input
+                type="text"
                 placeholder="Buscar propriedade, município, proprietário..."
-                value={search} onChange={(e) => setSearch(e.target.value)}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><FiSearch /></InputAdornment> } }}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
               />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Chip
-                icon={<FiFilter size={14} />}
-                label={`${filtradas.length} resultado(s)`}
-                color="primary" variant="outlined" size="small"
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Status</InputLabel>
-                <Select value={filtroStatus} label="Status" onChange={(e) => mudarFiltroStatus(e.target.value)}>
-                  <MenuItem value="">Todos</MenuItem>
-                  <MenuItem value="concluida">Concluídas</MenuItem>
-                  <MenuItem value="rascunho">Rascunhos</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Técnico</InputLabel>
-                <Select value={filtroTecnico} label="Técnico" onChange={(e) => setFiltroTecnico(e.target.value)}>
-                  <MenuItem value="">Todos</MenuItem>
-                  {tecnicos.map((t) => (
-                    <MenuItem key={t} value={t}>{t}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Localização</InputLabel>
-                <Select value={filtroLocalizacao} label="Localização" onChange={(e) => setFiltroLocalizacao(e.target.value)}>
-                  <MenuItem value="">Todos</MenuItem>
-                  {localizacoes.map((loc) => (
-                    <MenuItem key={loc} value={loc}>{loc}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+            </div>
+            <div className="sm:col-span-2 md:col-span-6 flex items-center justify-between gap-2">
+              <Badge variant="outline" size="sm" className="gap-1">
+                <FiFilter size={12} />
+                {filtradas.length} resultado(s)
+              </Badge>
+            </div>
+
+            <div className="md:col-span-4">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
+              <select
+                value={filtroStatus}
+                onChange={(e) => mudarFiltroStatus(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              >
+                <option value="">Todos os status</option>
+                <option value="concluida">Concluídas</option>
+                <option value="rascunho">Rascunhos</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-4">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Técnico</label>
+              <select
+                value={filtroTecnico}
+                onChange={(e) => setFiltroTecnico(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              >
+                <option value="">Todos os técnicos</option>
+                {tecnicos.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-4">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Localização</label>
+              <select
+                value={filtroLocalizacao}
+                onChange={(e) => setFiltroLocalizacao(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              >
+                <option value="">Todas as localizações</option>
+                {localizacoes.map((loc) => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {loading ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <div className="space-y-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} variant="rectangular" height={56} sx={{ borderRadius: 2 }} />
+            <Skeleton key={i} className="h-16 w-full rounded-xl" />
           ))}
-        </Box>
+        </div>
       ) : erro && avaliacoes.length === 0 ? (
         <Card>
           <CardContent>
@@ -255,206 +264,212 @@ export default function Historico() {
           </CardContent>
         </Card>
       ) : isMobile ? (
-        // Cards para mobile
-        <Grid container spacing={2}>
+        /* Visualização Mobile */
+        <div className="space-y-3">
           {filtradas.map((av) => {
             const podeComparar = av.status === 'concluida';
             const selecionada = selecionadas.some((s) => s.id === av.id);
             return (
-            <Grid size={12} key={av.id}>
-              <Card sx={modoComparar && selecionada ? { border: '2px solid', borderColor: 'primary.main' } : undefined}>
-                <CardContent sx={{ pb: '12px !important' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+              <Card
+                key={av.id}
+                className={cn(
+                  'transition-all',
+                  modoComparar && selecionada && 'border-2 border-caparao-700 bg-caparao-50/20'
+                )}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-start gap-2">
                       {modoComparar && (
-                        <Tooltip title={podeComparar ? 'Selecionar para comparar' : 'Só avaliações concluídas podem ser comparadas'}>
-                          <span>
-                            <Checkbox
-                              size="small"
-                              checked={selecionada}
-                              disabled={!podeComparar || (!selecionada && selecionadas.length >= 2)}
-                              onChange={() => alternarSelecao(av)}
-                              slotProps={{ input: { 'aria-label': `Selecionar avaliação de ${av.propriedade_nome} para comparar` } }}
-                              sx={{ mt: -0.5, ml: -1 }}
-                            />
-                          </span>
-                        </Tooltip>
+                        <input
+                          type="checkbox"
+                          checked={selecionada}
+                          disabled={!podeComparar || (!selecionada && selecionadas.length >= 2)}
+                          onChange={() => alternarSelecao(av)}
+                          aria-label={`Selecionar avaliação de ${av.propriedade_nome}`}
+                          className="mt-1 h-4 w-4 rounded border-slate-300 text-caparao-700 focus:ring-caparao-700"
+                        />
                       )}
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={700}>{av.propriedade_nome}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {av.municipio} · {formatarData(av.data_avaliacao)}
-                        </Typography>
-                      </Box>
-                    </Box>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">{av.propriedade_nome}</h3>
+                        <p className="text-xs text-slate-500">{av.municipio} · {formatarData(av.data_avaliacao)}</p>
+                      </div>
+                    </div>
                     <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
-                  </Box>
+                  </div>
 
                   {av.igs && (
-                    <Box sx={{ mb: 1 }}>
-                      <Grid container spacing={0.5}>
-                        {[
-                          { label: 'Ec', val: av.indice_economico, cor: COR_DIMS.economico },
-                          { label: 'Am', val: av.indice_ambiental, cor: COR_DIMS.ambiental },
-                          { label: 'So', val: av.indice_social, cor: COR_DIMS.social },
-                          { label: 'IGQG', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
-                        ].map((d) => (
-                          <Grid size={3} key={d.label}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ textAlign: 'center' }}>{d.label}</Typography>
-                            <LinearProgress
-                              variant="determinate"
-                              value={(d.val || 0) * 100}
-                              sx={{ height: 6, borderRadius: 3, bgcolor: `${d.cor}22`, '& .MuiLinearProgress-bar': { bgcolor: d.cor } }}
-                            />
-                            <Typography variant="caption" color={d.cor} fontWeight={700} display="block" sx={{ textAlign: 'center' }}>
-                              {d.val ? `${(d.val * 100).toFixed(0)}%` : '—'}
-                            </Typography>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Box>
+                    <div className="grid grid-cols-4 gap-2 border-y border-slate-100 py-2.5 my-2 text-center">
+                      {[
+                        { label: 'Econ', val: av.indice_economico, cor: COR_DIMS.economico },
+                        { label: 'Amb', val: av.indice_ambiental, cor: COR_DIMS.ambiental },
+                        { label: 'Soc', val: av.indice_social, cor: COR_DIMS.social },
+                        { label: 'IGQG', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
+                      ].map((d) => (
+                        <div key={d.label}>
+                          <span className="block text-[10px] text-slate-400 font-bold">{d.label}</span>
+                          <span className="block text-xs font-black tabular-nums" style={{ color: d.cor }}>
+                            {d.val ? `${(d.val * 100).toFixed(0)}%` : '—'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   )}
 
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Chip
-                      label={av.status === 'concluida' ? 'Concluída' : 'Rascunho'}
-                      size="small"
-                      color={av.status === 'concluida' ? 'success' : 'warning'}
-                      variant="outlined"
-                    />
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary" onClick={() => navigate(`/avaliacao/${av.id}`)} aria-label={`Ver avaliação de ${av.propriedade_nome}`}>
+                  <div className="flex items-center justify-between pt-1">
+                    <Badge variant={av.status === 'concluida' ? 'success' : 'warning'} size="sm">
+                      {av.status === 'concluida' ? 'Concluída' : 'Rascunho'}
+                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/avaliacao/${av.id}`)}
+                        aria-label={`Ver avaliação de ${av.propriedade_nome}`}
+                        className="rounded-lg p-1.5 text-caparao-700 hover:bg-caparao-50"
+                      >
                         <FiEye size={16} />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id} aria-label={`Excluir avaliação de ${av.propriedade_nome}`}>
-                        {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
-                      </IconButton>
-                    </Box>
-                  </Box>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => pedirExclusao(av.id, av.propriedade_nome)}
+                        disabled={excluindo === av.id}
+                        aria-label={`Excluir avaliação de ${av.propriedade_nome}`}
+                        className="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            </Grid>
             );
           })}
-        </Grid>
+        </div>
       ) : (
-        // Tabela desktop
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 2,
-            border: '1px solid rgba(15, 23, 42, 0.08)',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-            overflow: 'hidden',
-          }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#F8FAFC' }}>
-                {modoComparar && <TableCell sx={{ width: 48, borderBottom: '1px solid #E2E8F0' }} />}
-                {['Propriedade', 'Município', 'Data', 'Técnico', 'Econômica', 'Ambiental', 'Social', 'IGQG', 'ICSR', 'Status', 'Ações'].map((h) => (
-                  <TableCell
-                    key={h}
-                    sx={{
-                      color: '#475569',
-                      fontWeight: 700,
-                      fontSize: '0.74rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.04em',
-                      borderBottom: '1px solid #E2E8F0',
-                      whiteSpace: 'nowrap',
-                      py: 1.5,
-                    }}
-                  >
-                    {h}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        /* Visualização Desktop */
+        <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+              <tr>
+                {modoComparar && <th className="py-3 px-3 w-10"></th>}
+                <th className="py-3 px-4">Propriedade</th>
+                <th className="py-3 px-3">Município</th>
+                <th className="py-3 px-3">Data</th>
+                <th className="py-3 px-3">Técnico</th>
+                <th className="py-3 px-3 text-center">Econômica</th>
+                <th className="py-3 px-3 text-center">Ambiental</th>
+                <th className="py-3 px-3 text-center">Social</th>
+                <th className="py-3 px-3 text-center">IGQG</th>
+                <th className="py-3 px-3">ICSR</th>
+                <th className="py-3 px-3">Status</th>
+                <th className="py-3 px-3 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
               {filtradas.map((av) => {
                 const podeComparar = av.status === 'concluida';
                 const selecionada = selecionadas.some((s) => s.id === av.id);
                 return (
-                <TableRow
-                  key={av.id}
-                  sx={{
-                    bgcolor: modoComparar && selecionada ? 'rgba(27, 77, 36, 0.06)' : 'inherit',
-                    transition: 'background-color 120ms ease',
-                    '&:hover': { bgcolor: '#F8FAFC', cursor: 'pointer' },
-                  }}
-                  onClick={() => navigate(`/avaliacao/${av.id}`)}
-                >
-                  {modoComparar && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Tooltip title={podeComparar ? 'Selecionar para comparar' : 'Só avaliações concluídas podem ser comparadas'}>
-                        <span>
-                          <Checkbox
-                            size="small"
-                            checked={selecionada}
-                            disabled={!podeComparar || (!selecionada && selecionadas.length >= 2)}
-                            onChange={() => alternarSelecao(av)}
-                            slotProps={{ input: { 'aria-label': `Selecionar avaliação de ${av.propriedade_nome} para comparar` } }}
-                          />
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                  )}
-                  <TableCell><Typography variant="body2" fontWeight={600}>{av.propriedade_nome}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{av.municipio}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{formatarData(av.data_avaliacao)}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{av.tecnico_responsavel || '—'}</Typography></TableCell>
-                  {[
-                    { val: av.indice_economico, cor: COR_DIMS.economico },
-                    { val: av.indice_ambiental, cor: COR_DIMS.ambiental },
-                    { val: av.indice_social, cor: COR_DIMS.social },
-                    { val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
-                  ].map((d, j) => (
-                    <TableCell key={j}>
-                      <Typography variant="body2" fontWeight={700} color={d.cor}>
+                  <tr
+                    key={av.id}
+                    onClick={() => navigate(`/avaliacao/${av.id}`)}
+                    className={cn(
+                      'hover:bg-slate-50/80 cursor-pointer transition-colors',
+                      modoComparar && selecionada && 'bg-caparao-50/30'
+                    )}
+                  >
+                    {modoComparar && (
+                      <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selecionada}
+                          disabled={!podeComparar || (!selecionada && selecionadas.length >= 2)}
+                          onChange={() => alternarSelecao(av)}
+                          aria-label={`Selecionar avaliação de ${av.propriedade_nome}`}
+                          className="h-4 w-4 rounded border-slate-300 text-caparao-700 focus:ring-caparao-700"
+                        />
+                      </td>
+                    )}
+                    <td className="py-3 px-4 font-bold text-slate-900">{av.propriedade_nome}</td>
+                    <td className="py-3 px-3 text-slate-600">{av.municipio}</td>
+                    <td className="py-3 px-3 text-slate-600">{formatarData(av.data_avaliacao)}</td>
+                    <td className="py-3 px-3 text-slate-600">{av.tecnico_responsavel || '—'}</td>
+                    {[
+                      { val: av.indice_economico, cor: COR_DIMS.economico },
+                      { val: av.indice_ambiental, cor: COR_DIMS.ambiental },
+                      { val: av.indice_social, cor: COR_DIMS.social },
+                      { val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
+                    ].map((d, j) => (
+                      <td key={j} className="py-3 px-3 text-center font-extrabold tabular-nums" style={{ color: d.cor }}>
                         {d.val !== null && d.val !== undefined ? `${(d.val * 100).toFixed(0)}%` : '—'}
-                      </Typography>
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    {av.classificacao ? (
-                      <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
-                    ) : <Typography variant="caption" color="text.disabled">—</Typography>}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={av.status === 'concluida' ? 'Concluída' : 'Rascunho'}
-                      size="small"
-                      color={av.status === 'concluida' ? 'success' : 'warning'}
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="error" onClick={() => pedirExclusao(av.id, av.propriedade_nome)} disabled={excluindo === av.id} aria-label={`Excluir avaliação de ${av.propriedade_nome}`}>
-                        {excluindo === av.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                </TableRow>
+                      </td>
+                    ))}
+                    <td className="py-3 px-3">
+                      {av.classificacao ? (
+                        <IGSBadge classificacao={av.classificacao} igs={av.igs} size="small" />
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-3">
+                      <Badge variant={av.status === 'concluida' ? 'success' : 'warning'} size="sm">
+                        {av.status === 'concluida' ? 'Concluída' : 'Rascunho'}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/avaliacao/${av.id}`)}
+                          className="rounded-lg p-1.5 text-caparao-700 hover:bg-caparao-50"
+                          title="Ver avaliação"
+                        >
+                          <FiEye size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => pedirExclusao(av.id, av.propriedade_nome)}
+                          disabled={excluindo === av.id}
+                          className="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+                          title="Excluir avaliação"
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 );
               })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
       )}
 
-      {!loading && !erro && total > ITENS_POR_PAGINA && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2.5 }}>
-          <Pagination
-            count={Math.ceil(total / ITENS_POR_PAGINA)}
-            page={pagina}
-            onChange={(_, p) => setPagina(p)}
-            color="primary"
-            shape="rounded"
-            siblingCount={isMobile ? 0 : 1}
-          />
-        </Box>
+      {/* Paginação */}
+      {!loading && !erro && totalPaginas > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={pagina <= 1}
+            onClick={() => setPagina((p) => p - 1)}
+            icon={<FiChevronLeft />}
+          >
+            Anterior
+          </Button>
+          <span className="text-xs font-semibold text-slate-600 px-2">
+            Página {pagina} de {totalPaginas}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={pagina >= totalPaginas}
+            onClick={() => setPagina((p) => p + 1)}
+            icon={<FiChevronRight />}
+          >
+            Próxima
+          </Button>
+        </div>
       )}
 
       <ConfirmDialog
@@ -473,6 +488,6 @@ export default function Historico() {
         idA={selecionadas[0]?.id}
         idB={selecionadas[1]?.id}
       />
-    </Box>
+    </div>
   );
 }
