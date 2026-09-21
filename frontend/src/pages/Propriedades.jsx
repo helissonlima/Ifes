@@ -518,47 +518,130 @@ export default function Propriedades() {
           ))}
         </Grid>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 2 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            border: '1px solid rgba(15, 23, 42, 0.08)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+            overflow: 'hidden',
+          }}
+        >
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'primary.main' }}>
-                {['Propriedade', 'Município/UF', 'Proprietário', 'Área Café', 'Avaliações', 'Último IGS', 'Ações'].map((h) => (
-                  <TableCell key={h} sx={{ color: 'white', fontWeight: 700 }}>{h}</TableCell>
+              <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                {['Propriedade', 'Município / UF', 'Proprietário', 'Área Café', 'Avaliações', 'Último ICSR', 'Ações'].map((h) => (
+                  <TableCell
+                    key={h}
+                    sx={{
+                      color: '#475569',
+                      fontWeight: 700,
+                      fontSize: '0.74rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      borderBottom: '1px solid #E2E8F0',
+                      py: 1.5,
+                    }}
+                  >
+                    {h}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {propriedades.map((p, i) => (
+              {propriedades.map((p) => (
                 <TableRow
                   key={p.id}
-                  sx={{ cursor: 'pointer', bgcolor: i % 2 === 0 ? 'inherit' : 'action.hover', '&:hover': { bgcolor: 'primary.50' } }}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'background-color 120ms ease',
+                    '&:hover': { bgcolor: '#F8FAFC' },
+                  }}
                   onClick={() => navigate(`/propriedades/${p.id}`)}
                 >
                   <TableCell>
-                    <Typography variant="body2" fontWeight={600}>{p.nome}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#0F172A' }}>
+                      {p.nome}
+                    </Typography>
                   </TableCell>
-                  <TableCell><Typography variant="body2">{p.municipio}/{p.estado}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{p.proprietario}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{p.area_cafe ? `${p.area_cafe} ha` : '—'}</Typography></TableCell>
-                  <TableCell><Chip label={p.total_avaliacoes} size="small" color="primary" variant="outlined" /></TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: '#475569' }}>
+                      {p.municipio}/{p.estado}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: '#475569' }}>
+                      {p.proprietario}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: '#475569', fontVariantNumeric: 'tabular-nums' }}>
+                      {p.area_cafe ? `${p.area_cafe} ha` : '—'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={`${p.total_avaliacoes} aval.`}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        borderColor: 'rgba(27, 77, 36, 0.25)',
+                        bgcolor: 'rgba(27, 77, 36, 0.04)',
+                        color: '#1B4D24',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>
                     {p.ultima_classificacao ? (
                       <IGSBadge classificacao={p.ultima_classificacao} igs={p.ultimo_igs} size="small" />
-                    ) : <Typography variant="caption" color="text.disabled">—</Typography>}
+                    ) : (
+                      <Typography variant="caption" sx={{ color: '#94A3B8' }}>—</Typography>
+                    )}
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary" title="Nova Avaliação" aria-label={`Nova avaliação para ${p.nome}`}
-                        onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}>
-                        <FiClipboard size={16} />
-                      </IconButton>
-                      <IconButton size="small" onClick={() => abrirEditar(p)} title="Editar" aria-label={`Editar ${p.nome}`}>
-                        <FiEdit2 size={16} />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => setConfirmExcluir(p)}
-                        disabled={excluindo === p.id} title="Excluir" aria-label={`Excluir ${p.nome}`}>
-                        {excluindo === p.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
-                      </IconButton>
+                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                      <Tooltip title="Nova Avaliação">
+                        <IconButton
+                          size="small"
+                          aria-label={`Nova avaliação para ${p.nome}`}
+                          onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}
+                          sx={{
+                            color: '#1B4D24',
+                            '&:hover': { bgcolor: 'rgba(27, 77, 36, 0.08)' },
+                          }}
+                        >
+                          <FiClipboard size={16} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Editar propriedade">
+                        <IconButton
+                          size="small"
+                          onClick={() => abrirEditar(p)}
+                          aria-label={`Editar ${p.nome}`}
+                          sx={{
+                            color: '#475569',
+                            '&:hover': { bgcolor: 'rgba(15, 23, 42, 0.06)' },
+                          }}
+                        >
+                          <FiEdit2 size={16} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Excluir propriedade">
+                        <IconButton
+                          size="small"
+                          onClick={() => setConfirmExcluir(p)}
+                          disabled={excluindo === p.id}
+                          aria-label={`Excluir ${p.nome}`}
+                          sx={{
+                            color: '#DC2626',
+                            '&:hover': { bgcolor: 'rgba(220, 38, 38, 0.08)' },
+                          }}
+                        >
+                          {excluindo === p.id ? <CircularProgress size={14} /> : <FiTrash2 size={16} />}
+                        </IconButton>
+                      </Tooltip>
                     </Box>
                   </TableCell>
                 </TableRow>

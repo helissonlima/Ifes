@@ -124,19 +124,38 @@ export default function Resultado() {
     <Box className="print-resultado">
       {/* Header */}
       <Box className="no-print" sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Button startIcon={<FiArrowLeft />} onClick={() => navigate(-1)} size="small">Voltar</Button>
+        <Button
+          startIcon={<FiArrowLeft />}
+          onClick={() => navigate(-1)}
+          size="small"
+          variant="outlined"
+          sx={{ borderColor: 'rgba(15, 23, 42, 0.15)', color: '#475569' }}
+        >
+          Voltar
+        </Button>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" fontWeight={800} color="primary.dark">Resultado da Avaliação</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
+            Laudo da Avaliação
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748B' }}>
             {avaliacao.propriedade_nome} · {avaliacao.municipio}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button startIcon={<FiClipboard />} variant="outlined" size="small"
-            onClick={() => navigate(`/avaliacao/nova?propriedade=${avaliacao.propriedade_id}`)}>
+          <Button
+            startIcon={<FiClipboard />}
+            variant="outlined"
+            size="small"
+            onClick={() => navigate(`/avaliacao/nova?propriedade=${avaliacao.propriedade_id}`)}
+          >
             Nova Avaliação
           </Button>
-          <Button startIcon={<FiPrinter />} variant="outlined" size="small" onClick={() => window.print()}>
+          <Button
+            startIcon={<FiPrinter />}
+            variant="contained"
+            size="small"
+            onClick={() => window.print()}
+          >
             Imprimir / PDF
           </Button>
         </Box>
@@ -146,9 +165,17 @@ export default function Resultado() {
         <CachedDataBanner mensagem="Este resultado está sendo exibido com apoio do cache local. Confirme os dados novamente quando a conexão estabilizar." />
       )}
 
-      {/* ICSR Principal — card limpo sem gradiente escuro */}
-      <Card sx={{ mb: 2, borderTop: `4px solid ${COR_CLASSIFICACAO[avaliacao.classificacao] || '#9E9E9E'}` }}>
-        <CardContent>
+      {/* ICSR Principal — card com acabamento sóbrio */}
+      <Card
+        sx={{
+          mb: 2.5,
+          bgcolor: '#FFFFFF',
+          border: '1px solid rgba(15, 23, 42, 0.08)',
+          borderTop: `4px solid ${COR_CLASSIFICACAO[avaliacao.classificacao] || '#9E9E9E'}`,
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
           <Grid container spacing={2} sx={{ alignItems: 'center' }}>
             <Grid size={{ xs: 12, sm: 3 }} sx={{ textAlign: 'center' }}>
               <IGSGauge igs={avaliacao.igs || 0} classificacao={avaliacao.classificacao} size={160} />
@@ -156,10 +183,20 @@ export default function Resultado() {
             <Grid size={{ xs: 12, sm: 9 }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1 }}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.68rem' }}>
+                  <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.7rem' }}>
                     ICSR — Índice Consolidado de Sustentabilidade Rural
                   </Typography>
-                  <Typography variant="h3" fontWeight={900} sx={{ lineHeight: 1.1, color: 'text.primary', mt: 0.25 }}>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 900,
+                      lineHeight: 1.1,
+                      color: '#0F172A',
+                      letterSpacing: '-0.03em',
+                      fontVariantNumeric: 'tabular-nums',
+                      mt: 0.25,
+                    }}
+                  >
                     {avaliacao.igs ? `${(avaliacao.igs * 100).toFixed(1)}%` : '—'}
                   </Typography>
                 </Box>
@@ -185,7 +222,7 @@ export default function Resultado() {
         </CardContent>
       </Card>
 
-      <Card sx={{ mb: 2, border: '1px solid', borderColor: 'rgba(46,125,50,0.12)' }}>
+      <Card sx={{ mb: 2.5, bgcolor: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.08)', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)' }}>
         <CardContent>
           <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
             <Grid size={{ xs: 12, md: 7 }}>

@@ -26,26 +26,43 @@ export default function BottomNav() {
 
   return (
     <Paper
-      sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1200 }}
-      elevation={8}
+      sx={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1200,
+        borderRadius: 0,
+        bgcolor: '#FFFFFF',
+        borderTop: '1px solid rgba(15, 23, 42, 0.08)',
+        boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.04)',
+      }}
+      elevation={0}
     >
       <BottomNavigation
         value={activeIndex === -1 ? false : activeIndex}
         onChange={(_, idx) => navigate(visibleItems[idx].path)}
         sx={{
-          bgcolor: 'white',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          height: 68,
+          bgcolor: 'transparent',
+          height: 64,
           '& .MuiBottomNavigationAction-root': {
             minWidth: 0,
             px: 0.5,
-            color: 'text.secondary',
-            '&.Mui-selected': { color: 'primary.main' },
+            py: 0.75,
+            color: '#64748B',
+            transition: 'color 150ms ease',
+            '&.Mui-selected': {
+              color: '#1B4D24',
+              '& .MuiBottomNavigationAction-label': {
+                fontWeight: 700,
+                color: '#1B4D24',
+              },
+            },
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '0.72rem',
-            fontWeight: 600,
+            fontWeight: 500,
+            mt: 0.25,
           },
         }}
       >

@@ -313,21 +313,48 @@ export default function Usuarios() {
           ))}
         </Grid>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 2 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            border: '1px solid rgba(15, 23, 42, 0.08)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+            overflow: 'hidden',
+          }}
+        >
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'primary.main' }}>
+              <TableRow sx={{ bgcolor: '#F8FAFC' }}>
                 {['Usuário', 'E-mail', 'Papel', 'Status', 'Permissões', 'Ações'].map((h) => (
-                  <TableCell key={h} sx={{ color: '#fff', fontWeight: 700 }}>{h}</TableCell>
+                  <TableCell
+                    key={h}
+                    sx={{
+                      color: '#475569',
+                      fontWeight: 700,
+                      fontSize: '0.74rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      borderBottom: '1px solid #E2E8F0',
+                      py: 1.5,
+                    }}
+                  >
+                    {h}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {usuariosFiltrados.map((u, i) => {
+              {usuariosFiltrados.map((u) => {
                 const isSelf = u.id === usuarioLogado?.id;
                 const permsAtivas = PERMISSION_KEYS.filter((p) => u.permissions?.[p.key]).length;
                 return (
-                  <TableRow key={u.id} sx={{ bgcolor: i % 2 === 0 ? 'inherit' : 'action.hover', '&:hover': { bgcolor: 'primary.50' } }}>
+                  <TableRow
+                    key={u.id}
+                    sx={{
+                      transition: 'background-color 120ms ease',
+                      '&:hover': { bgcolor: '#F8FAFC' },
+                    }}
+                  >
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Avatar src={u.foto_url || undefined} sx={{ bgcolor: corPapel(u.role), width: 38, height: 38 }}>

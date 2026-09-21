@@ -339,26 +339,49 @@ export default function Historico() {
         </Grid>
       ) : (
         // Tabela desktop
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 2 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            border: '1px solid rgba(15, 23, 42, 0.08)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+            overflow: 'hidden',
+          }}
+        >
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'primary.main' }}>
-                {modoComparar && <TableCell sx={{ color: 'white', width: 48 }} />}
+              <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                {modoComparar && <TableCell sx={{ width: 48, borderBottom: '1px solid #E2E8F0' }} />}
                 {['Propriedade', 'Município', 'Data', 'Técnico', 'Econômica', 'Ambiental', 'Social', 'IGQG', 'ICSR', 'Status', 'Ações'].map((h) => (
-                  <TableCell key={h} sx={{ color: 'white', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</TableCell>
+                  <TableCell
+                    key={h}
+                    sx={{
+                      color: '#475569',
+                      fontWeight: 700,
+                      fontSize: '0.74rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      borderBottom: '1px solid #E2E8F0',
+                      whiteSpace: 'nowrap',
+                      py: 1.5,
+                    }}
+                  >
+                    {h}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filtradas.map((av, i) => {
+              {filtradas.map((av) => {
                 const podeComparar = av.status === 'concluida';
                 const selecionada = selecionadas.some((s) => s.id === av.id);
                 return (
                 <TableRow
                   key={av.id}
                   sx={{
-                    bgcolor: modoComparar && selecionada ? 'primary.50' : i % 2 === 0 ? 'inherit' : 'action.hover',
-                    '&:hover': { bgcolor: 'primary.50', cursor: 'pointer' },
+                    bgcolor: modoComparar && selecionada ? 'rgba(27, 77, 36, 0.06)' : 'inherit',
+                    transition: 'background-color 120ms ease',
+                    '&:hover': { bgcolor: '#F8FAFC', cursor: 'pointer' },
                   }}
                   onClick={() => navigate(`/avaliacao/${av.id}`)}
                 >

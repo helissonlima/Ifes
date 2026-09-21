@@ -225,12 +225,33 @@ export default function Graos() {
           ))}
         </Grid>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            border: '1px solid rgba(15, 23, 42, 0.08)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+            overflow: 'hidden',
+          }}
+        >
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'primary.main' }}>
+              <TableRow sx={{ bgcolor: '#F8FAFC' }}>
                 {['Nome', 'Código', 'Descrição', 'Status', 'Ações'].map((h) => (
-                  <TableCell key={h} sx={{ color: 'white', fontWeight: 700 }}>{h}</TableCell>
+                  <TableCell
+                    key={h}
+                    sx={{
+                      color: '#475569',
+                      fontWeight: 700,
+                      fontSize: '0.74rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      borderBottom: '1px solid #E2E8F0',
+                      py: 1.5,
+                    }}
+                  >
+                    {h}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>

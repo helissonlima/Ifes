@@ -49,19 +49,57 @@ export default function Metodologia() {
       />
 
       {/* Apresentação */}
-      <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', color: 'white' }}>
-        <CardContent>
+      <Card
+        sx={{
+          mb: 2.5,
+          bgcolor: '#143519',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+          color: '#FFFFFF',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-            <MdOutlineEco size={48} color="rgba(255,255,255,0.9)" />
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                color: '#81C784',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <MdOutlineEco size={28} />
+            </Box>
             <Box>
-              <Typography variant="h6" fontWeight={800} color="white">
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  color: '#FFFFFF',
+                  letterSpacing: '-0.02em',
+                  fontSize: '1.15rem',
+                }}
+              >
                 Sistema Integrado de Avaliação de Sustentabilidade
               </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', mt: 0.5 }}>
-                Proposta híbrida baseada na análise comparativa entre o <strong>metodologia de referência</strong> (Minas Gerais)
-                e o <strong>Sistema de Indicadores da Cafeicultura Sustentável instituição regional</strong> (Espírito Santo).
-                Combina a robustez metodológica quantitativa do ISA com a aplicabilidade prática e foco
-                na cafeicultura do instituição regional.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.82)',
+                  mt: 0.75,
+                  lineHeight: 1.6,
+                  fontSize: '0.88rem',
+                }}
+              >
+                Proposta baseada na análise comparativa entre a <strong>metodologia de referência</strong> (Minas Gerais)
+                e a <strong>instituição regional</strong> (Espírito Santo).
+                Combina a robustez metodológica quantitativa com a aplicabilidade prática e o foco
+                na cafeicultura sustentável do Caparaó.
               </Typography>
             </Box>
           </Box>

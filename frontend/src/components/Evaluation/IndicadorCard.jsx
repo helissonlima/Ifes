@@ -27,23 +27,29 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
   return (
     <Card
       sx={{
-        mb: 2,
-        border: nota !== undefined ? `2px solid ${COR_NOTA[nota]}55` : '2px solid transparent',
-        transition: 'border-color 0.2s',
+        mb: 2.5,
+        bgcolor: '#FFFFFF',
+        border: '1px solid',
+        borderColor: nota !== undefined ? `${COR_NOTA[nota]}4D` : 'rgba(15, 23, 42, 0.08)',
+        boxShadow: nota !== undefined ? `0 2px 8px ${COR_NOTA[nota]}14` : '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+        transition: 'all 180ms ease',
       }}
     >
-      <CardContent sx={{ pb: '12px !important' }}>
+      <CardContent sx={{ p: 2.25, pb: '14px !important' }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: corDimensao, mt: 0.8, flexShrink: 0 }} />
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25, mb: 1.5 }}>
+          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: corDimensao, mt: 0.9, flexShrink: 0 }} />
           <Box sx={{ flexGrow: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-              <Typography variant="subtitle2" fontWeight={700}>{indicador.nome}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '0.92rem' }}>
+                {indicador.nome}
+              </Typography>
               {indicador.peso !== undefined && (
                 <Box sx={{
-                  px: 0.75, py: 0.1, borderRadius: 1,
-                  bgcolor: corDimensao + '1A', color: corDimensao,
-                  fontSize: '0.65rem', fontWeight: 700, lineHeight: 1.8,
+                  px: 0.8, py: 0.15, borderRadius: 1,
+                  bgcolor: 'rgba(15, 23, 42, 0.05)', color: '#475569',
+                  fontSize: '0.68rem', fontWeight: 700, lineHeight: 1.6,
+                  border: '1px solid rgba(15, 23, 42, 0.06)',
                 }}>
                   peso {Math.round(indicador.peso * 100)}%
                 </Box>
@@ -62,20 +68,25 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                     size="small"
                     aria-label={`O que significa ${glossario.termo}`}
                     onClick={() => setGlossarioAberto((v) => !v)}
-                    sx={{ p: 0.25, color: 'text.disabled', '&:hover': { color: corDimensao, bgcolor: 'transparent' } }}
+                    sx={{ p: 0.25, color: '#94A3B8', '&:hover': { color: corDimensao, bgcolor: 'transparent' } }}
                   >
-                    <FiInfo size={13} />
+                    <FiInfo size={14} />
                   </IconButton>
                 </Tooltip>
               )}
             </Box>
-            <Typography variant="caption" color="text.secondary">{indicador.criterio}</Typography>
+            <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.25, lineHeight: 1.4 }}>
+              {indicador.criterio}
+            </Typography>
           </Box>
           {nota !== undefined && (
             <Box sx={{
-              px: 1, py: 0.25, borderRadius: 1,
-              bgcolor: COR_NOTA[nota] + '22', color: COR_NOTA_TEXTO[nota],
+              px: 1.2, py: 0.35, borderRadius: 1,
+              bgcolor: COR_NOTA[nota] + '18',
+              color: COR_NOTA_TEXTO[nota],
+              border: `1px solid ${COR_NOTA[nota]}40`,
               fontWeight: 800, fontSize: '0.72rem', whiteSpace: 'nowrap',
+              fontVariantNumeric: 'tabular-nums',
             }}>
               {NIVEL[nota]} · {LABEL_NOTA[nota]}
             </Box>
@@ -118,31 +129,34 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 1.25,
-                  p: '9px 12px',
+                  p: '10px 14px',
                   borderRadius: 2,
-                  border: `1.5px solid ${selected ? cor : '#e0e0e0'}`,
-                  bgcolor: selected ? cor + '14' : 'background.paper',
+                  border: selected ? `1.5px solid ${cor}` : '1px solid #E2E8F0',
+                  bgcolor: selected ? `${cor}0C` : '#FFFFFF',
                   cursor: 'pointer',
-                  transition: 'all 0.15s',
+                  transition: 'all 120ms ease',
                   userSelect: 'none',
-                  '&:hover': { bgcolor: cor + '0E', borderColor: cor + '99' },
+                  '&:hover': {
+                    bgcolor: selected ? `${cor}12` : '#F8FAFC',
+                    borderColor: selected ? cor : '#CBD5E1',
+                  },
                   '&:focus-visible': { outline: `2px solid ${cor}`, outlineOffset: '2px' },
                 }}
               >
-                {/* Score badge */}
                 <Box sx={{
-                  minWidth: 36,
+                  minWidth: 38,
                   textAlign: 'center',
-                  px: 0.5,
-                  py: 0.2,
+                  px: 0.6,
+                  py: 0.25,
                   borderRadius: 1,
-                  bgcolor: selected ? cor : cor + '18',
+                  bgcolor: selected ? cor : `${cor}16`,
                   color: selected ? COR_NOTA_BADGE_SELECIONADO[c.nota] : COR_NOTA_TEXTO[c.nota],
-                  fontSize: '0.68rem',
+                  fontSize: '0.7rem',
                   fontWeight: 800,
                   flexShrink: 0,
-                  lineHeight: 1.6,
-                  transition: 'all 0.15s',
+                  lineHeight: 1.5,
+                  fontVariantNumeric: 'tabular-nums',
+                  transition: 'all 120ms ease',
                 }}>
                   {LABEL_NOTA[c.nota]}
                 </Box>

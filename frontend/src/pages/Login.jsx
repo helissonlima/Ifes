@@ -56,33 +56,54 @@ export default function Login() {
         <Paper
           elevation={0}
           sx={{
-            maxWidth: 430,
+            maxWidth: 420,
             mx: 'auto',
-            borderRadius: 3,
+            borderRadius: 2.5,
             overflow: 'hidden',
-            border: '1px solid',
-            borderColor: 'rgba(27,94,32,0.12)',
-            boxShadow: '0 18px 36px rgba(27, 94, 32, 0.08)',
+            bgcolor: '#FFFFFF',
+            border: '1px solid rgba(15, 23, 42, 0.12)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.15)',
           }}
         >
-          <Card elevation={0}>
+          <Card elevation={0} sx={{ bgcolor: 'transparent', border: 'none', boxShadow: 'none' }}>
             <CardContent
               sx={{
-                px: { xs: 2.5, sm: 3.5 },
-                py: { xs: 2.5, sm: 3 },
-                maxWidth: 420,
-                mx: 'auto',
+                px: { xs: 3, sm: 4 },
+                py: { xs: 3.5, sm: 4 },
               }}
             >
-              <Stack spacing={1.5} sx={{ alignItems: 'center', mb: 2.5 }}>
-                <Avatar sx={{ bgcolor: 'primary.main', width: 54, height: 54 }}>
-                  <MdOutlineEco size={26} />
+              <Stack spacing={1.25} sx={{ alignItems: 'center', mb: 3 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: '#1B4D24',
+                    width: 48,
+                    height: 48,
+                    boxShadow: '0 2px 8px rgba(27, 77, 36, 0.25)',
+                  }}
+                >
+                  <MdOutlineEco size={24} />
                 </Avatar>
-                <Typography variant="h5" fontWeight={800} sx={{ textAlign: 'center' }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 800,
+                    textAlign: 'center',
+                    color: '#0F172A',
+                    letterSpacing: '-0.025em',
+                  }}
+                >
                   SustentaCafé
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                  Instrumento digital do ICSR para avaliação técnica em campo.
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#64748B',
+                    textAlign: 'center',
+                    fontSize: '0.85rem',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Instrumento digital de avaliação do ICSR · IFES
                 </Typography>
               </Stack>
 

@@ -15,102 +15,204 @@ export default function Navbar({ onMenuClick, isMobile }) {
       position="fixed"
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%)',
+        bgcolor: '#122A16',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       }}
     >
-      <Toolbar sx={{ gap: 1, minHeight: { xs: 64, sm: 64 } }}>
+      <Toolbar sx={{ gap: 1, minHeight: { xs: 58, sm: 62 }, px: { xs: 2, sm: 3 } }}>
         {!isMobile && (
           <IconButton
             color="inherit"
             edge="start"
             onClick={onMenuClick}
-            size="large"
-            aria-label="Abrir menu"
-            sx={{ display: 'inline-flex' }}
+            size="medium"
+            aria-label="Alternar navegação lateral"
+            sx={{
+              color: 'rgba(255, 255, 255, 0.85)',
+              '&:hover': { color: '#FFFFFF', bgcolor: 'rgba(255, 255, 255, 0.08)' },
+            }}
           >
-            <FiMenu />
+            <FiMenu size={20} />
           </IconButton>
         )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-          <MdOutlineEco size={24} />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.2,
+            flexGrow: 1,
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate('/')}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 32,
+              height: 32,
+              borderRadius: 1.5,
+              bgcolor: 'rgba(76, 175, 80, 0.16)',
+              color: '#81C784',
+            }}
+          >
+            <MdOutlineEco size={20} />
+          </Box>
           <Box>
-            <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.1, display: { xs: 'none', sm: 'block' } }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 800,
+                color: '#FFFFFF',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.15,
+                fontSize: { xs: '1rem', sm: '1.05rem' },
+              }}
+            >
               SustentaCafé
             </Typography>
-            <Typography variant="caption" sx={{ opacity: 0.85, display: { xs: 'none', sm: 'block' }, lineHeight: 1 }}>
-              referência metodológica regional
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.65)',
+                display: { xs: 'none', sm: 'block' },
+                fontSize: '0.68rem',
+                letterSpacing: '0.01em',
+                lineHeight: 1,
+              }}
+            >
+              Sistema de Avaliação ICSR · IFES
             </Typography>
           </Box>
-          <Typography variant="h6" fontWeight={700} sx={{ display: { xs: 'block', sm: 'none' } }}>
-            SustentaCafé
-          </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
           {rascunhoPendente && (
-            <Tooltip title="Você tem uma avaliação com respostas ainda não sincronizadas. Toque para retomar.">
+            <Tooltip title="Você possui uma avaliação em rascunho com dados pendentes de sincronização. Toque para retomar.">
               <Button
                 onClick={() => navigate('/avaliacao/nova')}
-                aria-label="1 avaliação pendente de sincronização — toque para retomar"
+                aria-label="1 avaliação pendente de sincronização — clique para continuar"
                 size="small"
                 startIcon={<FiUploadCloud size={14} />}
                 variant="outlined"
                 sx={{
                   minWidth: 0,
-                  color: '#FFE082',
-                  borderColor: 'rgba(255,224,130,0.5)',
-                  bgcolor: 'rgba(255,224,130,0.12)',
-                  px: { xs: 1, sm: 1.2 },
-                  '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.8 } },
-                  '&:hover': { bgcolor: 'rgba(255,224,130,0.24)', borderColor: 'rgba(255,224,130,0.7)' },
+                  color: '#FEF08A',
+                  borderColor: 'rgba(254, 240, 138, 0.35)',
+                  bgcolor: 'rgba(254, 240, 138, 0.08)',
+                  px: { xs: 1, sm: 1.25 },
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  '&:hover': {
+                    bgcolor: 'rgba(254, 240, 138, 0.16)',
+                    borderColor: 'rgba(254, 240, 138, 0.6)',
+                  },
                 }}
               >
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, fontWeight: 700 }}>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                   1 pendente
                 </Box>
               </Button>
             </Tooltip>
           )}
+
+          {/* Indicador de Conexão */}
           <Box
             sx={{
               display: { xs: 'none', sm: 'flex' },
               alignItems: 'center',
-              gap: 0.75,
-              px: 1.1,
-              py: 0.5,
+              gap: 0.8,
+              px: 1.2,
+              py: 0.4,
               borderRadius: 999,
-              bgcolor: isOnline ? 'rgba(255,255,255,0.14)' : 'rgba(255,243,224,0.2)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              bgcolor: isOnline ? 'rgba(46, 125, 50, 0.2)' : 'rgba(234, 88, 12, 0.2)',
+              border: `1px solid ${isOnline ? 'rgba(74, 222, 128, 0.25)' : 'rgba(251, 146, 60, 0.3)'}`,
             }}
           >
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: isOnline ? '#B9F6CA' : '#FFE082' }} />
-            <Typography variant="caption" sx={{ fontWeight: 700, color: 'white' }}>
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                bgcolor: isOnline ? '#4ADE80' : '#FB923C',
+              }}
+            />
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                color: isOnline ? '#DCFCE7' : '#FFEDD5',
+                fontSize: '0.72rem',
+                letterSpacing: '0.01em',
+              }}
+            >
               {isOnline ? 'Online' : 'Sem rede'}
             </Typography>
           </Box>
-          <Avatar
-            src={user?.foto_url || ''}
-            alt={user?.nome || 'Usuario'}
-            sx={{ width: 34, height: 34, border: '2px solid rgba(255,255,255,0.6)' }}
-          >
-            {user?.nome?.[0] || 'U'}
-          </Avatar>
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-            <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.1 }}>
-              {user?.nome || 'Tecnico'}
-            </Typography>
+
+          {/* Usuário logado */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar
+              src={user?.foto_url || ''}
+              alt={user?.nome || 'Usuário'}
+              sx={{
+                width: 32,
+                height: 32,
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                bgcolor: 'rgba(255, 255, 255, 0.12)',
+                color: '#FFFFFF',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              {user?.nome?.[0]?.toUpperCase() || 'U'}
+            </Avatar>
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  lineHeight: 1.1,
+                  fontSize: '0.82rem',
+                }}
+              >
+                {user?.nome || 'Técnico'}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  lineHeight: 1,
+                  fontSize: '0.68rem',
+                  display: 'block',
+                }}
+              >
+                {user?.role === 'admin' ? 'Administrador' : 'Extensão Rural'}
+              </Typography>
+            </Box>
           </Box>
+
+          {/* Botão Sair */}
           <Button
             onClick={logout}
             color="inherit"
             size="small"
-            startIcon={<FiLogOut size={14} />}
+            startIcon={<FiLogOut size={13} />}
             sx={{
               minWidth: 0,
-              px: { xs: 1, sm: 1.2 },
-              borderColor: 'rgba(255,255,255,0.35)',
-              '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.8 } },
+              px: { xs: 1, sm: 1.25 },
+              py: 0.5,
+              fontSize: '0.78rem',
+              color: 'rgba(255, 255, 255, 0.85)',
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              '&:hover': {
+                bgcolor: 'rgba(255, 255, 255, 0.08)',
+                borderColor: 'rgba(255, 255, 255, 0.4)',
+                color: '#FFFFFF',
+              },
             }}
             variant="outlined"
           >

@@ -157,26 +157,116 @@ export default function Dashboard() {
         <CachedDataBanner mensagem="Painel carregado do cache local. Use este resumo como referência rápida e atualize novamente quando a conexão estabilizar." />
       )}
 
-      <Card sx={{ mb: 3, border: '1px solid', borderColor: 'rgba(46,125,50,0.12)' }}>
-        <CardContent sx={{ p: { xs: 2.25, md: 3 } }}>
-          <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: '0.04em' }}>
-            Diagnóstico Operacional
-          </Typography>
-          <Typography variant="h5" fontWeight={800} sx={{ mt: 0.75, mb: 1.5 }}>
-            {classificacaoMedia ? `ICSR médio em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.65, mb: 2.5 }}>
-            {dimensaoPrioritaria
-              ? `A dimensão com menor desempenho atual é ${dimensaoPrioritaria.label}. Use este painel para preparar a próxima visita e concentrar a conversa nos indicadores com maior potencial de melhoria.`
-              : 'Cadastre e conclua avaliações para transformar este painel em uma leitura operacional do território.'}
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-            {classificacaoMedia && <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />}
-            {dimensaoPrioritaria && (
-              <Chip icon={<FiTarget size={13} />} label={`Foco: ${dimensaoPrioritaria.label}`} variant="outlined" />
-            )}
-            <Chip icon={<FiTrendingUp size={13} />} label={`${stats?.avaliacoes_concluidas ?? 0} avaliações`} variant="outlined" color="success" />
-          </Box>
+      <Card
+        sx={{
+          mb: 3,
+          bgcolor: '#FFFFFF',
+          border: '1px solid rgba(15, 23, 42, 0.08)',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+        }}
+      >
+        <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#1B4D24',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    fontSize: '0.72rem',
+                  }}
+                >
+                  Diagnóstico Operacional do Território
+                </Typography>
+              </Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 800,
+                  color: '#0F172A',
+                  letterSpacing: '-0.02em',
+                  mb: 1.25,
+                }}
+              >
+                {classificacaoMedia ? `ICSR médio consolidado em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: '#475569',
+                  lineHeight: 1.6,
+                  mb: 2.5,
+                  fontSize: '0.92rem',
+                }}
+              >
+                {dimensaoPrioritaria
+                  ? `A dimensão com menor desempenho relativo é ${dimensaoPrioritaria.label}. Recomenda-se priorizar as ações de assistência técnica nos indicadores dessa dimensão nas próximas visitas de campo.`
+                  : 'Cadastre e conclua avaliações de propriedades rurais para transformar este painel em uma leitura estratégica do território.'}
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {classificacaoMedia && <IGSBadge classificacao={classificacaoMedia} igs={stats?.media_igs} size="medium" />}
+                {dimensaoPrioritaria && (
+                  <Chip
+                    icon={<FiTarget size={13} />}
+                    label={`Foco prioritário: ${dimensaoPrioritaria.label}`}
+                    variant="outlined"
+                    sx={{
+                      borderColor: 'rgba(15, 23, 42, 0.18)',
+                      fontWeight: 600,
+                      color: '#334155',
+                      fontSize: '0.78rem',
+                    }}
+                  />
+                )}
+                <Chip
+                  icon={<FiTrendingUp size={13} />}
+                  label={`${stats?.avaliacoes_concluidas ?? 0} avaliações concluídas`}
+                  variant="outlined"
+                  sx={{
+                    borderColor: 'rgba(27, 77, 36, 0.25)',
+                    bgcolor: 'rgba(27, 77, 36, 0.04)',
+                    fontWeight: 600,
+                    color: '#1B4D24',
+                    fontSize: '0.78rem',
+                  }}
+                />
+              </Box>
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Box
+                sx={{
+                  p: 2.5,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(27, 77, 36, 0.03)',
+                  border: '1px solid rgba(27, 77, 36, 0.08)',
+                  textAlign: 'center',
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#64748B',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    fontSize: '0.7rem',
+                    display: 'block',
+                    mb: 1,
+                  }}
+                >
+                  Índice Médio Consolidado
+                </Typography>
+                <IGSGauge
+                  igs={stats?.media_igs ?? 0}
+                  classificacao={classificacaoMedia}
+                  size={160}
+                />
+              </Box>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -186,8 +276,8 @@ export default function Dashboard() {
           <StatCard
             title="Propriedades"
             value={stats?.total_propriedades ?? '—'}
-            subtitle="cadastradas"
-            icon={<FiMap size={22} />}
+            subtitle="cadastradas no sistema"
+            icon={<FiMap size={18} />}
             color="primary.main"
           />
         </Grid>
@@ -195,8 +285,8 @@ export default function Dashboard() {
           <StatCard
             title="Avaliações"
             value={stats?.total_avaliacoes ?? '—'}
-            subtitle={`${stats?.avaliacoes_concluidas ?? 0} concluídas`}
-            icon={<FiClipboard size={22} />}
+            subtitle={`${stats?.avaliacoes_concluidas ?? 0} concluídas em campo`}
+            icon={<FiClipboard size={18} />}
             color="info.main"
           />
         </Grid>
@@ -204,8 +294,8 @@ export default function Dashboard() {
           <StatCard
             title="ICSR Médio"
             value={stats?.media_igs ? `${(stats.media_igs * 100).toFixed(1)}%` : '—'}
-            subtitle="média geral"
-            icon={<MdOutlineEco size={22} />}
+            subtitle="desempenho territorial"
+            icon={<MdOutlineEco size={18} />}
             color="success.main"
           />
         </Grid>
@@ -213,8 +303,8 @@ export default function Dashboard() {
           <StatCard
             title="Indicadores"
             value="32"
-            subtitle="em 4 dimensões"
-            icon={<FiBarChart2 size={22} />}
+            subtitle="em 4 dimensões científicas"
+            icon={<FiBarChart2 size={18} />}
             color="secondary.main"
           />
         </Grid>
@@ -265,36 +355,31 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 7, lg: 3 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>
-                ICSR Médio Geral
-              </Typography>
-              <IGSGauge
-                igs={stats?.media_igs ?? 0}
-                classificacao={getClassificacao(stats?.media_igs, metodologia?.escala)}
-              />
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
-                Por Dimensão
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Card sx={{ height: '100%', bgcolor: '#FFFFFF' }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1rem', mb: 2 }}>
+                Desempenho por Dimensão
               </Typography>
               {DIMENSOES.map((d) => (
-                <Box key={d.key} sx={{ mb: 1.5 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="caption" fontWeight={600}>{d.label}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {stats?.[d.key] ? `${(stats[d.key] * 100).toFixed(1)}%` : '—'} · peso {d.peso}
+                <Box key={d.key} sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.6 }}>
+                    <Typography variant="caption" fontWeight={700} sx={{ color: '#334155' }}>
+                      {d.label}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontVariantNumeric: 'tabular-nums' }}>
+                      {stats?.[d.key] ? `${(stats[d.key] * 100).toFixed(1)}%` : '—'} <Box component="span" sx={{ color: '#94A3B8' }}>(peso {d.peso})</Box>
                     </Typography>
                   </Box>
-                  <Tooltip title={`${d.label}: ${d.peso} do IGS`}>
+                  <Tooltip title={`${d.label}: peso ${d.peso} no ICSR consolidado`}>
                     <LinearProgress
                       variant="determinate"
                       value={stats?.[d.key] ? Math.min(stats[d.key] * 100, 100) : 0}
                       sx={{
-                        height: 8, borderRadius: 4,
-                        bgcolor: `${d.cor}22`,
-                        '& .MuiLinearProgress-bar': { bgcolor: d.cor },
+                        height: 7,
+                        borderRadius: 3.5,
+                        bgcolor: 'rgba(15, 23, 42, 0.06)',
+                        '& .MuiLinearProgress-bar': { bgcolor: d.cor, borderRadius: 3.5 },
                       }}
                     />
                   </Tooltip>
@@ -304,26 +389,40 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 5, lg: 3 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} gutterBottom>
-                Distribuição
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Card sx={{ height: '100%', bgcolor: '#FFFFFF' }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1rem', mb: 2 }}>
+                Distribuição das Avaliações
               </Typography>
               {stats?.distribuicao_classificacao?.length > 0 ? (
                 stats.distribuicao_classificacao.map((item) => (
-                  <Box key={item.classificacao} sx={{ mb: 1.5 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5, gap: 1 }}>
-                      <IGSBadge classificacao={item.classificacao} size="small" />
-                      <Typography variant="body2" fontWeight={700}>{item.quantidade}</Typography>
-                    </Box>
+                  <Box
+                    key={item.classificacao}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      py: 1,
+                      borderBottom: '1px solid rgba(15, 23, 42, 0.05)',
+                      '&:last-child': { borderBottom: 'none' },
+                    }}
+                  >
+                    <IGSBadge classificacao={item.classificacao} size="small" />
+                    <Typography
+                      variant="body2"
+                      fontWeight={700}
+                      sx={{ color: '#0F172A', fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {item.quantidade} <Box component="span" sx={{ fontWeight: 400, color: '#64748B', fontSize: '0.78rem' }}>propriedades</Box>
+                    </Typography>
                   </Box>
                 ))
               ) : (
                 <EmptyState
-                  icon={<MdOutlineEco size={36} />}
-                  title="Nenhuma avaliação concluída"
-                  description="Conclua a primeira avaliação para ver a distribuição por classificação de sustentabilidade."
+                  icon={<MdOutlineEco size={32} />}
+                  title="Sem avaliações concluídas"
+                  description="Conclua a primeira avaliação para visualizar a distribuição territorial por nível de sustentabilidade."
                   small
                 />
               )}

@@ -20,11 +20,11 @@ export default function IGSGauge({ igs, classificacao, size = 200 }) {
         >
           <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
           <RadialBar
-            background={{ fill: '#eee' }}
+            background={{ fill: '#F1F5F9' }}
             dataKey="value"
             angleAxisId={0}
             fill={cor}
-            cornerRadius={8}
+            cornerRadius={6}
           />
         </RadialBarChart>
       </ResponsiveContainer>
@@ -35,10 +35,30 @@ export default function IGSGauge({ igs, classificacao, size = 200 }) {
           textAlign: 'center',
         }}
       >
-        <Typography variant="h4" fontWeight={800} sx={{ lineHeight: 1, color: corTexto }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 800,
+            lineHeight: 1,
+            color: corTexto,
+            letterSpacing: '-0.03em',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
           {pct}%
         </Typography>
-        <Typography variant="caption" fontWeight={600} color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 700,
+            color: '#64748B',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            fontSize: '0.68rem',
+            mt: 0.5,
+            display: 'block',
+          }}
+        >
           {classificacao || 'N/D'}
         </Typography>
       </Box>
