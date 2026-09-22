@@ -27,7 +27,7 @@ export default function UpdatePrompt() {
           <button
             type="button"
             onClick={fecharOfflineReady}
-            className="ml-2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-hidden"
+            className="ml-2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1"
             aria-label="Fechar aviso offline"
           >
             <FiX size={16} />

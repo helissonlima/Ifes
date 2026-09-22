@@ -112,6 +112,25 @@ body {
   }
 }
 
+/* Movimento reduzido — exigência do PRODUCT.md (acessibilidade).
+   Animações de barra, gauge e transições viram instantâneas; o spinner
+   continua girando devagar, porque ele comunica "ainda processando". */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #F1F5F9; }

@@ -122,7 +122,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <input
               type="text"
               autoFocus
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.nome}
               onChange={f('nome')}
             />
@@ -131,7 +131,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <label className="block font-semibold text-slate-700 mb-1">Município *</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.municipio}
               onChange={f('municipio')}
             />
@@ -141,7 +141,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <input
               type="text"
               maxLength={2}
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 uppercase shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 uppercase shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.estado}
               onChange={handleUF}
             />
@@ -150,7 +150,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <label className="block font-semibold text-slate-700 mb-1">Nome do Proprietário *</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.proprietario}
               onChange={f('proprietario')}
             />
@@ -167,7 +167,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <label className="block font-semibold text-slate-700 mb-1">Rua / Via</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.rua}
               onChange={f('rua')}
             />
@@ -176,7 +176,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <label className="block font-semibold text-slate-700 mb-1">Número</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.numero}
               onChange={f('numero')}
             />
@@ -186,7 +186,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <input
               type="text"
               placeholder="Apto., lote..."
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.complemento}
               onChange={f('complemento')}
             />
@@ -195,7 +195,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <label className="block font-semibold text-slate-700 mb-1">Bairro</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.bairro}
               onChange={f('bairro')}
             />
@@ -205,7 +205,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <input
               type="text"
               placeholder="XXXXX-XXX"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.cep}
               onChange={handleCEP}
             />
@@ -224,7 +224,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
               type="number"
               step="0.01"
               min="0"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.area_total}
               onChange={f('area_total')}
             />
@@ -235,7 +235,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
               type="number"
               step="0.01"
               min="0"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.area_cafe}
               onChange={f('area_cafe')}
             />
@@ -272,7 +272,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             }}
             onFocus={() => setSeletorGraoAberto(true)}
             placeholder="Digite para buscar e adicionar um grão..."
-            className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+            className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
           />
 
           {seletorGraoAberto && graosFiltrados.length > 0 && (
@@ -347,7 +347,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <input
               type="tel"
               placeholder="(XX) XXXXX-XXXX"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.telefone}
               onChange={handleTelefone}
             />
@@ -357,7 +357,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
             <input
               type="email"
               placeholder="produtor@email.com"
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               value={dados.email}
               onChange={f('email')}
             />
@@ -521,7 +521,7 @@ export default function Propriedades() {
           placeholder="Buscar por nome, município ou proprietário..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+          className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
         />
       </div>
 

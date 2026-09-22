@@ -1,4 +1,4 @@
-export default function StatCard({ title, value, subtitle, icon, trend }) {
+export default function StatCard({ title, value, subtitle, icon }) {
   return (
     <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-150 hover:border-caparao-700/30 hover:shadow-md">
       <div>

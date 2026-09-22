@@ -18,7 +18,6 @@ import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import Skeleton from '../components/ui/Skeleton';
-import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
 import { formatarPercentual, pluralizar } from '../utils/formatarNumero';
 import { COR_DIMENSAO_TEXTO } from '../utils/coresICSR';
@@ -188,7 +187,7 @@ export default function Historico() {
                 placeholder="Buscar propriedade, município, proprietário..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               />
             </div>
             <div className="sm:col-span-2 md:col-span-6 flex items-center justify-between gap-2">
@@ -203,7 +202,7 @@ export default function Historico() {
               <select
                 value={filtroStatus}
                 onChange={(e) => mudarFiltroStatus(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               >
                 <option value="">Todos os status</option>
                 <option value="concluida">Concluídas</option>
@@ -216,7 +215,7 @@ export default function Historico() {
               <select
                 value={filtroTecnico}
                 onChange={(e) => setFiltroTecnico(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               >
                 <option value="">Todos os técnicos</option>
                 {tecnicos.map((t) => (
@@ -230,7 +229,7 @@ export default function Historico() {
               <select
                 value={filtroLocalizacao}
                 onChange={(e) => setFiltroLocalizacao(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               >
                 <option value="">Todas as localizações</option>
                 {localizacoes.map((loc) => (

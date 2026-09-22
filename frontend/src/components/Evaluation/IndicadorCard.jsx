@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { FiCheckSquare, FiChevronDown, FiChevronUp, FiCheck, FiInfo, FiEdit3 } from 'react-icons/fi';
+import { FiCheckSquare, FiChevronDown, FiChevronUp, FiCheck, FiInfo } from 'react-icons/fi';
 import { getDefinicao } from '../../utils/glossario';
 import { COR_NOTA, COR_NOTA_TEXTO, COR_NOTA_BADGE_SELECIONADO } from '../../utils/coresICSR';
 import Tooltip from '../ui/Tooltip';
@@ -54,7 +54,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                 <button
                   type="button"
                   aria-label={`O que significa ${glossario.termo}`}
-                  className="rounded-md p-0.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-hidden"
+                  className="rounded-md p-0.5 text-slate-400 hover:text-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1"
                 >
                   <FiInfo size={14} />
                 </button>
@@ -170,7 +170,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
         <button
           type="button"
           onClick={() => setObsExpanded((v) => !v)}
-          className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors focus:outline-hidden"
+          className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1"
         >
           {obsExpanded ? <FiChevronUp size={13} /> : <FiChevronDown size={13} />}
           <span>{observacao ? 'Editar observação' : 'Observação'}</span>
@@ -185,7 +185,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
             value={observacao || ''}
             onChange={(e) => onObservacaoChange?.(e.target.value)}
             placeholder="Justificativa da nota, evidências verificadas (fotos, documentos, depoimentos)."
-            className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 placeholder-slate-400 shadow-xs focus:border-caparao-700 focus:outline-hidden focus:ring-1 focus:ring-caparao-700"
+            className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 placeholder-slate-400 shadow-xs focus:border-caparao-700 focus-visible:outline-none focus:ring-1 focus:ring-caparao-700"
           />
         </div>
       )}

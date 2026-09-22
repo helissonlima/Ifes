@@ -216,7 +216,7 @@ export default function BackupCard({ onRestaurado }) {
               onChange={(e) => setConfirmacao(e.target.value)}
               disabled={restaurando}
               placeholder={PALAVRA_CONFIRMACAO}
-              className="w-full rounded-lg border border-slate-300 p-2 text-xs font-mono uppercase focus:border-red-600 focus:outline-hidden"
+              className="w-full rounded-lg border border-slate-300 p-2 text-xs font-mono uppercase focus:border-red-600 focus-visible:outline-none"
               autoFocus
             />
           </div>

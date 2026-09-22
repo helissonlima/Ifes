@@ -19,7 +19,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
               type="button"
               onClick={onMenuClick}
               aria-label="Alternar navegação lateral"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white/85 hover:bg-white/10 hover:text-white transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-400"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white/85 hover:bg-white/10 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
               <FiMenu size={20} />
             </button>

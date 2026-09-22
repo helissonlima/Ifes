@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import { erroEmail } from '../utils/masks';
 import {
   FiUserPlus, FiSearch, FiEdit2, FiTrash2, FiKey, FiShield, FiUsers,
-  FiUserCheck, FiUserX, FiEye, FiEyeOff, FiPlus, FiWifiOff,
+  FiUserCheck, FiUserX, FiEye, FiEyeOff, FiWifiOff,
 } from 'react-icons/fi';
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -250,14 +250,14 @@ export default function Usuarios() {
                 placeholder="Buscar por nome ou e-mail..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               />
             </div>
             <div className="sm:col-span-3">
               <select
                 value={filtroRole}
                 onChange={(e) => setFiltroRole(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               >
                 <option value="">Todos os papéis</option>
                 {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
@@ -267,7 +267,7 @@ export default function Usuarios() {
               <select
                 value={filtroStatus}
                 onChange={(e) => setFiltroStatus(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               >
                 <option value="">Todos os status</option>
                 <option value="ativo">Ativos</option>
@@ -507,7 +507,7 @@ export default function Usuarios() {
                 autoFocus
                 value={form.nome}
                 onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))}
-                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               />
             </div>
             <div>
@@ -517,7 +517,7 @@ export default function Usuarios() {
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="usuario@dominio.com.br"
-                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               />
               {erroEmail(form.email) && <span className="block mt-1 text-red-600">{erroEmail(form.email)}</span>}
             </div>
@@ -530,7 +530,7 @@ export default function Usuarios() {
                     type={showSenha ? 'text' : 'password'}
                     value={form.senha}
                     onChange={(e) => setForm((f) => ({ ...f, senha: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 p-2 pr-8 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                    className="w-full rounded-lg border border-slate-300 p-2 pr-8 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
                   />
                   <button
                     type="button"
@@ -551,7 +551,7 @@ export default function Usuarios() {
                 value={form.foto_url}
                 onChange={(e) => setForm((f) => ({ ...f, foto_url: e.target.value }))}
                 placeholder="https://exemplo.com/foto.jpg"
-                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
               />
             </div>
           </div>
@@ -657,7 +657,7 @@ export default function Usuarios() {
                 type={showSenha ? 'text' : 'password'}
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 p-2 pr-8 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                className="w-full rounded-lg border border-slate-300 p-2 pr-8 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
                 autoFocus
               />
               <button

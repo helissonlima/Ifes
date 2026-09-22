@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiCheck, FiX, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
 import { MdGrain } from 'react-icons/md';
 import { graosAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -31,7 +31,7 @@ function FormGrao({ dados, onChange }) {
           autoFocus
           value={dados.nome}
           onChange={f('nome')}
-          className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+          className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
         />
       </div>
       <div>
@@ -41,7 +41,7 @@ function FormGrao({ dados, onChange }) {
           maxLength={20}
           value={dados.codigo}
           onChange={f('codigo')}
-          className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 uppercase shadow-xs focus:border-caparao-700 focus:outline-hidden"
+          className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 uppercase shadow-xs focus:border-caparao-700 focus-visible:outline-none"
         />
       </div>
       <div>
@@ -50,7 +50,7 @@ function FormGrao({ dados, onChange }) {
           rows={2}
           value={dados.descricao}
           onChange={f('descricao')}
-          className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+          className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
         />
       </div>
       <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/50 p-3">
@@ -184,7 +184,7 @@ export default function Graos() {
           placeholder="Buscar por nome ou código..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+          className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
         />
       </div>
 

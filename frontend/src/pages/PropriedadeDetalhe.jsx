@@ -9,7 +9,7 @@ import { MdOutlineEco } from 'react-icons/md';
 import MapPicker from '../components/Common/MapPicker';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend, BarChart, Bar, Cell,
+  ResponsiveContainer, Legend, BarChart, Bar,
 } from 'recharts';
 import { propriedadesAPI, avaliacoesAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -454,7 +454,7 @@ export default function PropriedadeDetalhe() {
                   <select
                     value={idA}
                     onChange={(e) => setIdA(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                    className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
                   >
                     {concluidas.map((a) => (
                       <option key={a.id} value={a.id} disabled={a.id === idB}>
@@ -470,7 +470,7 @@ export default function PropriedadeDetalhe() {
                   <select
                     value={idB}
                     onChange={(e) => setIdB(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                    className="w-full rounded-lg border border-slate-300 p-2 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
                   >
                     {concluidas.map((a) => (
                       <option key={a.id} value={a.id} disabled={a.id === idA}>

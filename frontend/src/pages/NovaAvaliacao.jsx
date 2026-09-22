@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiClock, FiTrash2, FiHelpCircle, FiX, FiSearch } from 'react-icons/fi';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiSave, FiWifiOff, FiTrash2, FiHelpCircle, FiX, FiSearch } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { propriedadesAPI, avaliacoesAPI, indicadoresAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -66,7 +66,8 @@ export default function NovaAvaliacao() {
   const [seletorPropAberto, setSeletorPropAberto] = useState(false);
 
   // Cache offline
-  const [ultimoSalvoLocal, setUltimoSalvoLocal] = useState(null);
+  // Só o setter interessa: marca o instante do último autosave local.
+  const [, setUltimoSalvoLocal] = useState(null);
   const [syncPendente, setSyncPendente] = useState(false);
   const [dialogRascunho, setDialogRascunho] = useState({ open: false, draft: null });
   const autoSaveTimer = useRef(null);
@@ -647,7 +648,7 @@ export default function NovaAvaliacao() {
                       type="button"
                       onClick={() => setStep(idx)}
                       className={cn(
-                        'flex flex-1 flex-col items-center gap-1 transition-all focus:outline-hidden text-center group',
+                        'flex flex-1 flex-col items-center gap-1 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 text-center group',
                         active ? 'text-caparao-800 font-bold' : completed ? 'text-slate-700' : 'text-slate-400'
                       )}
                     >
@@ -757,7 +758,7 @@ export default function NovaAvaliacao() {
                         value={buscaPropriedade}
                         onChange={(e) => setBuscaPropriedade(e.target.value)}
                         placeholder="Buscar por nome, município..."
-                        className="w-full rounded-lg border border-slate-200 p-2 text-xs text-slate-800 focus:border-caparao-700 focus:outline-hidden mb-2"
+                        className="w-full rounded-lg border border-slate-200 p-2 text-xs text-slate-800 focus:border-caparao-700 focus-visible:outline-none mb-2"
                         autoFocus
                       />
                       <div className="divide-y divide-slate-100">
@@ -837,7 +838,7 @@ export default function NovaAvaliacao() {
                     type="date"
                     value={info.data}
                     onChange={(e) => setInfo((i) => ({ ...i, data: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
                   />
                 </div>
               </div>
@@ -851,7 +852,7 @@ export default function NovaAvaliacao() {
                   value={info.observacoes}
                   onChange={(e) => setInfo((i) => ({ ...i, observacoes: e.target.value }))}
                   placeholder="Anotações gerais sobre a visita técnica ou condições climáticas da propriedade..."
-                  className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus:outline-hidden"
+                  className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs text-slate-800 shadow-xs focus:border-caparao-700 focus-visible:outline-none"
                 />
               </div>
             </CardContent>
@@ -874,7 +875,6 @@ export default function NovaAvaliacao() {
           <RevisaoFinal
             info={info}
             dimensoesLista={dimensoesLista}
-            respostas={respostas}
             calcularIndiceDimensao={calcularIndiceDimensao}
             calcularIGS={calcularIGS}
             getClassificacao={getClassificacao}
@@ -1030,7 +1030,7 @@ export default function NovaAvaliacao() {
   );
 }
 
-function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao, calcularIGS, getClassificacao, totalRespondidos, totalIndicadores }) {
+function RevisaoFinal({ info, dimensoesLista, calcularIndiceDimensao, calcularIGS, getClassificacao, totalRespondidos, totalIndicadores }) {
   const igs = calcularIGS();
   const classificacao = getClassificacao(igs);
 
