@@ -21,7 +21,7 @@ import { friendlyError } from '../utils/errorMessages';
 import ConfirmDialog from '../components/Common/ConfirmDialog';
 import { useMetodologia, calcularIndiceDimensao as calcularIndiceDimensaoUtil, calcularIGS as calcularIGSUtil, getClassificacao as getClassificacaoUtil } from '../utils/metodologia';
 import { COR_CLASSIFICACAO } from '../utils/coresICSR';
-import { formatarData } from '../utils/formatarData';
+import { formatarData, hojeISO } from '../utils/formatarData';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
@@ -92,7 +92,7 @@ export default function NovaAvaliacao() {
   const [info, setInfo] = useState({
     propriedade: null,
     tecnico: '',
-    data: new Date().toISOString().split('T')[0],
+    data: hojeISO(),
     observacoes: '',
   });
   const [respostas, setRespostas] = useState({});

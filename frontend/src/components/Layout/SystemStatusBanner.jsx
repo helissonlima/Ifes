@@ -11,7 +11,7 @@ export default function SystemStatusBanner() {
       <Alert
         variant="warning"
         icon={<FiWifiOff className="h-5 w-5" />}
-        className="mb-4"
+        className="no-print mb-4"
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold text-amber-900">
@@ -35,7 +35,7 @@ export default function SystemStatusBanner() {
     <Alert
       variant="success"
       icon={<FiWifi className="h-5 w-5" />}
-      className="mb-4"
+      className="no-print mb-4"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-semibold text-emerald-900">

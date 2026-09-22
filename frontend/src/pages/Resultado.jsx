@@ -21,6 +21,7 @@ import Badge from '../components/ui/Badge';
 import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
+import { formatarNumero, formatarPercentual } from '../utils/formatarNumero';
 
 // Nome do campo de índice de cada dimensão na resposta de GET /avaliacoes/:id
 const CAMPO_POR_DIMENSAO = {
@@ -283,12 +284,13 @@ export default function Resultado() {
                     <div className="flex justify-between items-center text-xs mb-1">
                       <div>
                         <span className="font-bold text-slate-800 text-sm">{info.nome}</span>
-                        <span className="block text-[11px] text-slate-500">
-                          Peso: {info.peso}% · Contribuição: {((valor * info.peso) / 100 * 100).toFixed(1)}%
+                        <span className="block text-xs text-slate-500">
+                          Peso: {Math.round(info.peso * 100)}% · Contribuição:{' '}
+                          {formatarNumero(valor * info.peso * 100)} p.p. do ICSR
                         </span>
                       </div>
                       <span className="text-base font-extrabold tabular-nums" style={{ color: info.cor }}>
-                        {(valor * 100).toFixed(1)}%
+                        {formatarPercentual(valor)}
                       </span>
                     </div>
                     <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
@@ -442,7 +444,7 @@ export default function Resultado() {
               <h3 className="text-sm font-bold text-slate-800 mb-2">
                 Detalhamento por Dimensão
               </h3>
-              <div className="flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 mb-4">
+              <div className="no-print flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 mb-4">
                 {diagnostico.diagnostico_por_dimensao.map((d, i) => (
                   <button
                     key={d.dimensao}
@@ -460,8 +462,20 @@ export default function Resultado() {
                 ))}
               </div>
 
-              {diagnostico.diagnostico_por_dimensao[tabDiag] && (
-                <div className="overflow-x-auto rounded-lg border border-slate-200">
+              {diagnostico.diagnostico_por_dimensao.map((dimensao, indice) => (
+                <div
+                  key={dimensao.dimensao}
+                  className={cn(
+                    'overflow-x-auto rounded-lg border border-slate-200',
+                    // Em tela mostra só a aba ativa; no papel, todas as
+                    // dimensões saem em sequência, cada uma com seu título.
+                    indice === tabDiag ? '' : 'hidden print:block',
+                    indice > 0 && 'print:mt-4'
+                  )}
+                >
+                  <p className="hidden print:block px-3 pt-3 text-sm font-bold text-slate-800">
+                    {dimensao.nome}
+                  </p>
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                       <tr>
@@ -473,7 +487,7 @@ export default function Resultado() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {diagnostico.diagnostico_por_dimensao[tabDiag].itens.map((it) => (
+                      {dimensao.itens.map((it) => (
                         <tr key={it.indicador_codigo} className="hover:bg-slate-50/70">
                           <td className="py-2.5 px-3">
                             <p className="font-semibold text-slate-800">{it.indicador_nome}</p>
@@ -509,7 +523,7 @@ export default function Resultado() {
                     </tbody>
                   </table>
                 </div>
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -564,7 +578,7 @@ export default function Resultado() {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 mb-4">
+          <div className="no-print flex gap-2 overflow-x-auto border-b border-slate-200 pb-2 mb-4">
             {Object.entries(DIM_INFO).map(([cod, info], i) => (
               <button
                 key={cod}
@@ -583,8 +597,17 @@ export default function Resultado() {
           </div>
 
           {Object.entries(DIM_INFO).map(([cod, info], i) => (
-            tabAtiva === i && (
-              <div key={cod}>
+            (
+              <div
+                key={cod}
+                className={cn(
+                  i === tabAtiva ? '' : 'hidden print:block',
+                  i > 0 && 'print:mt-4'
+                )}
+              >
+                <p className="hidden print:block mb-2 text-sm font-bold text-slate-800">
+                  {info.nome}
+                </p>
                 {(respostasPorDimensao[cod] || []).length === 0 ? (
                   <Alert variant="info">Nenhum indicador avaliado nesta dimensão.</Alert>
                 ) : (

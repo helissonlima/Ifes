@@ -47,40 +47,65 @@ body {
   color: #14532D;
 }
 
-/* Print styles */
+/* Print styles — laudo da avaliação em A4.
+   Reescrito após a saída do MUI: os seletores antigos (.MuiCard-root,
+   .MuiAppBar-root, .MuiTabs-root) não casavam com nada, então a impressão
+   saía sem nenhuma regra aplicada. */
 @media print {
   @page { size: A4; margin: 14mm; }
 
-  body { background: #fff !important; }
+  html, body {
+    background: #fff !important;
+  }
 
-  .MuiAppBar-root,
-  .MuiDrawer-root,
-  .MuiBottomNavigation-root,
-  .MuiTabs-root,
-  .no-print,
-  button {
+  /* Cromo da aplicação: barra superior, navegação e ações de tela. */
+  header,
+  aside,
+  nav,
+  .no-print {
     display: none !important;
   }
 
-  /* Mostra todas as abas/tabpanels ocultas para impressão */
-  .print-resultado [role="tabpanel"] { display: block !important; }
-  .print-resultado .MuiTabs-root { display: none !important; }
+  /* O <main> tem padding e offset para a barra fixa — sem ela na folha. */
+  main {
+    padding: 0 !important;
+  }
 
-  .MuiCard-root,
-  .MuiPaper-root {
+  .pt-15 {
+    padding-top: 0 !important;
+  }
+
+  /* Cards: sem sombra, com borda fina, sem quebrar no meio. */
+  .print-resultado [class*="rounded-"] {
     box-shadow: none !important;
-    border: 1px solid #ddd !important;
+  }
+
+  .print-resultado > * {
     break-inside: avoid;
   }
 
-  .print-resultado .MuiCard-root { page-break-inside: avoid; }
+  /* Abas viram seções: imprime todo o conteúdo, não só o painel ativo. */
+  .print-resultado [role="tabpanel"] {
+    display: block !important;
+  }
 
-  /* Mostra todas as colunas escondidas em telas pequenas */
-  .print-resultado [class*="MuiTableCell-root"] {
+  .print-resultado [role="tablist"] {
+    display: none !important;
+  }
+
+  /* Colunas escondidas em telas estreitas voltam no papel. */
+  .print-resultado td.hidden,
+  .print-resultado th.hidden {
     display: table-cell !important;
   }
 
-  /* Cards com gradiente: garante cores na impressão */
+  /* Blocos marcados para aparecer só na impressão (títulos de dimensão e
+     as abas inativas, que no papel viram seções em sequência). */
+  .print-resultado .print\:block {
+    display: block !important;
+  }
+
+  /* Gráficos e faixas coloridas precisam sair com cor. */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
