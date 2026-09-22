@@ -709,10 +709,10 @@ function StatBox({ icon, label, value, cor }) {
       style={{ borderTop: `3px solid ${cor}` }}
     >
       <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
-        <span style={{ color }}>{icon}</span>
+        <span style={{ color: cor }}>{icon}</span>
         <span>{label}</span>
       </div>
-      <div className="text-2xl font-black tabular-nums" style={{ color }}>
+      <div className="text-2xl font-black tabular-nums" style={{ color: cor }}>
         {value}
       </div>
     </div>

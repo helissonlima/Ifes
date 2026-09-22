@@ -2,7 +2,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { FiX } from 'react-icons/fi';
 import { cn } from '../../utils/cn';
 
-export const Dialog = DialogPrimitive.Root;
+export const DialogRoot = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogPortal = DialogPrimitive.Portal;
 export const DialogClose = DialogPrimitive.Close;
@@ -10,10 +10,7 @@ export const DialogClose = DialogPrimitive.Close;
 export function DialogOverlay({ className, ...props }) {
   return (
     <DialogPrimitive.Overlay
-      className={cn(
-        'fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-2xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-        className
-      )}
+      className={cn('fixed inset-0 z-50 bg-slate-900/50', className)}
       {...props}
     />
   );
@@ -25,29 +22,43 @@ export function DialogContent({ className, children, ...props }) {
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-slate-200 bg-white p-6 shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-2xl',
+          // Mobile: folha de tela cheia. sm+: caixa centralizada.
+          'fixed inset-0 z-50 flex w-full flex-col bg-white shadow-xl',
+          'sm:inset-auto sm:left-1/2 sm:top-1/2 sm:max-h-[85vh] sm:w-[calc(100%-2rem)] sm:max-w-lg',
+          'sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:border-slate-200',
           className
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#1B4D24] focus:ring-offset-2 disabled:pointer-events-none cursor-pointer">
-          <FiX className="h-4 w-4 text-slate-500" />
-          <span className="sr-only">Fechar</span>
-        </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPortal>
   );
 }
 
 export function DialogHeader({ className, ...props }) {
-  return <div className={cn('flex flex-col space-y-1.5 text-left', className)} {...props} />;
+  return (
+    <div
+      className={cn(
+        'flex shrink-0 flex-col gap-1 border-b border-slate-200 px-5 py-4 pr-12',
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+export function DialogBody({ className, ...props }) {
+  return <div className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-4', className)} {...props} />;
 }
 
 export function DialogFooter({ className, ...props }) {
   return (
     <div
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 mt-2', className)}
+      className={cn(
+        'flex shrink-0 flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-end',
+        className
+      )}
       {...props}
     />
   );
@@ -56,7 +67,7 @@ export function DialogFooter({ className, ...props }) {
 export function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
-      className={cn('text-lg font-bold leading-tight tracking-tight text-slate-900', className)}
+      className={cn('text-base font-bold leading-tight tracking-tight text-slate-900', className)}
       {...props}
     />
   );
@@ -64,12 +75,60 @@ export function DialogTitle({ className, ...props }) {
 
 export function DialogDescription({ className, ...props }) {
   return (
-    <DialogPrimitive.Description
-      className={cn('text-sm text-slate-500', className)}
-      {...props}
-    />
+    <DialogPrimitive.Description className={cn('text-sm text-slate-500', className)} {...props} />
   );
 }
 
-export default Dialog;
+export function DialogCloseButton({ className, ...props }) {
+  return (
+    <DialogPrimitive.Close
+      className={cn(
+        'absolute right-3 top-3 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-2 disabled:pointer-events-none',
+        className
+      )}
+      {...props}
+    >
+      <FiX className="h-5 w-5" aria-hidden="true" />
+      <span className="sr-only">Fechar</span>
+    </DialogPrimitive.Close>
+  );
+}
 
+/**
+ * Dialog padrão do sistema: monta overlay, caixa, cabeçalho com título,
+ * corpo rolável e rodapé fixo com as ações.
+ *
+ * O cabeçalho e o rodapé não rolam — só o corpo — para que os botões de
+ * ação continuem visíveis em formulários longos (propriedade, usuário).
+ */
+export default function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  footer,
+  className,
+  bodyClassName,
+  children,
+  ...props
+}) {
+  return (
+    <DialogRoot open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={className}
+        aria-describedby={description ? undefined : undefined}
+        {...props}
+      >
+        {(title || description) && (
+          <DialogHeader>
+            {title && <DialogTitle>{title}</DialogTitle>}
+            {description && <DialogDescription>{description}</DialogDescription>}
+          </DialogHeader>
+        )}
+        <DialogBody className={bodyClassName}>{children}</DialogBody>
+        {footer && <DialogFooter>{footer}</DialogFooter>}
+        <DialogCloseButton />
+      </DialogContent>
+    </DialogRoot>
+  );
+}

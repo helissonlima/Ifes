@@ -697,7 +697,7 @@ export default function Propriedades() {
         open={dialog.open}
         onOpenChange={(open) => !open && !salvando && fecharDialog()}
         title={dialog.editando ? 'Editar Propriedade' : 'Nova Propriedade'}
-        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="max-w-2xl"
         footer={
           <div className="flex w-full items-center justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={fecharDialog} disabled={salvando}>

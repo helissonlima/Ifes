@@ -49,7 +49,7 @@ export default function ComparativoAvaliacoesDialog({ open, onClose, idA, idB })
       open={open}
       onOpenChange={(isOpen) => !isOpen && onClose()}
       title="Comparativo entre avaliações"
-      className="max-w-2xl max-h-[85vh] overflow-y-auto"
+      className="max-w-2xl"
       footer={
         <Button variant="secondary" onClick={onClose}>
           Fechar

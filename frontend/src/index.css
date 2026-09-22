@@ -1,14 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1B4D24;
-  --color-primary-light: #2E7D32;
-  --color-primary-dark: #113518;
+  /* Verde Caparaó — escala única de marca/ação, ancorada em 700 (#1B4D24).
+     Usada em navegação ativa, botões primários, abas selecionadas e foco. */
+  --color-caparao-50: #F0F7F1;
+  --color-caparao-100: #DCEDE0;
+  --color-caparao-200: #BBDCC3;
+  --color-caparao-300: #8DC29B;
+  --color-caparao-400: #5A9F6E;
+  --color-caparao-500: #35804B;
+  --color-caparao-600: #246237;
+  --color-caparao-700: #1B4D24;
+  --color-caparao-800: #143519;
+  --color-caparao-900: #0F2712;
+
+  /* Aliases de compatibilidade */
+  --color-primary: var(--color-caparao-700);
+  --color-primary-light: var(--color-caparao-500);
+  --color-primary-dark: var(--color-caparao-800);
   --color-secondary: #5D4037;
+
+  /* Cores de dimensão ICSR (dado, não marca) */
   --color-dimensao-economica: #0284C7;
   --color-dimensao-ambiental: #1B4D24;
   --color-dimensao-social: #F57C00;
   --color-dimensao-gestao: #7E22CE;
+
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
 }
 
