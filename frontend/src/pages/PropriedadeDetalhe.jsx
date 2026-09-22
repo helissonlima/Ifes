@@ -162,7 +162,7 @@ export default function PropriedadeDetalhe() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             icon={<FiArrowLeft />}
             onClick={() => navigate('/propriedades')}

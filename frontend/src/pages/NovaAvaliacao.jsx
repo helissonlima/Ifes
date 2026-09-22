@@ -581,7 +581,7 @@ export default function NovaAvaliacao() {
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 icon={<FiArrowLeft />}
                 onClick={() => navigate(-1)}
@@ -964,7 +964,7 @@ export default function NovaAvaliacao() {
 
             <div className="flex justify-between gap-2">
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 icon={<FiArrowLeft />}
                 disabled={passo === 0}

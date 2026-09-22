@@ -276,7 +276,7 @@ export default function Graos() {
                         type="button"
                         onClick={() => abrirEditar(g)}
                         aria-label={`Editar ${g.nome}`}
-                        className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-500 hover:bg-slate-100"
                       >
                         <FiEdit2 size={16} />
                       </button>
@@ -285,7 +285,7 @@ export default function Graos() {
                         onClick={() => setConfirmExcluir(g)}
                         disabled={excluindo === g.id}
                         aria-label={`Excluir ${g.nome}`}
-                        className="rounded-lg p-1.5 text-red-600 hover:bg-red-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-red-600 hover:bg-red-50"
                       >
                         <FiTrash2 size={16} />
                       </button>

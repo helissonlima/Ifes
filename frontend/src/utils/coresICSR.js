@@ -45,3 +45,18 @@ export const COR_CLASSIFICACAO_TEXTO = {
   'Boa': '#33691e',
   'Alta': '#2E7D32',
 };
+
+// Status do diagnóstico (vem do backend em caixa alta, com a cor da faixa).
+// A cor da faixa serve de fundo, não de texto: '#8BC34A' (BOM) sobre o próprio
+// fundo tintado fica abaixo de 4.5:1. Aqui cada status ganha o par
+// fundo/texto já validado e um rótulo em caixa normal.
+export const STATUS_DIAGNOSTICO = {
+  'CRÍTICO':   { rotulo: 'Crítico',   texto: '#B71C1C', fundo: '#FEECEB' },
+  'ATENÇÃO':   { rotulo: 'Atenção',   texto: '#E65100', fundo: '#FFF3E0' },
+  'BOM':       { rotulo: 'Bom',       texto: '#33691E', fundo: '#F1F8E9' },
+  'EXCELENTE': { rotulo: 'Excelente', texto: '#1B5E20', fundo: '#E8F5E9' },
+};
+
+export function estiloStatus(status) {
+  return STATUS_DIAGNOSTICO[status] || { rotulo: status, texto: '#334155', fundo: '#F1F5F9' };
+}

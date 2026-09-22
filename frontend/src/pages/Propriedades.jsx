@@ -315,7 +315,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
                       <button
                         type="button"
                         onClick={() => removerGrao(g.id)}
-                        className="rounded-md p-1 text-slate-400 hover:text-red-600"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-400 hover:text-red-600"
                         title="Remover"
                       >
                         <FiX size={16} />
@@ -593,7 +593,7 @@ export default function Propriedades() {
                       type="button"
                       onClick={() => abrirEditar(p)}
                       aria-label={`Editar ${p.nome}`}
-                      className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-slate-800"
                     >
                       <FiEdit2 size={16} />
                     </button>
@@ -602,7 +602,7 @@ export default function Propriedades() {
                       onClick={() => setConfirmExcluir(p)}
                       disabled={excluindo === p.id}
                       aria-label={`Excluir ${p.nome}`}
-                      className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-red-500 hover:bg-red-50 hover:text-red-700"
                     >
                       <FiTrash2 size={16} />
                     </button>
@@ -658,7 +658,7 @@ export default function Propriedades() {
                           type="button"
                           aria-label={`Nova avaliação para ${p.nome}`}
                           onClick={() => navigate(`/avaliacao/nova?propriedade=${p.id}`)}
-                          className="rounded-lg p-1.5 text-caparao-700 hover:bg-caparao-50"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-caparao-700 hover:bg-caparao-50"
                         >
                           <FiClipboard size={16} />
                         </button>
@@ -668,7 +668,7 @@ export default function Propriedades() {
                           type="button"
                           onClick={() => abrirEditar(p)}
                           aria-label={`Editar ${p.nome}`}
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-slate-800"
                         >
                           <FiEdit2 size={16} />
                         </button>
@@ -679,7 +679,7 @@ export default function Propriedades() {
                           onClick={() => setConfirmExcluir(p)}
                           disabled={excluindo === p.id}
                           aria-label={`Excluir ${p.nome}`}
-                          className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-red-500 hover:bg-red-50 hover:text-red-700"
                         >
                           <FiTrash2 size={16} />
                         </button>

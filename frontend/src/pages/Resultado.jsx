@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import { avaliacoesAPI } from '../services/api';
 import { friendlyError } from '../utils/errorMessages';
-import { COR_NOTA, COR_NOTA_TEXTO, COR_CLASSIFICACAO } from '../utils/coresICSR';
+import { COR_NOTA, COR_NOTA_TEXTO, COR_CLASSIFICACAO, estiloStatus } from '../utils/coresICSR';
 import { useMetodologia } from '../utils/metodologia';
 import { formatarData, formatarDataCurta } from '../utils/formatarData';
 import CachedDataBanner from '../components/Common/CachedDataBanner';
@@ -143,7 +143,7 @@ export default function Resultado() {
       <div className="no-print flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             icon={<FiArrowLeft />}
             onClick={() => navigate(-1)}
@@ -381,16 +381,62 @@ export default function Resultado() {
                   Plano de Ação Prioritário — Top 5 indicadores
                 </span>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+              {/* Lista empilhada no celular: a tabela cortava Status, Impacto
+                  e Prazo num scroll horizontal pouco perceptível. */}
+              <ul className="space-y-2 sm:hidden">
+                {diagnostico.plano_acao_top5.map((it, i) => (
+                  <li
+                    key={it.indicador_codigo}
+                    className="rounded-lg border border-caparao-100 bg-white p-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-caparao-100 text-xs font-bold text-caparao-800">
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-slate-900">{it.indicador_nome}</p>
+                        <p className="text-xs text-slate-500">{it.dimensao_nome}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <span
+                            className="inline-flex rounded-md px-2 py-0.5 text-xs font-bold"
+                            style={{
+                              backgroundColor: `${COR_NOTA[it.nota] || '#9E9E9E'}22`,
+                              color: COR_NOTA_TEXTO[it.nota] || '#334155',
+                            }}
+                          >
+                            {formatarPercentual(it.nota, 0)}
+                          </span>
+                          <span
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-semibold"
+                            style={{
+                              backgroundColor: estiloStatus(it.status).fundo,
+                              color: estiloStatus(it.status).texto,
+                            }}
+                          >
+                            {STATUS_ICON[it.status]}
+                            {estiloStatus(it.status).rotulo}
+                          </span>
+                          <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
+                            +{formatarNumero(it.impacto_igs * 100, 2)} p.p.
+                          </span>
+                        </div>
+                        <p className="mt-1.5 text-xs text-slate-500">{it.prazo_sugerido}</p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full text-left text-sm">
                   <thead className="bg-caparao-100/60 text-slate-700 font-semibold border-b border-caparao-200">
                     <tr>
                       <th className="py-2 px-3 w-10">#</th>
                       <th className="py-2 px-3">Indicador</th>
                       <th className="py-2 px-3 w-20">Nota</th>
                       <th className="py-2 px-3 w-28">Status</th>
-                      <th className="py-2 px-3 hidden md:table-cell w-28">Impacto ICSR</th>
-                      <th className="py-2 px-3 hidden sm:table-cell">Prazo sugerido</th>
+                      <th className="py-2 px-3 w-28">Impacto ICSR</th>
+                      <th className="py-2 px-3">Prazo sugerido</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-caparao-100">
@@ -405,29 +451,29 @@ export default function Resultado() {
                           <span
                             className="inline-flex rounded-md px-2 py-0.5 text-xs font-bold"
                             style={{
-                              backgroundColor: COR_NOTA[it.nota] || '#9E9E9E',
-                              color: COR_NOTA_TEXTO[it.nota] || '#616161',
+                              backgroundColor: `${COR_NOTA[it.nota] || '#9E9E9E'}22`,
+                              color: COR_NOTA_TEXTO[it.nota] || '#334155',
                             }}
                           >
-                            {(it.nota * 100).toFixed(0)}%
+                            {formatarPercentual(it.nota, 0)}
                           </span>
                         </td>
                         <td className="py-2.5 px-3">
                           <span
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-semibold"
                             style={{
-                              backgroundColor: `${it.status_cor}22`,
-                              color: it.status_cor,
+                              backgroundColor: estiloStatus(it.status).fundo,
+                              color: estiloStatus(it.status).texto,
                             }}
                           >
                             {STATUS_ICON[it.status]}
-                            {it.status}
+                            {estiloStatus(it.status).rotulo}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-slate-800 hidden md:table-cell">
-                          +{(it.impacto_igs * 100).toFixed(2)}%
+                        <td className="py-2.5 px-3 font-bold text-slate-800 tabular-nums">
+                          +{formatarNumero(it.impacto_igs * 100, 2)} p.p.
                         </td>
-                        <td className="py-2.5 px-3 text-slate-600 hidden sm:table-cell">
+                        <td className="py-2.5 px-3 text-slate-600">
                           {it.prazo_sugerido}
                         </td>
                       </tr>
@@ -436,7 +482,7 @@ export default function Resultado() {
                 </table>
               </div>
               <p className="mt-2 text-xs text-slate-500">
-                * Impacto ICSR = potencial de ganho no índice consolidado se este indicador atingir nota 1,00.
+                * Impacto ICSR = quantos pontos percentuais o índice consolidado ganha se este indicador atingir nota 1,00.
               </p>
             </div>
 
@@ -499,18 +545,18 @@ export default function Resultado() {
                             )}
                           </td>
                           <td className="py-2.5 px-3 font-bold" style={{ color: COR_NOTA_TEXTO[it.nota] || '#616161' }}>
-                            {(it.nota * 100).toFixed(0)}%
+                            {formatarPercentual(it.nota, 0)}
                           </td>
                           <td className="py-2.5 px-3">
                             <span
-                              className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
+                              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-semibold"
                               style={{
-                                backgroundColor: `${it.status_cor}22`,
-                                color: it.status_cor,
+                                backgroundColor: estiloStatus(it.status).fundo,
+                                color: estiloStatus(it.status).texto,
                               }}
                             >
                               {STATUS_ICON[it.status]}
-                              {it.status}
+                              {estiloStatus(it.status).rotulo}
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-slate-600 hidden md:table-cell">
@@ -645,7 +691,7 @@ export default function Resultado() {
                               className="py-3 px-3 w-16 text-right font-extrabold tabular-nums"
                               style={{ color: COR_NOTA[r.nota] }}
                             >
-                              {(r.nota * 100).toFixed(0)}%
+                              {formatarPercentual(r.nota, 0)}
                             </td>
                             <td className="py-3 px-3 text-slate-600 hidden md:table-cell text-sm">
                               {r.criterio_selecionado || '—'}

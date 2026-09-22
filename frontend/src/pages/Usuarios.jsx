@@ -442,7 +442,7 @@ export default function Usuarios() {
                             type="button"
                             onClick={() => abrirEditar(u)}
                             aria-label={`Editar ${u.nome}`}
-                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-500 hover:bg-slate-100 hover:text-slate-800"
                           >
                             <FiEdit2 size={16} />
                           </button>
@@ -452,7 +452,7 @@ export default function Usuarios() {
                             type="button"
                             onClick={() => abrirResetSenha(u)}
                             aria-label={`Redefinir senha de ${u.nome}`}
-                            className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-amber-600 hover:bg-amber-50"
                           >
                             <FiKey size={16} />
                           </button>
@@ -463,7 +463,7 @@ export default function Usuarios() {
                             disabled={isSelf}
                             onClick={() => abrirExcluir(u)}
                             aria-label={`Excluir ${u.nome}`}
-                            className="rounded-lg p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <FiTrash2 size={16} />
                           </button>

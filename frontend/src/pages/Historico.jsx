@@ -326,7 +326,7 @@ export default function Historico() {
                         type="button"
                         onClick={() => navigate(`/avaliacao/${av.id}`)}
                         aria-label={`Ver avaliação de ${av.propriedade_nome}`}
-                        className="rounded-lg p-1.5 text-caparao-700 hover:bg-caparao-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-caparao-700 hover:bg-caparao-50"
                       >
                         <FiEye size={16} />
                       </button>
@@ -335,7 +335,7 @@ export default function Historico() {
                         onClick={() => pedirExclusao(av.id, av.propriedade_nome)}
                         disabled={excluindo === av.id}
                         aria-label={`Excluir avaliação de ${av.propriedade_nome}`}
-                        className="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-red-500 hover:bg-red-50"
                       >
                         <FiTrash2 size={16} />
                       </button>
@@ -422,7 +422,7 @@ export default function Historico() {
                         <button
                           type="button"
                           onClick={() => navigate(`/avaliacao/${av.id}`)}
-                          className="rounded-lg p-1.5 text-caparao-700 hover:bg-caparao-50"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-caparao-700 hover:bg-caparao-50"
                           title="Ver avaliação"
                         >
                           <FiEye size={16} />
@@ -431,7 +431,7 @@ export default function Historico() {
                           type="button"
                           onClick={() => pedirExclusao(av.id, av.propriedade_nome)}
                           disabled={excluindo === av.id}
-                          className="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-red-500 hover:bg-red-50"
                           title="Excluir avaliação"
                         >
                           <FiTrash2 size={16} />

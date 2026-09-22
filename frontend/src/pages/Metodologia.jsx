@@ -161,11 +161,11 @@ export default function Metodologia() {
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <Table>
               <TableHeader>
-                <TableRow className="bg-caparao-800 hover:bg-caparao-800">
-                  <TableHead className="text-white font-bold">Faixa do IGS</TableHead>
-                  <TableHead className="text-white font-bold">Classificação</TableHead>
-                  <TableHead className="text-white font-bold">Descrição</TableHead>
-                  <TableHead className="text-white font-bold">Nível</TableHead>
+                <TableRow>
+                  <TableHead>Faixa do IGS</TableHead>
+                  <TableHead>Classificação</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Nível</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -306,7 +306,7 @@ export default function Metodologia() {
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <Table className="min-w-[760px]">
               <TableHeader>
-                <TableRow className="bg-caparao-800 hover:bg-caparao-800">
+                <TableRow>
                   {['Nota', 'Interpretação Geral', 'Ambiental', 'Econômica', 'Social', 'Gestão & Qualidade'].map((h) => (
                     <TableHead key={h} className="text-white font-bold">
                       {h}

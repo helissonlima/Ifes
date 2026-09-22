@@ -189,9 +189,9 @@ export default function Guia() {
             <div className="overflow-x-auto rounded-xl border border-slate-200">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-caparao-800 hover:bg-caparao-800">
-                    <TableHead className="text-white font-bold">Etapa</TableHead>
-                    <TableHead className="text-white font-bold">Duração</TableHead>
+                  <TableRow>
+                    <TableHead>Etapa</TableHead>
+                    <TableHead>Duração</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
