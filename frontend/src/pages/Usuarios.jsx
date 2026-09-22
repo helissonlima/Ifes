@@ -20,6 +20,7 @@ import Dialog from '../components/ui/Dialog';
 import Switch from '../components/ui/Switch';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
+import { CAPARAO_700 } from '../utils/coresMarca';
 
 const PERMISSION_KEYS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -30,7 +31,7 @@ const PERMISSION_KEYS = [
 ];
 
 const ROLES = [
-  { value: 'admin', label: 'Administrador', cor: '#1B4D24', desc: 'Acesso total + gerência de usuários' },
+  { value: 'admin', label: 'Administrador', cor: CAPARAO_700, desc: 'Acesso total + gerência de usuários' },
   { value: 'tecnico', label: 'Técnico', cor: '#0284C7', desc: 'Cadastra propriedades e realiza avaliações' },
   { value: 'visualizador', label: 'Visualizador', cor: '#7C3AED', desc: 'Apenas consulta dashboards e históricos' },
 ];
@@ -232,7 +233,7 @@ export default function Usuarios() {
 
       {/* Cards de Métricas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatBox icon={<FiUsers />} label="Total" value={stats.total} cor="#1B4D24" />
+        <StatBox icon={<FiUsers />} label="Total" value={stats.total} cor={CAPARAO_700} />
         <StatBox icon={<FiUserCheck />} label="Ativos" value={stats.ativos} cor="#16A34A" />
         <StatBox icon={<FiUserX />} label="Inativos" value={stats.inativos} cor="#DC2626" />
         <StatBox icon={<FiShield />} label="Admins" value={stats.admins} cor="#7C3AED" />
@@ -368,7 +369,7 @@ export default function Usuarios() {
         /* Desktop Table */
         <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-xs">
               <tr>
                 <th className="py-3 px-4">Usuário</th>
                 <th className="py-3 px-4">E-mail</th>
@@ -401,7 +402,7 @@ export default function Usuarios() {
                             <span className="font-bold text-slate-900 text-sm">{u.nome}</span>
                             {isSelf && <Badge variant="outline" size="sm">você</Badge>}
                           </div>
-                          <span className="text-[11px] text-slate-400">
+                          <span className="text-xs text-slate-400">
                             cadastrado em {formatarData(u.criado_em)}
                           </span>
                         </div>
@@ -539,7 +540,7 @@ export default function Usuarios() {
                     {showSenha ? <FiEyeOff size={14} /> : <FiEye size={14} />}
                   </button>
                 </div>
-                <span className="block mt-1 text-[11px] text-slate-500">Mínimo 6 caracteres</span>
+                <span className="block mt-1 text-xs text-slate-500">Mínimo 6 caracteres</span>
               </div>
             )}
 
@@ -573,7 +574,7 @@ export default function Usuarios() {
                       <FiShield size={14} />
                       <span>{r.label}</span>
                     </div>
-                    <p className="mt-1 text-[11px] text-slate-500 leading-snug">{r.desc}</p>
+                    <p className="mt-1 text-xs text-slate-500 leading-snug">{r.desc}</p>
                   </div>
                 );
               })}
@@ -588,14 +589,14 @@ export default function Usuarios() {
                   <button
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, permissions: PERMISSION_KEYS.reduce((a, p) => ({ ...a, [p.key]: true }), {}) }))}
-                    className="text-[11px] font-semibold text-caparao-700 hover:underline"
+                    className="text-xs font-semibold text-caparao-700 hover:underline"
                   >
                     Marcar todas
                   </button>
                   <button
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, permissions: PERMISSION_KEYS.reduce((a, p) => ({ ...a, [p.key]: false }), {}) }))}
-                    className="text-[11px] font-semibold text-slate-500 hover:underline"
+                    className="text-xs font-semibold text-slate-500 hover:underline"
                   >
                     Limpar
                   </button>
@@ -667,7 +668,7 @@ export default function Usuarios() {
                 {showSenha ? <FiEyeOff size={14} /> : <FiEye size={14} />}
               </button>
             </div>
-            <span className="block mt-1 text-[11px] text-slate-500">Mínimo 6 caracteres</span>
+            <span className="block mt-1 text-xs text-slate-500">Mínimo 6 caracteres</span>
           </div>
         </div>
       </Dialog>

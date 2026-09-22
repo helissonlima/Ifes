@@ -23,7 +23,7 @@ function CenterLoading({ title = 'Carregando sistema', description = 'Preparando
   return (
     <div className="min-h-screen grid place-items-center px-4 bg-slate-50/50">
       <div className="flex flex-col items-center text-center max-w-sm gap-3">
-        <Spinner size={32} className="text-[#1B4D24]" />
+        <Spinner size={32} className="text-caparao-700" />
         <div>
           <h1 className="text-base font-black text-slate-900 mb-1">
             {title}

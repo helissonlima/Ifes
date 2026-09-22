@@ -22,6 +22,7 @@ import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
 import { formatarNumero, formatarPercentual } from '../utils/formatarNumero';
+import { CAPARAO_700 } from '../utils/coresMarca';
 
 // Nome do campo de índice de cada dimensão na resposta de GET /avaliacoes/:id
 const CAMPO_POR_DIMENSAO = {
@@ -196,7 +197,7 @@ export default function Resultado() {
             <div className="sm:col-span-8 lg:col-span-9">
               <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
                 <div>
-                  <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-500">
                     ICSR — Índice Consolidado de Sustentabilidade Rural
                   </span>
                   <div className="text-4xl font-black tracking-tight text-slate-900 tabular-nums leading-tight mt-0.5">
@@ -208,19 +209,19 @@ export default function Resultado() {
 
               <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3 sm:grid-cols-4">
                 <div>
-                  <span className="block text-[11px] text-slate-500">Propriedade</span>
+                  <span className="block text-xs text-slate-500">Propriedade</span>
                   <span className="block text-sm font-bold text-slate-800">{avaliacao.propriedade_nome}</span>
                 </div>
                 <div>
-                  <span className="block text-[11px] text-slate-500">Município</span>
+                  <span className="block text-xs text-slate-500">Município</span>
                   <span className="block text-sm font-semibold text-slate-800">{avaliacao.municipio}</span>
                 </div>
                 <div>
-                  <span className="block text-[11px] text-slate-500">Técnico</span>
+                  <span className="block text-xs text-slate-500">Técnico</span>
                   <span className="block text-sm font-semibold text-slate-800">{avaliacao.tecnico_responsavel || '—'}</span>
                 </div>
                 <div>
-                  <span className="block text-[11px] text-slate-500">Data</span>
+                  <span className="block text-xs text-slate-500">Data</span>
                   <span className="block text-sm font-semibold text-slate-800">{formatarData(avaliacao.data_avaliacao)}</span>
                 </div>
               </div>
@@ -306,7 +307,7 @@ export default function Resultado() {
                 );
               })}
               <div className="mt-4 rounded-lg bg-caparao-50/50 p-3 text-center border border-caparao-100">
-                <p className="text-[11px] font-medium text-caparao-800">
+                <p className="text-xs font-medium text-caparao-800">
                   ICSR = (Amb. × 35%) + (Econ. × 30%) + (Soc. × 20%) + (IGQG × 15%) — Médias ponderadas
                 </p>
               </div>
@@ -398,7 +399,7 @@ export default function Resultado() {
                         <td className="py-2.5 px-3 font-bold text-caparao-800">{i + 1}</td>
                         <td className="py-2.5 px-3">
                           <p className="font-semibold text-slate-800">{it.indicador_nome}</p>
-                          <p className="text-[11px] text-slate-500">{it.dimensao_nome}</p>
+                          <p className="text-xs text-slate-500">{it.dimensao_nome}</p>
                         </td>
                         <td className="py-2.5 px-3">
                           <span
@@ -413,7 +414,7 @@ export default function Resultado() {
                         </td>
                         <td className="py-2.5 px-3">
                           <span
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
                             style={{
                               backgroundColor: `${it.status_cor}22`,
                               color: it.status_cor,
@@ -434,7 +435,7 @@ export default function Resultado() {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-2 text-[11px] text-slate-500">
+              <p className="mt-2 text-xs text-slate-500">
                 * Impacto ICSR = potencial de ganho no índice consolidado se este indicador atingir nota 1,00.
               </p>
             </div>
@@ -476,7 +477,7 @@ export default function Resultado() {
                   <p className="hidden print:block px-3 pt-3 text-sm font-bold text-slate-800">
                     {dimensao.nome}
                   </p>
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                       <tr>
                         <th className="py-2.5 px-3">Indicador</th>
@@ -492,7 +493,7 @@ export default function Resultado() {
                           <td className="py-2.5 px-3">
                             <p className="font-semibold text-slate-800">{it.indicador_nome}</p>
                             {it.evidencia_esperada && (
-                              <p className="text-[11px] text-slate-500 mt-0.5">
+                              <p className="text-xs text-slate-500 mt-0.5">
                                 Evidência: {it.evidencia_esperada}
                               </p>
                             )}
@@ -502,7 +503,7 @@ export default function Resultado() {
                           </td>
                           <td className="py-2.5 px-3">
                             <span
-                              className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold"
                               style={{
                                 backgroundColor: `${it.status_cor}22`,
                                 color: it.status_cor,
@@ -552,7 +553,7 @@ export default function Resultado() {
                   <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} />
                   <RTooltip />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="ICSR" stroke="#1B4D24" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="ICSR" stroke={CAPARAO_700} strokeWidth={3} dot={{ r: 4 }} />
                   <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
                   <Line type="monotone" dataKey="Econômica" stroke="#0284C7" strokeWidth={2} dot={{ r: 3 }} />
                   <Line type="monotone" dataKey="Social" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
@@ -612,7 +613,7 @@ export default function Resultado() {
                   <Alert variant="info">Nenhum indicador avaliado nesta dimensão.</Alert>
                 ) : (
                   <div className="overflow-x-auto rounded-lg border border-slate-200">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full text-left text-sm">
                       <tbody className="divide-y divide-slate-100">
                         {(respostasPorDimensao[cod] || []).map((r) => (
                           <tr key={r.id} className="hover:bg-slate-50">
@@ -622,7 +623,7 @@ export default function Resultado() {
                               </p>
                               {r.observacao && (
                                 <Tooltip content={r.observacao}>
-                                  <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-slate-500 italic max-w-sm truncate">
+                                  <span className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500 italic max-w-sm truncate">
                                     <FiEdit3 size={11} className="shrink-0" />
                                     {r.observacao}
                                   </span>
@@ -646,7 +647,7 @@ export default function Resultado() {
                             >
                               {(r.nota * 100).toFixed(0)}%
                             </td>
-                            <td className="py-3 px-3 text-slate-500 hidden md:table-cell text-[11px]">
+                            <td className="py-3 px-3 text-slate-600 hidden md:table-cell text-sm">
                               {r.criterio_selecionado || '—'}
                             </td>
                           </tr>

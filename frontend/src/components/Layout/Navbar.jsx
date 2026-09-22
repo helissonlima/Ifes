@@ -11,7 +11,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
   const rascunhoPendente = useRascunhoPendente();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#122A16] text-white border-b border-white/10 shadow-xs">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-caparao-900 text-white border-b border-white/10 shadow-xs">
       <div className="flex h-15 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
           {!isMobile && (
@@ -36,7 +36,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
               <span className="block text-base font-extrabold tracking-tight text-white leading-tight">
                 SustentaCafé
               </span>
-              <span className="hidden sm:block text-[10px] text-white/60 tracking-wider leading-none">
+              <span className="hidden sm:block text-xs text-white/60 tracking-wider leading-none">
                 Sistema de Avaliação ICSR · IFES
               </span>
             </div>
@@ -69,7 +69,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
             <span
               className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}
             />
-            <span className="text-[11px] font-semibold">
+            <span className="text-xs font-semibold">
               {isOnline ? 'Online' : 'Sem rede'}
             </span>
           </div>
@@ -91,7 +91,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
               <p className="text-xs font-semibold text-white/95 leading-tight">
                 {user?.nome || 'Técnico'}
               </p>
-              <p className="text-[10px] text-white/60 leading-tight">
+              <p className="text-xs text-white/60 leading-tight">
                 {user?.role === 'admin' ? 'Administrador' : 'Extensão Rural'}
               </p>
             </div>

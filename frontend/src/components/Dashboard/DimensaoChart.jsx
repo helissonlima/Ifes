@@ -1,4 +1,5 @@
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { CAPARAO_700 } from '../../utils/coresMarca';
 
 export default function DimensaoChart({ economica, ambiental, social, gestao }) {
   const data = [
@@ -20,7 +21,7 @@ export default function DimensaoChart({ economica, ambiental, social, gestao }) 
           <Radar
             name="ICSR"
             dataKey="valor"
-            stroke="#1B4D24"
+            stroke={CAPARAO_700}
             fill="#2E7D32"
             fillOpacity={0.3}
             strokeWidth={2}

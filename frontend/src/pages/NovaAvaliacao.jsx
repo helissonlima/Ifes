@@ -29,6 +29,7 @@ import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import Dialog from '../components/ui/Dialog';
 import { cn } from '../utils/cn';
+import { CAPARAO_700 } from '../utils/coresMarca';
 
 const DIMENSOES_ORDEM = ['economica', 'ambiental', 'social', 'gestao_qualidade'];
 
@@ -459,7 +460,7 @@ export default function NovaAvaliacao() {
       e.removeAttribute('data-tutorial-hl');
     });
     el.setAttribute('data-tutorial-hl', '1');
-    el.style.outline = '3px solid #1B4D24';
+    el.style.outline = `3px solid ${CAPARAO_700}`;
     el.style.outlineOffset = '4px';
     el.style.borderRadius = '12px';
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -660,7 +661,7 @@ export default function NovaAvaliacao() {
                       >
                         {completed ? <FiCheck size={14} /> : idx + 1}
                       </div>
-                      <span className="text-[11px] font-medium leading-tight">{label}</span>
+                      <span className="text-xs font-medium leading-tight">{label}</span>
                     </button>
                   );
                 })}
@@ -700,7 +701,7 @@ export default function NovaAvaliacao() {
                 className="h-full rounded-full transition-all duration-300"
                 style={{
                   width: `${progressoEtapa}%`,
-                  backgroundColor: step === 0 ? '#1B4D24' : dimensoesLista[step - 1]?.cor || '#1B4D24',
+                  backgroundColor: step === 0 ? CAPARAO_700 : dimensoesLista[step - 1]?.cor || CAPARAO_700,
                 }}
               />
             </div>
@@ -763,7 +764,7 @@ export default function NovaAvaliacao() {
                             >
                               <div>
                                 <p className="font-bold text-slate-800">{p.nome}</p>
-                                <p className="text-[11px] text-slate-500">{formatLocalizacao(p)} · {p.proprietario}</p>
+                                <p className="text-xs text-slate-500">{formatLocalizacao(p)} · {p.proprietario}</p>
                               </div>
                               {info.propriedade?.id === p.id && (
                                 <FiCheck className="text-caparao-700" size={16} />
@@ -810,7 +811,7 @@ export default function NovaAvaliacao() {
                     disabled
                     className="w-full rounded-lg border border-slate-200 bg-slate-100 p-2.5 text-xs text-slate-600 shadow-xs cursor-not-allowed"
                   />
-                  <span className="block mt-1 text-[11px] text-slate-500">
+                  <span className="block mt-1 text-xs text-slate-500">
                     Preenchido automaticamente com seu nome
                   </span>
                 </div>
@@ -1106,7 +1107,7 @@ function RevisaoFinal({ info, dimensoesLista, respostas, calcularIndiceDimensao,
                   >
                     {idx !== null ? `${(idx * 100).toFixed(1)}%` : '—'}
                   </span>
-                  <span className="block text-[11px] text-slate-500 mt-0.5">
+                  <span className="block text-xs text-slate-500 mt-0.5">
                     peso {Math.round(d.peso * 100)}%
                   </span>
                 </div>

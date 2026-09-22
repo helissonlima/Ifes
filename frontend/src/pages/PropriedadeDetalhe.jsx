@@ -25,6 +25,7 @@ import Badge from '../components/ui/Badge';
 import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
+import { CAPARAO_700 } from '../utils/coresMarca';
 
 export default function PropriedadeDetalhe() {
   const { id } = useParams();
@@ -311,7 +312,7 @@ export default function PropriedadeDetalhe() {
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-slate-200">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                    <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-xs">
                       <tr>
                         <th className="py-2.5 px-3">Data</th>
                         <th className="py-2.5 px-3">Técnico</th>
@@ -387,7 +388,7 @@ export default function PropriedadeDetalhe() {
                     <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11, fill: '#64748b' }} />
                     <RTooltip />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Line type="monotone" dataKey="ICSR" stroke="#1B4D24" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="ICSR" stroke={CAPARAO_700} strokeWidth={3} dot={{ r: 4 }} />
                     <Line type="monotone" dataKey="Ambiental" stroke="#4CAF50" strokeWidth={2} dot={{ r: 3 }} />
                     <Line type="monotone" dataKey="Econômica" stroke="#0284C7" strokeWidth={2} dot={{ r: 3 }} />
                     <Line type="monotone" dataKey="Social" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} />
@@ -477,7 +478,7 @@ function Info({ icon, label, valor }) {
     <div className="flex items-start gap-2">
       <span className="mt-0.5 text-slate-400">{icon}</span>
       <div>
-        <span className="block text-[10px] text-slate-400 uppercase tracking-wider">{label}</span>
+        <span className="block text-xs text-slate-400 uppercase tracking-wider">{label}</span>
         <span className="block font-semibold text-slate-800">{valor}</span>
       </div>
     </div>
@@ -516,7 +517,7 @@ function Comparativo({ comp, dimInfo }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-slate-400">
           <span className="block text-xs text-slate-500">Avaliação A</span>
-          <span className="block text-[11px] text-slate-400">{fmtData(comp.a.data)}</span>
+          <span className="block text-xs text-slate-400">{fmtData(comp.a.data)}</span>
           <div className="text-3xl font-black text-slate-800 tabular-nums my-1">
             {(comp.a.igs * 100).toFixed(1)}%
           </div>
@@ -556,7 +557,7 @@ function Comparativo({ comp, dimInfo }) {
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 text-center border-t-4 border-t-caparao-800">
           <span className="block text-xs text-slate-500">Avaliação B</span>
-          <span className="block text-[11px] text-slate-400">{fmtData(comp.b.data)}</span>
+          <span className="block text-xs text-slate-400">{fmtData(comp.b.data)}</span>
           <div className="text-3xl font-black text-slate-800 tabular-nums my-1">
             {(comp.b.igs * 100).toFixed(1)}%
           </div>
@@ -585,7 +586,7 @@ function Comparativo({ comp, dimInfo }) {
               <RTooltip />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="A" fill="#94A3B8" name="Antes" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="B" fill="#1B4D24" name="Depois" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="B" fill={CAPARAO_700} name="Depois" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -604,7 +605,7 @@ function Comparativo({ comp, dimInfo }) {
               <tr key={d.codigo}>
                 <td className="py-2.5 px-3">
                   <span className="font-bold block" style={{ color: d.cor }}>{d.nome}</span>
-                  <span className="text-[11px] text-slate-400">peso {Math.round(d.peso * 100)}%</span>
+                  <span className="text-xs text-slate-400">peso {Math.round(d.peso * 100)}%</span>
                 </td>
                 <td className="py-2.5 px-3 tabular-nums font-semibold text-slate-700">{(d.a * 100).toFixed(1)}%</td>
                 <td className="py-2.5 px-3 tabular-nums font-semibold text-slate-700">{(d.b * 100).toFixed(1)}%</td>
@@ -639,7 +640,7 @@ function Comparativo({ comp, dimInfo }) {
                     <td className="py-2 px-3 font-semibold text-slate-800">{it.indicador_nome}</td>
                     <td className="py-2 px-3">
                       <span
-                        className="rounded-md px-2 py-0.5 text-[11px] font-bold"
+                        className="rounded-md px-2 py-0.5 text-xs font-bold"
                         style={{
                           backgroundColor: `${dim.cor || '#999'}22`,
                           color: dim.cor || '#444',
@@ -762,7 +763,7 @@ function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }
                 <YAxis unit=" kg" tick={{ fontSize: 11, fill: '#64748b' }} />
                 <RTooltip formatter={(v, name) => [`${v?.toLocaleString('pt-BR')} kg/ha`, name]} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="municipio" name={`Município (${dados.municipio})`} fill="#1B4D24" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="municipio" name={`Município (${dados.municipio})`} fill={CAPARAO_700} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="uf" name={`Estado (${dados.uf})`} fill="#0284C7" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -806,7 +807,7 @@ function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-[11px] text-slate-400">
+        <p className="mt-2 text-xs text-slate-400">
           Fonte: {dados.fonte} · Cultura: {dados.cultura}
         </p>
       </div>

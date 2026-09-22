@@ -192,7 +192,7 @@ export default function Historico() {
             </div>
 
             <div className="md:col-span-4">
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">Status</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Status</label>
               <select
                 value={filtroStatus}
                 onChange={(e) => mudarFiltroStatus(e.target.value)}
@@ -205,7 +205,7 @@ export default function Historico() {
             </div>
 
             <div className="md:col-span-4">
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">Técnico</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Técnico</label>
               <select
                 value={filtroTecnico}
                 onChange={(e) => setFiltroTecnico(e.target.value)}
@@ -219,7 +219,7 @@ export default function Historico() {
             </div>
 
             <div className="md:col-span-4">
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">Localização</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Localização</label>
               <select
                 value={filtroLocalizacao}
                 onChange={(e) => setFiltroLocalizacao(e.target.value)}
@@ -307,7 +307,7 @@ export default function Historico() {
                         { label: 'IGQG', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
                       ].map((d) => (
                         <div key={d.label}>
-                          <span className="block text-[10px] text-slate-400 font-bold">{d.label}</span>
+                          <span className="block text-xs text-slate-400 font-bold">{d.label}</span>
                           <span className="block text-xs font-black tabular-nums" style={{ color: d.cor }}>
                             {d.val ? `${(d.val * 100).toFixed(0)}%` : '—'}
                           </span>
@@ -349,7 +349,7 @@ export default function Historico() {
         /* Visualização Desktop */
         <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-xs">
               <tr>
                 {modoComparar && <th className="py-3 px-3 w-10"></th>}
                 <th className="py-3 px-4">Propriedade</th>

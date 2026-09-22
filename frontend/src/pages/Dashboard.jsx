@@ -202,7 +202,7 @@ export default function Dashboard() {
 
             <div className="md:col-span-4">
               <div className="rounded-xl border border-caparao-100 bg-caparao-50/40 p-4 text-center">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Índice Médio Consolidado
                 </span>
                 <IGSGauge

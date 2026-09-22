@@ -45,7 +45,7 @@ export default function BottomNav() {
             </span>
             <span
               className={cn(
-                'mt-1 text-[11px] leading-none',
+                'mt-1 text-xs leading-none',
                 active ? 'font-bold text-caparao-800' : 'font-medium'
               )}
             >

@@ -84,7 +84,7 @@ export default function ComparativoAvaliacoesDialog({ open, onClose, idA, idB })
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[dados.a, dados.b].map((av, i) => (
                 <div key={av.id} className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
                     Avaliação {i === 0 ? 'A' : 'B'}
                   </span>
                   <h4 className="text-sm font-bold text-slate-900 mt-0.5">{av.propriedade_nome}</h4>
@@ -154,7 +154,7 @@ export default function ComparativoAvaliacoesDialog({ open, onClose, idA, idB })
                     <tr key={ind.codigo} className="hover:bg-slate-50/60">
                       <td className="py-2.5 px-3">
                         <p className="font-semibold text-slate-800">{ind.indicador_nome}</p>
-                        <p className="text-[11px] text-slate-400">{ind.dimensao_nome}</p>
+                        <p className="text-xs text-slate-400">{ind.dimensao_nome}</p>
                       </td>
                       <td className="py-2.5 px-3 text-center font-semibold text-slate-700">{ind.nota_a ?? '—'}</td>
                       <td className="py-2.5 px-3 text-center font-semibold text-slate-700">{ind.nota_b ?? '—'}</td>

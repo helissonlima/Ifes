@@ -40,7 +40,7 @@ export default function Login() {
     >
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-6 sm:p-8 relative z-10">
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-xl bg-[#1B4D24] text-white flex items-center justify-center shadow-md mb-3">
+          <div className="w-12 h-12 rounded-xl bg-caparao-700 text-white flex items-center justify-center shadow-md mb-3">
             <MdOutlineEco size={26} />
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -94,7 +94,7 @@ export default function Login() {
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
 
-          <p className="text-[11px] text-slate-400 text-center leading-relaxed pt-2">
+          <p className="text-xs text-slate-400 text-center leading-relaxed pt-2">
             Em caso de falha de acesso, confirme sua conexão e as permissões do seu perfil junto à administração.
           </p>
         </form>

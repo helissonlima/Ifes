@@ -12,7 +12,7 @@ export const Input = forwardRef(function Input(
           'flex items-center w-full rounded-lg border bg-white px-3 py-2 text-sm shadow-2xs transition-colors',
           error
             ? 'border-red-500 focus-within:ring-2 focus-within:ring-red-400 focus-within:border-red-500'
-            : 'border-slate-300 focus-within:ring-2 focus-within:ring-[#1B4D24]/20 focus-within:border-[#1B4D24]',
+            : 'border-slate-300 focus-within:ring-2 focus-within:ring-caparao-700/20 focus-within:border-caparao-700',
           className
         )}
       >
@@ -36,7 +36,7 @@ export const Input = forwardRef(function Input(
         'flex w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
         error
           ? 'border-red-500 focus:border-red-500 focus:ring-red-400'
-          : 'border-slate-300 focus:border-[#1B4D24] focus:ring-[#1B4D24]/20',
+          : 'border-slate-300 focus:border-caparao-700 focus:ring-caparao-700/20',
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ export const Textarea = forwardRef(function Textarea(
         'flex min-h-[80px] w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 shadow-2xs transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
         error
           ? 'border-red-500 focus:border-red-500 focus:ring-red-400'
-          : 'border-slate-300 focus:border-[#1B4D24] focus:ring-[#1B4D24]/20',
+          : 'border-slate-300 focus:border-caparao-700 focus:ring-caparao-700/20',
         className
       )}
       {...props}

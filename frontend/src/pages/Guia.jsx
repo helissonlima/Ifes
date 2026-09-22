@@ -189,7 +189,7 @@ export default function Guia() {
             <div className="overflow-x-auto rounded-xl border border-slate-200">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-[#143519] hover:bg-[#143519]">
+                  <TableRow className="bg-caparao-800 hover:bg-caparao-800">
                     <TableHead className="text-white font-bold">Etapa</TableHead>
                     <TableHead className="text-white font-bold">Duração</TableHead>
                   </TableRow>
@@ -233,7 +233,7 @@ export default function Guia() {
                 'Documentação do produtor: CAR, notas fiscais, certificados',
               ].map((m) => (
                 <li key={m} className="flex items-start gap-2.5 text-xs md:text-sm text-slate-700">
-                  <FiCheckCircle size={15} className="mt-0.5 text-[#1B4D24] shrink-0" />
+                  <FiCheckCircle size={15} className="mt-0.5 text-caparao-700 shrink-0" />
                   <span>{m}</span>
                 </li>
               ))}

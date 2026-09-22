@@ -69,7 +69,7 @@ function SidebarContent({ onClose, isMobile }) {
 
           return (
             <div key={section.title} className="mb-5">
-              <span className="block px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="block px-3 mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
                 {section.title}
               </span>
               <ul className="space-y-1">
@@ -112,11 +112,11 @@ function SidebarContent({ onClose, isMobile }) {
         <p className="text-xs font-bold text-caparao-800 leading-tight">
           IFES · Campus Itapina
         </p>
-        <p className="mt-0.5 text-[11px] text-slate-500 leading-tight">
+        <p className="mt-0.5 text-xs text-slate-500 leading-tight">
           ICSR Caparaó (MG × ES)
         </p>
         {localidade && (
-          <div className="mt-2.5 rounded-md border border-caparao-200/60 bg-caparao-50/50 px-2.5 py-1 text-[11px] font-medium text-caparao-800 truncate">
+          <div className="mt-2.5 rounded-md border border-caparao-200/60 bg-caparao-50/50 px-2.5 py-1 text-xs font-medium text-caparao-800 truncate">
             📍 {localidade}
           </div>
         )}

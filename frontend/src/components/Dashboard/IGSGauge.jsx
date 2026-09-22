@@ -37,7 +37,7 @@ export default function IGSGauge({ igs, classificacao, size = 200 }) {
         >
           {pct}%
         </span>
-        <span className="mt-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+        <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
           {classificacao || 'N/D'}
         </span>
       </div>

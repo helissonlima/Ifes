@@ -22,7 +22,7 @@ export const TableHead = forwardRef(function TableHead({ className, ...props }, 
     <th
       ref={ref}
       className={cn(
-        'h-11 px-4 text-left align-middle font-bold text-slate-500 uppercase tracking-wider text-[11px] select-none',
+        'h-11 px-4 text-left align-middle font-bold text-slate-500 uppercase tracking-wider text-xs select-none',
         className
       )}
       {...props}

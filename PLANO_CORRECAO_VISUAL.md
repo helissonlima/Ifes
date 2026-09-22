@@ -53,10 +53,16 @@ elimina dezenas de sintomas de uma vez; por isso o plano é ordenado por causa, 
 ### C4. Números errados no Laudo
 - `Resultado.jsx:287`: `Peso: 0.35% · Contribuição: 0.2%` — o peso já é fração. Exibir
   `Peso: 35% · Contribuição: 23,8 p.p.` (`info.peso * 100` e `valor * info.peso`).
-- Gráfico "Comparativo por Dimensão": barras não batem com os índices (Ambiental 68% aparece
-  ~38%). Conferir a `dataKey` — parece plotar contribuição ponderada com eixo 0–100%.
-- Data da avaliação grava um dia antes (selecionado 21/09, salvo 20/09): conversão para UTC.
-  Enviar `YYYY-MM-DD` puro, sem `toISOString()`.
+- ~~Gráfico "Comparativo por Dimensão"~~: **verificado, está correto.** As barras medem
+  68,0 / 56,0 / 33,2 / 72,8% do eixo, batendo com os índices. A leitura anterior foi erro de
+  medição minha sobre um screenshot reduzido.
+- Datas por fuso (dois bugs distintos, ambos confirmados):
+  1. O driver `pg` converte `DATE` para um `Date` na meia-noite do fuso do **servidor**. Com o
+     backend em UTC (o caso do container), `2026-07-01` é serializado como
+     `2026-07-01T00:00:00.000Z` e o navegador em UTC-3 exibe **30/06** — toda data de avaliação
+     aparece um dia antes em produção. Corrigir no driver (`types.setTypeParser(1082)`).
+  2. O campo de data da Nova Avaliação usava `toISOString()`, que é UTC: após as 21h no Brasil
+     o padrão já vinha como o dia seguinte.
 
 ---
 

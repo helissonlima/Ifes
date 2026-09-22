@@ -45,7 +45,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
               {indicador.nome}
             </h3>
             {indicador.peso !== undefined && (
-              <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+              <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
                 peso {Math.round(indicador.peso * 100)}%
               </span>
             )}
@@ -61,7 +61,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
               </Tooltip>
             )}
           </div>
-          <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+          <p className="mt-1 text-sm text-slate-600 leading-relaxed">
             {indicador.criterio}
           </p>
         </div>
@@ -132,7 +132,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                 {LABEL_NOTA[c.nota]}
               </div>
 
-              <div className="flex-1 min-w-0 text-xs leading-relaxed">
+              <div className="flex-1 min-w-0 text-sm leading-relaxed">
                 <span className="font-bold mr-1" style={{ color: COR_NOTA_TEXTO[c.nota] }}>
                   {NIVEL[c.nota]}:
                 </span>
@@ -158,7 +158,7 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
       {/* Footer com evidência esperada e botão de observação */}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         {indicador.evidencia_esperada && (
-          <div className="flex items-center gap-1.5 rounded-md border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600">
+          <div className="flex items-center gap-1.5 rounded-md border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-sm text-slate-600">
             <FiCheckSquare size={13} className="shrink-0 text-caparao-700" />
             <span>Evidência: {indicador.evidencia_esperada}</span>
           </div>

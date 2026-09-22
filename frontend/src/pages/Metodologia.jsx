@@ -55,7 +55,7 @@ export default function Metodologia() {
       />
 
       {/* Apresentação */}
-      <div className="rounded-xl bg-[#143519] border border-white/10 p-6 text-white shadow-xs">
+      <div className="rounded-xl bg-caparao-800 border border-white/10 p-6 text-white shadow-xs">
         <div className="flex gap-4 items-start">
           <div className="w-11 h-11 rounded-lg bg-white/10 text-emerald-300 flex items-center justify-center shrink-0">
             <MdOutlineEco size={28} />
@@ -122,7 +122,7 @@ export default function Metodologia() {
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
           <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl text-center">
-            <p className="text-lg md:text-xl font-black text-emerald-950 font-mono tracking-tight">
+            <p className="text-lg md:text-xl font-black text-emerald-950 tabular-nums tracking-tight">
               ICSR = (IA × 0,35) + (IE × 0,30) + (IS × 0,20) + (IGQG × 0,15)
             </p>
             <p className="text-xs text-slate-600 mt-1.5">
@@ -161,7 +161,7 @@ export default function Metodologia() {
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <Table>
               <TableHeader>
-                <TableRow className="bg-[#143519] hover:bg-[#143519]">
+                <TableRow className="bg-caparao-800 hover:bg-caparao-800">
                   <TableHead className="text-white font-bold">Faixa do IGS</TableHead>
                   <TableHead className="text-white font-bold">Classificação</TableHead>
                   <TableHead className="text-white font-bold">Descrição</TableHead>
@@ -171,7 +171,7 @@ export default function Metodologia() {
               <TableBody>
                 {ESCALA.map((e, idx) => (
                   <TableRow key={e.classificacao} className="hover:bg-slate-50/80">
-                    <TableCell className="font-mono font-bold text-slate-800">{e.faixa}</TableCell>
+                    <TableCell className="tabular-nums font-bold text-slate-800">{e.faixa}</TableCell>
                     <TableCell>
                       <span
                         className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold text-white shadow-2xs"
@@ -284,10 +284,10 @@ export default function Metodologia() {
                   borderColor: `${n.cor}33`,
                 }}
               >
-                <div className="text-xl font-black font-mono" style={{ color: n.cor }}>
+                <div className="text-xl font-black tabular-nums" style={{ color: n.cor }}>
                   {n.nota}
                 </div>
-                <div className="text-[11px] text-slate-600 mt-1 leading-tight">{n.desc}</div>
+                <div className="text-xs text-slate-600 mt-1 leading-tight">{n.desc}</div>
               </div>
             ))}
           </div>
@@ -306,7 +306,7 @@ export default function Metodologia() {
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <Table className="min-w-[760px]">
               <TableHeader>
-                <TableRow className="bg-[#143519] hover:bg-[#143519]">
+                <TableRow className="bg-caparao-800 hover:bg-caparao-800">
                   {['Nota', 'Interpretação Geral', 'Ambiental', 'Econômica', 'Social', 'Gestão & Qualidade'].map((h) => (
                     <TableHead key={h} className="text-white font-bold">
                       {h}
@@ -360,7 +360,7 @@ export default function Metodologia() {
                   <TableRow key={r.nota} className="hover:bg-slate-50/80">
                     <TableCell>
                       <span
-                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold text-white font-mono shadow-2xs"
+                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold text-white tabular-nums shadow-2xs"
                         style={{ backgroundColor: r.cor }}
                       >
                         {r.nota}

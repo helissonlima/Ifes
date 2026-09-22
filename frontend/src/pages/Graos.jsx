@@ -55,7 +55,7 @@ function FormGrao({ dados, onChange }) {
       <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/50 p-3">
         <div>
           <span className="font-bold text-slate-800 block">Disponível para seleção</span>
-          <span className="text-[11px] text-slate-500">Permite associar este grão às propriedades cadastradas</span>
+          <span className="text-xs text-slate-500">Permite associar este grão às propriedades cadastradas</span>
         </div>
         <Switch checked={dados.ativo} onCheckedChange={handleAtivo} />
       </div>
@@ -249,7 +249,7 @@ export default function Graos() {
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-xs">
               <tr>
                 <th className="py-3 px-4">Nome</th>
                 <th className="py-3 px-4">Código</th>

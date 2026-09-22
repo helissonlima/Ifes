@@ -21,7 +21,7 @@ export const Button = forwardRef(function Button(
 
   const variants = {
     primary:
-      'bg-[#1B4D24] text-white hover:bg-[#143B1B] active:bg-[#0F2E14] focus-visible:ring-[#1B4D24] shadow-xs',
+      'bg-caparao-700 text-white hover:bg-caparao-800 active:bg-caparao-900 focus-visible:ring-caparao-700 shadow-xs',
     secondary:
       'bg-slate-100 text-slate-800 hover:bg-slate-200 active:bg-slate-300 focus-visible:ring-slate-400',
     outline:

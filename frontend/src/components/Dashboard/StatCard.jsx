@@ -3,7 +3,7 @@ export default function StatCard({ title, value, subtitle, icon, trend }) {
     <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-150 hover:border-caparao-700/30 hover:shadow-md">
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
             {title}
           </span>
           {icon && (

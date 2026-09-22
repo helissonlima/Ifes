@@ -56,7 +56,7 @@ function PreviewProducao({ info }) {
     <div className="flex flex-wrap gap-2 mt-1">
       {rendimento_atual && (
         <Tooltip content={`Rendimento médio do município (${rendimento_atual.ano})`}>
-          <span className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
+          <span className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
             <FiTrendingUp size={11} />
             Município: {rendimento_atual.valor.toLocaleString('pt-BR')} kg/ha
           </span>
@@ -64,7 +64,7 @@ function PreviewProducao({ info }) {
       )}
       {rendimento_uf_atual && (
         <Tooltip content={`Rendimento médio do estado (${rendimento_uf_atual.ano})`}>
-          <span className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+          <span className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700">
             Estado: {rendimento_uf_atual.valor.toLocaleString('pt-BR')} kg/ha
           </span>
         </Tooltip>
@@ -112,7 +112,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
   return (
     <div className="space-y-4 text-xs">
       <div>
-        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-[11px] mb-2">
+        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-xs mb-2">
           Informações Básicas
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -158,7 +158,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
       </div>
 
       <div className="border-t border-slate-100 pt-3">
-        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-[11px] mb-2">
+        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-xs mb-2">
           Endereço Completo
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -213,7 +213,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
       </div>
 
       <div className="border-t border-slate-100 pt-3">
-        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-[11px] mb-2">
+        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-xs mb-2">
           Áreas de Cultivo
         </h4>
         <div className="grid grid-cols-2 gap-3">
@@ -244,7 +244,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
 
       {/* Localização no mapa */}
       <div className="border-t border-slate-100 pt-3">
-        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-[11px] mb-2">
+        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-xs mb-2">
           Localização no Mapa
         </h4>
         <MapPicker
@@ -258,7 +258,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
 
       {/* Grãos Cultivados */}
       <div className="border-t border-slate-100 pt-3">
-        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-[11px] mb-2">
+        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-xs mb-2">
           Grãos Cultivados
         </h4>
         <div className="relative">
@@ -283,7 +283,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
                   className="flex cursor-pointer items-center justify-between p-2 rounded-md hover:bg-slate-50"
                 >
                   <span className="font-semibold text-slate-800">{g.nome}</span>
-                  <span className="text-[11px] text-slate-400">{g.codigo}</span>
+                  <span className="text-xs text-slate-400">{g.codigo}</span>
                 </div>
               ))}
             </div>
@@ -323,7 +323,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
                   </div>
                   {temIBGE && dados.municipio && dados.estado && (
                     <div className="mt-2 pt-2 border-t border-slate-200/60">
-                      <span className="block text-[11px] text-slate-500 mb-1">
+                      <span className="block text-xs text-slate-500 mb-1">
                         Média IBGE PAM — {dados.municipio}/{dados.estado}:
                       </span>
                       <PreviewProducao info={preview} />
@@ -337,7 +337,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
       </div>
 
       <div className="border-t border-slate-100 pt-3">
-        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-[11px] mb-2">
+        <h4 className="font-bold text-caparao-800 uppercase tracking-wider text-xs mb-2">
           Contato
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -360,7 +360,7 @@ function FormPropriedade({ dados, onChange, graosDisponiveis, previewProducao })
               value={dados.email}
               onChange={f('email')}
             />
-            {emailErro && <span className="block mt-1 text-[11px] text-red-600">{emailErro}</span>}
+            {emailErro && <span className="block mt-1 text-xs text-red-600">{emailErro}</span>}
           </div>
         </div>
       </div>
@@ -614,7 +614,7 @@ export default function Propriedades() {
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-xs">
               <tr>
                 <th className="py-3 px-4">Propriedade</th>
                 <th className="py-3 px-4">Município / UF</th>
