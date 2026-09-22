@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { FiCheckCircle, FiAlertTriangle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi';
 import { authAPI, setAuthToken, onUnauthorized, TOKEN_KEY } from '../services/api';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
@@ -36,7 +36,6 @@ const defaultContextValue = {
   logout: () => {},
   hasPermission: () => false,
   isOnline: true,
-  networkRecoveredAt: null,
 };
 
 const AppContext = createContext(defaultContextValue);
@@ -45,7 +44,6 @@ export function AppProvider({ children }) {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
-  const [networkRecoveredAt, setNetworkRecoveredAt] = useState(null);
   const { isOnline } = useNetworkStatus();
 
   const loadSession = useCallback(async () => {
@@ -101,13 +99,20 @@ export function AppProvider({ children }) {
     return () => onUnauthorized(null);
   }, [notify]);
 
+  // A volta da conexão é um evento, não um estado: vira toast e desaparece.
+  // Antes isto marcava "recuperado" já na montagem (isOnline começa true), e o
+  // banner verde ficava fixo em todas as telas mesmo sem nunca ter caído.
+  const estavaOffline = useRef(false);
   useEffect(() => {
-    if (isOnline) {
-      setNetworkRecoveredAt(new Date().toISOString());
+    if (!isOnline) {
+      estavaOffline.current = true;
       return;
     }
-    setNetworkRecoveredAt(null);
-  }, [isOnline]);
+    if (estavaOffline.current) {
+      estavaOffline.current = false;
+      notify('Conexão restabelecida. As próximas leituras virão do servidor.', 'success');
+    }
+  }, [isOnline, notify]);
 
   const login = useCallback(async (email, senha) => {
     const response = await authAPI.login(email, senha);
@@ -157,7 +162,6 @@ export function AppProvider({ children }) {
       logout,
       hasPermission,
       isOnline,
-      networkRecoveredAt,
     }}>
       {children}
 

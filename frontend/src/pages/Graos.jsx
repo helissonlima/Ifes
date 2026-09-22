@@ -14,6 +14,7 @@ import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
 import Dialog from '../components/ui/Dialog';
 import Switch from '../components/ui/Switch';
+import { pluralizar } from '../utils/formatarNumero';
 
 const FORM_INICIAL = { nome: '', codigo: '', descricao: '', ativo: true };
 
@@ -156,7 +157,7 @@ export default function Graos() {
     <div className="space-y-6">
       <PageHeaderCard
         title="Gestão de Grãos"
-        subtitle={`${graos.length} grão(s) cadastrado(s)`}
+        subtitle={pluralizar(graos.length, 'grão cadastrado', 'grãos cadastrados')}
         actions={
           <div className="flex items-center gap-2">
             <Button

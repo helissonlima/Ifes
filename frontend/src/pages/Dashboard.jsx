@@ -20,6 +20,7 @@ import Badge from '../components/ui/Badge';
 import Progress from '../components/ui/Progress';
 import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
+import { formatarPercentual } from '../utils/formatarNumero';
 
 // Nome do campo de cada dimensão na resposta de GET /avaliacoes/estatisticas
 // (médias agregadas — convenção própria dessa API).
@@ -232,7 +233,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="ICSR Médio"
-          value={stats?.media_igs ? `${(stats.media_igs * 100).toFixed(1)}%` : '—'}
+          value={stats?.media_igs ? formatarPercentual(stats.media_igs) : '—'}
           subtitle="desempenho territorial"
           icon={<MdOutlineEco size={18} />}
         />
@@ -314,7 +315,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center text-xs mb-1">
                     <span className="font-semibold text-slate-700">{d.label}</span>
                     <span className="text-slate-500 tabular-nums">
-                      {stats?.[d.key] ? `${(stats[d.key] * 100).toFixed(1)}%` : '—'}{' '}
+                      {stats?.[d.key] ? formatarPercentual(stats[d.key]) : '—'}{' '}
                       <span className="text-slate-400">({d.peso})</span>
                     </span>
                   </div>

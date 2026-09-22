@@ -1,4 +1,5 @@
 import { COR_CLASSIFICACAO, COR_CLASSIFICACAO_TEXTO_SOBRE_FUNDO } from '../../utils/coresICSR';
+import { formatarPercentual } from '../../utils/formatarNumero';
 import { cn } from '../../utils/cn';
 
 export default function IGSBadge({ classificacao, igs, size = 'medium', className }) {
@@ -17,13 +18,13 @@ export default function IGSBadge({ classificacao, igs, size = 'medium', classNam
     <span
       style={{ backgroundColor: bgColor, color: textColor }}
       className={cn(
-        'inline-flex items-center rounded-full font-bold shadow-xs transition-colors',
+        'inline-flex items-center whitespace-nowrap rounded-full font-bold shadow-xs transition-colors',
         sizeClasses[size] || sizeClasses.medium,
         className
       )}
     >
       {classificacao}
-      {igs !== undefined ? ` (${(igs * 100).toFixed(1)}%)` : ''}
+      {igs !== undefined ? ` (${formatarPercentual(igs)})` : ''}
     </span>
   );
 }

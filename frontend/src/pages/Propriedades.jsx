@@ -19,6 +19,7 @@ import Badge from '../components/ui/Badge';
 import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { Card, CardContent } from '../components/ui/Card';
+import { formatarArea, pluralizar } from '../utils/formatarNumero';
 
 const FORM_INICIAL = {
   nome: '', municipio: '', estado: 'ES', proprietario: '',
@@ -499,7 +500,7 @@ export default function Propriedades() {
     <div className="space-y-6">
       <PageHeaderCard
         title="Propriedades"
-        subtitle={`${total} propriedade(s) cadastrada(s)`}
+        subtitle={pluralizar(total, 'propriedade cadastrada', 'propriedades cadastradas')}
         actions={
           <Button variant="primary" icon={<FiPlus />} onClick={abrirNovo}>
             Nova Propriedade
@@ -574,8 +575,8 @@ export default function Propriedades() {
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {p.area_cafe && <Badge variant="outline">{p.area_cafe} ha café</Badge>}
-                  <Badge variant="primary">{p.total_avaliacoes} avaliação(ões)</Badge>
+                  {Number(p.area_cafe) > 0 && <Badge variant="outline">{formatarArea(p.area_cafe)} de café</Badge>}
+                  <Badge variant="primary">{pluralizar(p.total_avaliacoes, 'avaliação', 'avaliações')}</Badge>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3" onClick={(e) => e.stopPropagation()}>
@@ -636,11 +637,11 @@ export default function Propriedades() {
                   <td className="py-3.5 px-4 text-slate-600">{p.municipio}/{p.estado}</td>
                   <td className="py-3.5 px-4 text-slate-600">{p.proprietario}</td>
                   <td className="py-3.5 px-4 text-slate-600 tabular-nums">
-                    {p.area_cafe ? `${p.area_cafe} ha` : '—'}
+                    {formatarArea(p.area_cafe)}
                   </td>
                   <td className="py-3.5 px-4">
                     <Badge variant="primary" size="sm">
-                      {p.total_avaliacoes} aval.
+                      {pluralizar(p.total_avaliacoes, 'aval.', 'avals.')}
                     </Badge>
                   </td>
                   <td className="py-3.5 px-4">

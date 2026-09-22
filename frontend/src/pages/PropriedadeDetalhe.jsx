@@ -26,6 +26,7 @@ import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
 import { CAPARAO_700 } from '../utils/coresMarca';
+import { formatarArea } from '../utils/formatarNumero';
 
 export default function PropriedadeDetalhe() {
   const { id } = useParams();
@@ -203,8 +204,8 @@ export default function PropriedadeDetalhe() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <Info icon={<FiUser />} label="Proprietário" valor={propriedade.proprietario} />
                 <Info icon={<FiMap />} label="Município/UF" valor={`${propriedade.municipio}/${propriedade.estado}`} />
-                <Info icon={<MdOutlineEco />} label="Área total" valor={propriedade.area_total ? `${propriedade.area_total} ha` : '—'} />
-                <Info icon={<MdOutlineEco />} label="Área de café" valor={propriedade.area_cafe ? `${propriedade.area_cafe} ha` : '—'} />
+                <Info icon={<MdOutlineEco />} label="Área total" valor={formatarArea(propriedade.area_total)} />
+                <Info icon={<MdOutlineEco />} label="Área de café" valor={formatarArea(propriedade.area_cafe)} />
                 <Info icon={<FiPhone />} label="Telefone" valor={propriedade.telefone || '—'} />
                 <Info icon={<FiMail />} label="E-mail" valor={propriedade.email || '—'} />
                 <Info icon={<FiCalendar />} label="Cadastrada em" valor={fmtData(propriedade.criado_em)} />

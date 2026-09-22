@@ -20,6 +20,7 @@ import Badge from '../components/ui/Badge';
 import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
+import { formatarPercentual, pluralizar } from '../utils/formatarNumero';
 
 const COR_DIMS = {
   economico: '#0284C7', ambiental: '#16A34A', social: '#D97706', gestao: '#7C3AED',
@@ -123,7 +124,7 @@ export default function Historico() {
     <div className="space-y-6">
       <PageHeaderCard
         title="Histórico de Avaliações"
-        subtitle={`${total} avaliação(ões) registrada(s)`}
+        subtitle={pluralizar(total, 'avaliação registrada', 'avaliações registradas')}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -309,7 +310,7 @@ export default function Historico() {
                         <div key={d.label}>
                           <span className="block text-xs text-slate-400 font-bold">{d.label}</span>
                           <span className="block text-xs font-black tabular-nums" style={{ color: d.cor }}>
-                            {d.val ? `${(d.val * 100).toFixed(0)}%` : '—'}
+                            {d.val ? formatarPercentual(d.val, 0) : '—'}
                           </span>
                         </div>
                       ))}
@@ -401,7 +402,7 @@ export default function Historico() {
                       { val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
                     ].map((d, j) => (
                       <td key={j} className="py-3 px-3 text-center font-extrabold tabular-nums" style={{ color: d.cor }}>
-                        {d.val !== null && d.val !== undefined ? `${(d.val * 100).toFixed(0)}%` : '—'}
+                        {d.val !== null && d.val !== undefined ? formatarPercentual(d.val, 0) : '—'}
                       </td>
                     ))}
                     <td className="py-3 px-3">

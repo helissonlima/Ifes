@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
@@ -14,6 +14,13 @@ export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // Trocar de rota recomeça a leitura do topo. Sem isto, sair de uma lista
+  // rolada (Propriedades, Histórico) abria a tela seguinte no meio.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
 
   const handleMenuClick = () => {
     if (isMobile) {
