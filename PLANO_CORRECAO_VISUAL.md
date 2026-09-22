@@ -8,6 +8,37 @@ Propriedade, Nova Avaliação (etapas 1 e 2), Laudo, Histórico, Metodologia, Gu
 A maior parte dos defeitos visíveis vem de **três causas-raiz** da migração. Corrigi-las primeiro
 elimina dezenas de sintomas de uma vez; por isso o plano é ordenado por causa, não por tela.
 
+
+> **Status (21/09/2026): fases 0 a 4 executadas e enviadas ao `main`.**
+> Commits `0673c6a` (bloqueadores), `0f85191` (laudo e impressão), `e808f36`
+> (tokens e tipografia), `979d112` + `8e3a9d9` (layout e componentes),
+> `5882ed3` (tela a tela), `54555ca` (acessibilidade e lint) e `1badc4a`
+> (testes de regressão).
+>
+> Verificado ao final: as 11 telas em 1440×900 e 375×812, sem erro de console,
+> sem scroll horizontal, sem conteúdo de diálogo fora de diálogo e com estado
+> ativo visível. `npm run verify` passa (termos proibidos + build) e a suíte
+> está verde: 111 testes de frontend e 44 de backend.
+>
+> `npm run verify:strict` **continua falhando no lint**, como já falhava antes
+> desta rodada: eram 39 erros no commit `fdc0784`, hoje são 24. Os que restam
+> são avisos de hooks (ver abaixo), não defeitos visuais.
+>
+> **Fica pendente de decisão sua** (ver Fase 3): a ordem das etapas do wizard
+> é Econômica → Ambiental → Social → IGQG, contrária à ordem canônica do
+> instrumento. Não alterei: muda o fluxo de trabalho de técnicos já treinados
+> e as 17 avaliações existentes foram feitas nessa sequência. As exibições de
+> *leitura* (radar, histórico, laudo) já seguem a ordem canônica.
+>
+> Os 24 erros de lint restantes são, na maioria, `react-hooks/set-state-in-effect`
+> (chamadas de `setLoading` no carregamento das páginas) e
+> `react-refresh/only-export-components`. Nenhum é defeito de comportamento;
+> zerá-los é refatorar o data-fetching de todas as telas — trabalho próprio,
+> não visual. Há ainda dois avisos de *stale closure* no fluxo de rascunho
+> offline da Nova Avaliação (`restaurarRascunho` e `sincronizarAutomaticamente`
+> usados antes da declaração), que não mexi por ser o mecanismo que protege o
+> trabalho do técnico em campo.
+
 ---
 
 ## Fase 0 — Bloqueadores (telas quebradas ou fluxo impossível)
