@@ -110,7 +110,7 @@ function SidebarContent({ onClose, isMobile }) {
       {/* Rodapé da Barra Lateral */}
       <div className="border-t border-slate-100 bg-slate-50/70 p-4">
         <p className="text-xs font-bold text-caparao-800 leading-tight">
-          IFES · Campus Itapina
+          IFES · Campus Ibatiba
         </p>
         <p className="mt-0.5 text-xs text-slate-500 leading-tight">
           ICSR Caparaó (MG × ES)
