@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { MdOutlineEco } from 'react-icons/md';
-import { FiLock, FiMail } from 'react-icons/fi';
+import { FiLock, FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
 import { friendlyError } from '../utils/errorMessages';
 import { useApp } from '../context/AppContext';
 import { Button } from '../components/ui/Button';
@@ -14,6 +14,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
 
   if (isAuthenticated) return <Navigate to="/" replace />;
 
@@ -35,10 +36,10 @@ export default function Login() {
     <div
       className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center relative"
       style={{
-        backgroundImage: `linear-gradient(rgba(9, 30, 14, 0.52), rgba(9, 30, 14, 0.42)), radial-gradient(circle at top, rgba(76,175,80,0.25), transparent 40%), url(${loginBg})`,
+        backgroundImage: `linear-gradient(rgba(9, 30, 14, 0.66), rgba(9, 30, 14, 0.58)), radial-gradient(circle at top, rgba(76,175,80,0.25), transparent 40%), url(${loginBg})`,
       }}
     >
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-6 sm:p-8 relative z-10">
+      <div className="w-full max-w-md bg-white rounded-xl border border-slate-200/80 shadow-2xl p-6 sm:p-8 relative z-10">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-12 h-12 rounded-xl bg-caparao-700 text-white flex items-center justify-center shadow-md mb-3">
             <MdOutlineEco size={26} />
@@ -53,7 +54,7 @@ export default function Login() {
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 block" htmlFor="email-input">
+            <label className="block text-sm font-semibold text-slate-700" htmlFor="email-input">
               E-mail
             </label>
             <Input
@@ -69,18 +70,29 @@ export default function Login() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 block" htmlFor="senha-input">
+            <label className="block text-sm font-semibold text-slate-700" htmlFor="senha-input">
               Senha
             </label>
             <Input
               id="senha-input"
-              type="password"
+              type={senhaVisivel ? 'text' : 'password'}
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               placeholder="••••••••"
               required
               autoComplete="current-password"
               startAdornment={<FiLock size={16} />}
+              endAdornment={
+                <button
+                  type="button"
+                  onClick={() => setSenhaVisivel((v) => !v)}
+                  aria-label={senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-pressed={senhaVisivel}
+                  className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700"
+                >
+                  {senhaVisivel ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                </button>
+              }
             />
           </div>
 
@@ -94,7 +106,7 @@ export default function Login() {
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
 
-          <p className="text-xs text-slate-400 text-center leading-relaxed pt-2">
+          <p className="pt-2 text-center text-xs leading-relaxed text-slate-500">
             Em caso de falha de acesso, confirme sua conexão e as permissões do seu perfil junto à administração.
           </p>
         </form>

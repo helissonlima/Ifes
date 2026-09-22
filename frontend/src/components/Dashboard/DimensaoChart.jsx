@@ -2,11 +2,13 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tool
 import { CAPARAO_700 } from '../../utils/coresMarca';
 
 export default function DimensaoChart({ economica, ambiental, social, gestao }) {
+  // Ordem canônica do ICSR: Ambiental (35%) → Econômica (30%) → Social (20%)
+  // → IGQG (15%). O nome da quarta é sempre por extenso ou pela sigla IGQG.
   const data = [
-    { dimensao: 'Econômica', valor: Math.round((economica || 0) * 100) },
-    { dimensao: 'Ambiental', valor: Math.round((ambiental || 0) * 100) },
-    { dimensao: 'Social', valor: Math.round((social || 0) * 100) },
-    { dimensao: 'Gestão', valor: Math.round((gestao || 0) * 100) },
+    { dimensao: 'Ambiental', valor: Math.round((Number(ambiental) || 0) * 100) },
+    { dimensao: 'Econômica', valor: Math.round((Number(economica) || 0) * 100) },
+    { dimensao: 'Social', valor: Math.round((Number(social) || 0) * 100) },
+    { dimensao: 'IGQG', valor: Math.round((Number(gestao) || 0) * 100) },
   ];
 
   return (
@@ -22,7 +24,7 @@ export default function DimensaoChart({ economica, ambiental, social, gestao }) 
             name="ICSR"
             dataKey="valor"
             stroke={CAPARAO_700}
-            fill="#2E7D32"
+            fill={CAPARAO_700}
             fillOpacity={0.3}
             strokeWidth={2}
           />

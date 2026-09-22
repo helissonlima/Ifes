@@ -624,7 +624,9 @@ export default function NovaAvaliacao() {
             {/* Progresso global */}
             <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1.5">
               <span>Progresso global da avaliação</span>
-              <span>{totalRespondidos}/{totalIndicadores} ({Math.round(progressoGlobal)}%)</span>
+              <span>
+                {totalRespondidos} de {totalIndicadores} indicadores ({Math.round(progressoGlobal)}%)
+              </span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 mb-4">
               <div
@@ -687,14 +689,25 @@ export default function NovaAvaliacao() {
               </div>
             )}
 
-            {/* Progresso do step atual */}
-            <div className="flex justify-between items-center text-xs text-slate-500 font-medium mb-1">
+            {/* Progresso do step atual — rotulado, para não se confundir com a
+                barra de progresso global logo acima. */}
+            <div className="mb-1 flex items-center justify-between gap-2 text-xs font-medium text-slate-500">
               <span>
-                {step >= 1 && step <= dimensoesLista.length
-                  ? `${dimensoesLista[step - 1]?.indicadores?.length || 0} indicadores · peso ${Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%`
-                  : `Etapa ${Math.min(step + 1, STEP_LABELS.length)} de ${STEP_LABELS.length}`}
+                Etapa {Math.min(step + 1, STEP_LABELS.length)} de {STEP_LABELS.length}
+                {step >= 1 && step <= dimensoesLista.length && (
+                  <>
+                    {' · '}
+                    {dimensoesLista[step - 1]?.nome}
+                    {' · peso '}
+                    {Math.round((dimensoesLista[step - 1]?.peso || 0) * 100)}%
+                  </>
+                )}
               </span>
-              <span className="font-bold">{Math.round(progressoEtapa)}%</span>
+              <span className="font-bold whitespace-nowrap">
+                {step >= 1 && step <= dimensoesLista.length
+                  ? `${dimensoesLista[step - 1]?.indicadores?.filter((i) => respostas[i.codigo] !== undefined).length || 0} de ${dimensoesLista[step - 1]?.indicadores?.length || 0} respondidos`
+                  : `${Math.round(progressoEtapa)}% desta etapa`}
+              </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
               <div

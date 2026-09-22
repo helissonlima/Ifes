@@ -1,6 +1,7 @@
 import { FiInfo } from 'react-icons/fi';
 import IndicadorCard from './IndicadorCard';
 import { calcularIndiceDimensao } from '../../utils/metodologia';
+import { corTextoDimensao } from '../../utils/coresICSR';
 import Alert from '../ui/Alert';
 import Tooltip from '../ui/Tooltip';
 
@@ -23,15 +24,21 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-bold" style={{ color: dimensao.cor }}>
+              {/* A cor da dimensão identifica; quem carrega o texto é o
+                  contraste do slate. */}
+              <span
+                className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: dimensao.cor }}
+                aria-hidden="true"
+              />
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
                 {dimensao.nome}
               </h2>
               <Tooltip content="Atribua notas de 0,00 a 1,00 para cada indicador conforme os critérios descritivos. Valores intermediários são permitidos. Registre justificativa na observação para notas extremas.">
                 <button
                   type="button"
                   aria-label="Como avaliar os indicadores desta dimensão"
-                  className="rounded-md p-1 opacity-70 hover:opacity-100 transition-opacity focus:outline-hidden"
-                  style={{ color: dimensao.cor }}
+                  className="rounded-md p-1 text-slate-500 transition-colors hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700"
                 >
                   <FiInfo size={16} />
                 </button>
@@ -44,8 +51,11 @@ export default function DimensaoStep({ dimensao, respostas, observacoes, onChang
 
           <div className="text-right">
             <span
-              className="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold text-white shadow-xs"
-              style={{ backgroundColor: dimensao.cor }}
+              className="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold"
+              style={{
+                backgroundColor: `${dimensao.cor}1A`,
+                color: corTextoDimensao(dimensao.codigo),
+              }}
             >
               {respondidos}/{total}
             </span>

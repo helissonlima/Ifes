@@ -21,9 +21,15 @@ import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
 import { formatarPercentual, pluralizar } from '../utils/formatarNumero';
+import { COR_DIMENSAO_TEXTO } from '../utils/coresICSR';
 
+// Números de dimensão sobre fundo branco usam o token de texto acessível —
+// antes esta tela tinha uma paleta própria, divergente do backend e do tema.
 const COR_DIMS = {
-  economico: '#0284C7', ambiental: '#16A34A', social: '#D97706', gestao: '#7C3AED',
+  economico: COR_DIMENSAO_TEXTO.economica,
+  ambiental: COR_DIMENSAO_TEXTO.ambiental,
+  social: COR_DIMENSAO_TEXTO.social,
+  gestao: COR_DIMENSAO_TEXTO.gestao_qualidade,
 };
 
 const ITENS_POR_PAGINA = 20;
@@ -302,8 +308,8 @@ export default function Historico() {
                   {av.igs && (
                     <div className="grid grid-cols-4 gap-2 border-y border-slate-100 py-2.5 my-2 text-center">
                       {[
-                        { label: 'Econ', val: av.indice_economico, cor: COR_DIMS.economico },
                         { label: 'Amb', val: av.indice_ambiental, cor: COR_DIMS.ambiental },
+                        { label: 'Econ', val: av.indice_economico, cor: COR_DIMS.economico },
                         { label: 'Soc', val: av.indice_social, cor: COR_DIMS.social },
                         { label: 'IGQG', val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
                       ].map((d) => (
@@ -357,8 +363,8 @@ export default function Historico() {
                 <th className="py-3 px-3">Município</th>
                 <th className="py-3 px-3">Data</th>
                 <th className="py-3 px-3">Técnico</th>
-                <th className="py-3 px-3 text-center">Econômica</th>
                 <th className="py-3 px-3 text-center">Ambiental</th>
+                <th className="py-3 px-3 text-center">Econômica</th>
                 <th className="py-3 px-3 text-center">Social</th>
                 <th className="py-3 px-3 text-center">IGQG</th>
                 <th className="py-3 px-3">ICSR</th>
@@ -396,8 +402,8 @@ export default function Historico() {
                     <td className="py-3 px-3 text-slate-600">{formatarData(av.data_avaliacao)}</td>
                     <td className="py-3 px-3 text-slate-600">{av.tecnico_responsavel || '—'}</td>
                     {[
-                      { val: av.indice_economico, cor: COR_DIMS.economico },
                       { val: av.indice_ambiental, cor: COR_DIMS.ambiental },
+                      { val: av.indice_economico, cor: COR_DIMS.economico },
                       { val: av.indice_social, cor: COR_DIMS.social },
                       { val: av.indice_gestao_qualidade, cor: COR_DIMS.gestao },
                     ].map((d, j) => (

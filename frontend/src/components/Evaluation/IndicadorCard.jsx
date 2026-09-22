@@ -112,14 +112,17 @@ export default function IndicadorCard({ indicador, nota, observacao, onChange, o
                 }
               }}
               style={{
+                // A opção escolhida precisa ser lida de relance, no sol: borda
+                // de 2px na cor da nota, fundo tintado mais forte e o check
+                // sempre visível. Antes diferia só por uma borda fina.
                 borderColor: selected ? cor : undefined,
-                backgroundColor: selected ? `${cor}0D` : undefined,
+                backgroundColor: selected ? `${cor}1F` : undefined,
               }}
               className={cn(
-                'flex items-start gap-3 rounded-lg p-3 text-left transition-all duration-100 cursor-pointer select-none focus:outline-hidden focus-visible:ring-2',
+                'flex items-start gap-3 rounded-lg p-3 text-left transition-all duration-100 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1',
                 selected
-                  ? 'border-1.5'
-                  : 'border border-slate-200 bg-white hover:bg-slate-50/80 hover:border-slate-300'
+                  ? 'border-2 shadow-xs'
+                  : 'border-2 border-slate-200 bg-white hover:bg-slate-50/80 hover:border-slate-300'
               )}
             >
               <div

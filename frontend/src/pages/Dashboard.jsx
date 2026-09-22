@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiTrendingUp, FiWifiOff } from 'react-icons/fi';
+import { FiMap, FiClipboard, FiBarChart2, FiPlus, FiArrowRight, FiTarget, FiWifiOff } from 'react-icons/fi';
 import { MdOutlineEco } from 'react-icons/md';
 import { avaliacoesAPI } from '../services/api';
 import { friendlyError } from '../utils/errorMessages';
@@ -17,10 +17,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
-import Progress from '../components/ui/Progress';
 import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
-import { formatarPercentual } from '../utils/formatarNumero';
+import { formatarPercentual, pluralizar } from '../utils/formatarNumero';
 
 // Nome do campo de cada dimensão na resposta de GET /avaliacoes/estatisticas
 // (médias agregadas — convenção própria dessa API).
@@ -134,6 +133,12 @@ export default function Dashboard() {
 
   const classificacaoMedia = getClassificacao(stats?.media_igs, metodologia?.escala);
   const dimensaoPrioritaria = getDimensaoPrioritaria(stats, DIMENSOES);
+  const totalAvaliacoes = Number(stats?.total_avaliacoes) || 0;
+  const concluidas = Number(stats?.avaliacoes_concluidas) || 0;
+  const rascunhos = Math.max(totalAvaliacoes - concluidas, 0);
+  const propriedadesEmAlerta = (stats?.distribuicao_classificacao || [])
+    .filter((d) => d.classificacao === 'Baixa' || d.classificacao === 'Muito Baixa')
+    .reduce((soma, d) => soma + Number(d.quantidade || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -180,9 +185,29 @@ export default function Dashboard() {
                 {classificacaoMedia ? `ICSR médio consolidado em ${classificacaoMedia}` : 'Ainda não há base suficiente para leitura consolidada'}
               </h2>
               <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                {dimensaoPrioritaria
-                  ? `A dimensão com menor desempenho relativo é ${dimensaoPrioritaria.label}. Recomenda-se priorizar as ações de assistência técnica nos indicadores dessa dimensão nas próximas visitas de campo.`
-                  : 'Cadastre e conclua avaliações de propriedades rurais para transformar este painel em uma leitura estratégica do território.'}
+                {concluidas === 0
+                  ? 'Cadastre e conclua avaliações de propriedades rurais para transformar este painel em uma leitura estratégica do território.'
+                  : (
+                    <>
+                      {dimensaoPrioritaria && (
+                        <>
+                          A dimensão com menor desempenho relativo é{' '}
+                          <strong className="font-semibold text-slate-800">
+                            {dimensaoPrioritaria.label}
+                          </strong>{' '}
+                          ({formatarPercentual(dimensaoPrioritaria.valor)}): priorize os indicadores
+                          dessa dimensão nas próximas visitas.{' '}
+                        </>
+                      )}
+                      {propriedadesEmAlerta > 0 && (
+                        <>
+                          {pluralizar(propriedadesEmAlerta, 'propriedade está', 'propriedades estão')}{' '}
+                          em faixa Baixa ou Muito Baixa e {propriedadesEmAlerta === 1 ? 'pede' : 'pedem'}{' '}
+                          assistência técnica intensiva.
+                        </>
+                      )}
+                    </>
+                  )}
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 {classificacaoMedia && (
@@ -194,10 +219,12 @@ export default function Dashboard() {
                     Foco prioritário: {dimensaoPrioritaria.label}
                   </Badge>
                 )}
-                <Badge variant="primary" className="gap-1">
-                  <FiTrendingUp size={13} />
-                  {stats?.avaliacoes_concluidas ?? 0} avaliações concluídas
-                </Badge>
+                {rascunhos > 0 && (
+                  <Badge variant="warning" className="gap-1">
+                    <FiClipboard size={13} />
+                    {pluralizar(rascunhos, 'avaliação em rascunho', 'avaliações em rascunho')}
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -238,9 +265,9 @@ export default function Dashboard() {
           icon={<MdOutlineEco size={18} />}
         />
         <StatCard
-          title="Indicadores"
-          value="32"
-          subtitle="em 4 dimensões científicas"
+          title="Em rascunho"
+          value={rascunhos}
+          subtitle={rascunhos === 0 ? 'nenhuma avaliação pendente' : 'aguardando conclusão'}
           icon={<FiBarChart2 size={18} />}
         />
       </div>
@@ -399,8 +426,11 @@ export default function Dashboard() {
 
 function getDimensaoPrioritaria(stats, dimensoes) {
   if (!stats || !dimensoes) return null;
+  // As médias vêm de AVG() no Postgres: o driver serializa NUMERIC como
+  // string para não perder precisão. O filtro por typeof 'number' descartava
+  // todas e o painel dizia "cadastre avaliações" mesmo com a base cheia.
   return dimensoes
-    .map((d) => ({ ...d, valor: stats[d.key] }))
-    .filter((d) => typeof d.valor === 'number')
+    .map((d) => ({ ...d, valor: Number(stats[d.key]) }))
+    .filter((d) => Number.isFinite(d.valor))
     .sort((a, b) => a.valor - b.valor)[0] || null;
 }

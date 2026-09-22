@@ -54,7 +54,7 @@ const ETAPAS = [
       'Para cada indicador, atribua nota de 0,00 a 1,00 conforme os critérios descritivos.',
       'Use 0,25 / 0,50 / 0,75 ou valores intermediários quando o desempenho estiver entre dois níveis.',
       'Registre a justificativa de notas extremas (0,00 ou 1,00) no campo de observação.',
-      'O sistema calcula automaticamente os subíndices e o IGS final.',
+      'O sistema calcula automaticamente os subíndices e o ICSR final.',
     ],
   },
   {
@@ -98,17 +98,17 @@ export default function Guia() {
       />
 
       {/* Apresentação */}
-      <div className="rounded-xl bg-gradient-to-br from-[#1B5E20] to-[#2E7D32] p-6 text-white shadow-xs border border-emerald-900/30">
+      <div className="rounded-xl border border-caparao-200 bg-caparao-50 p-6 shadow-xs">
         <div className="flex gap-4 items-start">
-          <div className="p-2.5 rounded-xl bg-white/10 text-emerald-200 shrink-0">
+          <div className="p-2.5 rounded-xl bg-white text-caparao-700 shrink-0 border border-caparao-200">
             <MdOutlineEco size={36} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
               Como aplicar o ICSR em campo
             </h2>
-            <p className="mt-1.5 text-sm text-white/90 leading-relaxed">
-              A avaliação completa leva entre <strong className="text-white font-semibold">4 e 6 horas</strong> e pode ser dividida em duas visitas.
+            <p className="mt-1.5 text-sm text-slate-700 leading-relaxed">
+              A avaliação completa leva entre <strong className="text-slate-900 font-semibold">4 e 6 horas</strong> e pode ser dividida em duas visitas.
               Siga as cinco etapas abaixo para garantir uma avaliação consistente, transparente e útil
               ao produtor.
             </p>

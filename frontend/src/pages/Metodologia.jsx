@@ -55,18 +55,18 @@ export default function Metodologia() {
       />
 
       {/* Apresentação */}
-      <div className="rounded-xl bg-caparao-800 border border-white/10 p-6 text-white shadow-xs">
+      <div className="rounded-xl border border-caparao-200 bg-caparao-50 p-6 shadow-xs">
         <div className="flex gap-4 items-start">
-          <div className="w-11 h-11 rounded-lg bg-white/10 text-emerald-300 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-lg bg-white text-caparao-700 border border-caparao-200 flex items-center justify-center shrink-0">
             <MdOutlineEco size={28} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
               Sistema Integrado de Avaliação de Sustentabilidade
             </h2>
-            <p className="mt-1.5 text-sm text-white/85 leading-relaxed">
-              Proposta baseada na análise comparativa entre a <strong className="font-semibold text-white">metodologia de referência</strong> (Minas Gerais)
-              e a <strong className="font-semibold text-white">instituição regional</strong> (Espírito Santo).
+            <p className="mt-1.5 text-sm text-slate-700 leading-relaxed">
+              Proposta baseada na análise comparativa entre a <strong className="font-semibold text-slate-900">metodologia de referência</strong> (Minas Gerais)
+              e a <strong className="font-semibold text-slate-900">instituição regional</strong> (Espírito Santo).
               Combina a robustez metodológica quantitativa com a aplicabilidade prática e o foco
               na cafeicultura sustentável do Caparaó.
             </p>
@@ -162,7 +162,7 @@ export default function Metodologia() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Faixa do IGS</TableHead>
+                  <TableHead>Faixa do ICSR</TableHead>
                   <TableHead>Classificação</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Nível</TableHead>
@@ -307,8 +307,8 @@ export default function Metodologia() {
             <Table className="min-w-[760px]">
               <TableHeader>
                 <TableRow>
-                  {['Nota', 'Interpretação Geral', 'Ambiental', 'Econômica', 'Social', 'Gestão & Qualidade'].map((h) => (
-                    <TableHead key={h} className="text-white font-bold">
+                  {['Nota', 'Interpretação Geral', 'Ambiental', 'Econômica', 'Social', 'IGQG'].map((h) => (
+                    <TableHead key={h}>
                       {h}
                     </TableHead>
                   ))}

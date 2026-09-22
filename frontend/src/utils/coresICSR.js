@@ -60,3 +60,17 @@ export const STATUS_DIAGNOSTICO = {
 export function estiloStatus(status) {
   return STATUS_DIAGNOSTICO[status] || { rotulo: status, texto: '#334155', fundo: '#F1F5F9' };
 }
+
+// Texto acessível por dimensão (≥4.5:1 sobre branco). As cores de dimensão
+// são pensadas para preencher área — barra, ponto, fatia — e não alcançam
+// contraste como texto: #2196F3 sobre branco fica em ~3:1.
+export const COR_DIMENSAO_TEXTO = {
+  ambiental: '#1B5E20',
+  economica: '#0D47A1',
+  social: '#E65100',
+  gestao_qualidade: '#6A1B9A',
+};
+
+export function corTextoDimensao(codigo) {
+  return COR_DIMENSAO_TEXTO[codigo] || '#334155';
+}

@@ -14,7 +14,7 @@ import {
 import { propriedadesAPI, avaliacoesAPI, producaoAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { friendlyError } from '../utils/errorMessages';
-import { COR_NOTA } from '../utils/coresICSR';
+import { COR_NOTA, COR_CLASSIFICACAO } from '../utils/coresICSR';
 import { useMetodologia } from '../utils/metodologia';
 import { formatarData as fmtData, formatarDataCurta } from '../utils/formatarData';
 import IGSBadge from '../components/Common/IGSBadge';
@@ -26,7 +26,8 @@ import Skeleton from '../components/ui/Skeleton';
 import Tooltip from '../components/ui/Tooltip';
 import { cn } from '../utils/cn';
 import { CAPARAO_700 } from '../utils/coresMarca';
-import { formatarArea } from '../utils/formatarNumero';
+import { formatarArea, formatarNumero, formatarPercentual } from '../utils/formatarNumero';
+import IGSGauge from '../components/Dashboard/IGSGauge';
 
 export default function PropriedadeDetalhe() {
   const { id } = useParams();
@@ -150,8 +151,20 @@ export default function PropriedadeDetalhe() {
 
   const tabsInfo = [
     { id: 0, label: 'Histórico', icon: <FiClipboard size={16} />, disabled: false },
-    { id: 1, label: 'Evolução', icon: <FiBarChart2 size={16} />, disabled: timelineData.length === 0 },
-    { id: 2, label: 'Comparar avaliações', icon: <FiActivity size={16} />, disabled: concluidas.length < 2 },
+    {
+      id: 1,
+      label: 'Evolução',
+      icon: <FiBarChart2 size={16} />,
+      disabled: timelineData.length === 0,
+      motivo: 'Disponível depois da primeira avaliação concluída',
+    },
+    {
+      id: 2,
+      label: 'Comparar avaliações',
+      icon: <FiActivity size={16} />,
+      disabled: concluidas.length < 2,
+      motivo: `Requer 2 avaliações concluídas (esta propriedade tem ${concluidas.length})`,
+    },
     { id: 3, label: 'Produção Regional', icon: <FiDatabase size={16} />, disabled: false },
     { id: 4, label: 'Localização', icon: <FiMap size={16} />, disabled: false },
   ];
@@ -216,56 +229,73 @@ export default function PropriedadeDetalhe() {
         </div>
 
         <div className="md:col-span-5">
+          {/* Fundo branco com acento no topo na cor da banda — o hero com
+              gradiente escuro e número gigante é anti-padrão no sistema. */}
           <div
-            className="flex h-full flex-col justify-center rounded-xl p-6 text-white shadow-xs"
+            className="flex h-full flex-col justify-center rounded-xl border border-slate-200/90 bg-white p-6 shadow-xs"
             style={{
-              background: ultima
-                ? 'linear-gradient(135deg, #122A16 0%, #1B4D24 100%)'
-                : 'linear-gradient(135deg, #475569 0%, #64748B 100%)',
+              borderTop: `4px solid ${ultima ? (COR_CLASSIFICACAO[ultima.classificacao] || '#94A3B8') : '#CBD5E1'}`,
             }}
           >
             {ultima ? (
               <>
-                <span className="text-xs font-semibold text-white/80">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Última avaliação concluída
                 </span>
-                <div className="mt-1 text-3xl sm:text-4xl font-black tracking-tight tabular-nums">
-                  ICSR {(Number(ultima.igs) * 100).toFixed(1)}%
+                <div className="mt-2 flex items-center gap-4">
+                  <IGSGauge
+                    igs={Number(ultima.igs)}
+                    classificacao={ultima.classificacao}
+                    size={96}
+                  />
+                  <div className="min-w-0">
+                    <div className="text-2xl font-black tracking-tight tabular-nums text-slate-900">
+                      ICSR {formatarPercentual(ultima.igs)}
+                    </div>
+                    <div className="mt-1.5">
+                      <IGSBadge classificacao={ultima.classificacao} size="medium" />
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <IGSBadge classificacao={ultima.classificacao} size="medium" />
-                </div>
-                <p className="mt-1 text-xs text-white/70">
+                <p className="mt-3 text-xs text-slate-500">
                   {fmtData(ultima.data_avaliacao)} · {ultima.tecnico_responsavel || 'Técnico não informado'}
                 </p>
 
                 {concluidas.length > 1 && (
-                  <div className="mt-4 border-t border-white/20 pt-3 flex items-center gap-2 text-xs font-semibold">
-                    {evolucaoIGS >= 0 ? <FiTrendingUp /> : <FiTrendingDown />}
-                    <span>{evolucaoIGS >= 0 ? '+' : ''}{(evolucaoIGS * 100).toFixed(1)}%</span>
-                    <span className="text-white/75 font-normal">
+                  <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3 text-xs font-semibold">
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1',
+                        evolucaoIGS >= 0 ? 'text-emerald-700' : 'text-red-700'
+                      )}
+                    >
+                      {evolucaoIGS >= 0 ? <FiTrendingUp /> : <FiTrendingDown />}
+                      {evolucaoIGS >= 0 ? '+' : ''}{formatarNumero(evolucaoIGS * 100)} p.p.
+                    </span>
+                    <span className="font-normal text-slate-500">
                       desde a 1ª avaliação ({fmtData(primeira.data_avaliacao)})
                     </span>
                   </div>
                 )}
 
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 self-start"
+                  icon={<FiEye size={14} />}
                   onClick={() => navigate(`/avaliacao/${ultima.id}`)}
-                  className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
                 >
-                  <FiEye size={14} />
                   Ver resultado completo
-                </button>
+                </Button>
               </>
             ) : (
-              <div className="text-center py-4">
-                <MdOutlineEco size={40} className="mx-auto text-white/60 mb-2" />
-                <p className="text-sm font-semibold">Nenhuma avaliação concluída</p>
+              <div className="py-4 text-center">
+                <MdOutlineEco size={40} className="mx-auto mb-2 text-slate-300" />
+                <p className="text-sm font-semibold text-slate-700">Nenhuma avaliação concluída</p>
                 <Button
                   variant="primary"
                   size="sm"
-                  className="mt-3 bg-white text-slate-900 hover:bg-white/90"
+                  className="mt-3"
                   icon={<FiClipboard />}
                   onClick={() => navigate(`/avaliacao/nova?propriedade=${propriedade.id}`)}
                 >
@@ -281,25 +311,38 @@ export default function PropriedadeDetalhe() {
       <Card>
         <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex gap-2 overflow-x-auto">
-            {tabsInfo.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                disabled={t.disabled}
-                onClick={() => setTab(t.id)}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors',
-                  tab === t.id
-                    ? 'bg-caparao-700 text-white shadow-xs'
-                    : t.disabled
-                    ? 'text-slate-300 cursor-not-allowed'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                )}
-              >
-                {t.icon}
-                <span>{t.label}</span>
-              </button>
-            ))}
+            {tabsInfo.map((t) => {
+              const botao = (
+                <button
+                  key={t.id}
+                  type="button"
+                  disabled={t.disabled}
+                  onClick={() => setTab(t.id)}
+                  aria-current={tab === t.id ? 'true' : undefined}
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-caparao-700 focus-visible:ring-offset-1',
+                    tab === t.id
+                      ? 'bg-caparao-700 text-white shadow-xs'
+                      : t.disabled
+                      ? 'text-slate-400 cursor-not-allowed'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  )}
+                >
+                  {t.icon}
+                  <span>{t.label}</span>
+                </button>
+              );
+
+              // Aba indisponível diz o porquê; cinza mudo não explica nada.
+              if (t.disabled && t.motivo) {
+                return (
+                  <Tooltip key={t.id} content={t.motivo}>
+                    <span className="inline-flex">{botao}</span>
+                  </Tooltip>
+                );
+              }
+              return botao;
+            })}
           </div>
         </CardHeader>
         <CardContent className="pt-4">
