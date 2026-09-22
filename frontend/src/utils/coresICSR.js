@@ -11,12 +11,12 @@ export const COR_NOTA = {
 
 // Texto legível sobre fundo branco/claro
 export const COR_NOTA_TEXTO = {
-  0: '#b71c1c', 0.25: '#e65100', 0.5: '#8B6000', 0.75: '#33691e', 1: '#1B5E20',
+  0: '#b71c1c', 0.25: '#BF360C', 0.5: '#8B6000', 0.75: '#33691e', 1: '#1B5E20',
 };
 
 // Texto legível sobre o próprio fundo colorido da nota (badge selecionado)
 export const COR_NOTA_BADGE_SELECIONADO = {
-  0: '#fff', 0.25: '#3E1F00', 0.5: '#5D4000', 0.75: '#1B3A00', 1: '#1B5E20',
+  0: '#3B0A08', 0.25: '#3E1F00', 0.5: '#5D4000', 0.75: '#1B3A00', 1: '#1B5E20',
 };
 
 // Cor base por classificação do IGS (Muito Baixa..Alta)
@@ -29,18 +29,22 @@ export const COR_CLASSIFICACAO = {
 };
 
 // Texto sobre o próprio fundo colorido da classificação (badges/chips)
+// Texto sobre o próprio fundo colorido da classificação (badges/chips).
+// As cinco bandas usam texto ESCURO: branco sobre Muito Baixa dá 3,7:1 e
+// sobre Alta dá 2,8:1 — abaixo do mínimo para um badge de 12px em negrito.
+// A regra valia para Moderada e Boa, mas o mesmo defeito existia nas outras.
 export const COR_CLASSIFICACAO_TEXTO_SOBRE_FUNDO = {
-  'Muito Baixa': '#fff',
-  'Baixa': '#fff',
+  'Muito Baixa': '#3B0A08',
+  'Baixa': '#4E2600',
   'Moderada': '#5D4000',
   'Boa': '#1B3A00',
-  'Alta': '#fff',
+  'Alta': '#0B2D0F',
 };
 
 // Texto colorido sobre fundo branco (títulos, números — não em badges)
 export const COR_CLASSIFICACAO_TEXTO = {
   'Muito Baixa': '#c62828',
-  'Baixa': '#e65100',
+  'Baixa': '#BF360C',
   'Moderada': '#8B6000',
   'Boa': '#33691e',
   'Alta': '#2E7D32',
@@ -52,7 +56,7 @@ export const COR_CLASSIFICACAO_TEXTO = {
 // fundo/texto já validado e um rótulo em caixa normal.
 export const STATUS_DIAGNOSTICO = {
   'CRÍTICO':   { rotulo: 'Crítico',   texto: '#B71C1C', fundo: '#FEECEB' },
-  'ATENÇÃO':   { rotulo: 'Atenção',   texto: '#E65100', fundo: '#FFF3E0' },
+  'ATENÇÃO':   { rotulo: 'Atenção',   texto: '#BF360C', fundo: '#FFF3E0' },
   'BOM':       { rotulo: 'Bom',       texto: '#33691E', fundo: '#F1F8E9' },
   'EXCELENTE': { rotulo: 'Excelente', texto: '#1B5E20', fundo: '#E8F5E9' },
 };
@@ -67,7 +71,7 @@ export function estiloStatus(status) {
 export const COR_DIMENSAO_TEXTO = {
   ambiental: '#1B5E20',
   economica: '#0D47A1',
-  social: '#E65100',
+  social: '#BF360C',
   gestao_qualidade: '#6A1B9A',
 };
 
