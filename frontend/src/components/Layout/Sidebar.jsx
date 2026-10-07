@@ -10,7 +10,7 @@ const MENU_SECTIONS = [
     title: 'Operação de Campo',
     items: [
       { label: 'Visão Geral', icon: <FiHome size={18} />, path: '/', permission: 'dashboard' },
-      { label: 'Propriedades', icon: <FiMap size={18} />, path: '/propriedades', permission: 'propriedades' },
+      { label: 'Proprieda', icon: <FiMap size={18} />, path: '/propriedades', permission: 'propriedades' },
       { label: 'Nova Avaliação', icon: <FiClipboard size={18} />, path: '/avaliacao/nova', permission: 'avaliacoes' },
       { label: 'Histórico', icon: <FiList size={18} />, path: '/historico', permission: 'historico' },
     ],
