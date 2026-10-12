@@ -12,7 +12,7 @@ jobs:
     # Mesma versão do node:20-alpine usado nos Dockerfiles (backend/frontend)
     # — mantém o CI alinhado com a imagem que efetivamente vai pra produção.
     env:
-      NODE_VERSION: '20'
+      NODE_VERSION: '18'
 
     services:
       postgres:
