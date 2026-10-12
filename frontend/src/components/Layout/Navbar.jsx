@@ -34,7 +34,7 @@ export default function Navbar({ onMenuClick, isMobile }) {
             </div>
             <div>
               <span className="block text-base font-extrabold tracking-tight text-white leading-tight">
-                SustentaCafé
+                AppSus
               </span>
               <span className="hidden sm:block text-xs text-white/60 tracking-wider leading-none">
                 Sistema de Avaliação ICSR · IFES
