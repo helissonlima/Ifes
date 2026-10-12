@@ -775,7 +775,7 @@ function ProducaoRegional({ propriedade, dados, carregando, erro, onRecarregar }
             {producaoEstimada ? producaoEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '—'}
           </div>
           <span className="block text-xs text-slate-400">
-            {producaoEstimada ? `toneladas · ${areaCafe} ha` : 'Informe a área de café na propriedade'}
+            {producaoEstimada ? `toneladas · ${areaCafe} ha` : 'Informe a área plantada na propriedade'}
           </span>
         </div>
       </div>
